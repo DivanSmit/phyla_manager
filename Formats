@@ -1,0 +1,109 @@
+////////////////////////////////////////////////////////////////////////
+Basic recipe for an instance
+
+generate_instance_recipe(Pars, BH) ->
+  RECIPE = #{
+    <<"plugins">>=> [
+    #{<<"name">>=><<"booster_task_sp">>,<<"lib">>=><<"explorer_plugins">>,<<"init_args">>=>[]}
+    ],
+    <<"bc">> => #{
+      <<"identity">>=>#{
+        <<"id">>=><<"my_first_instance">>,
+        <<"name">>=><<"my_first_instance">>,
+        <<"taxonomy">>=>#{<<"arti_class">>=><<"resource-instance">>,<<"base_type">>=><<"my_first_type">>}
+      },
+      <<"capabilities">>=>[],
+      <<"responsibilities">>=>[],
+      <<"addresses">>=>#{},
+      <<"meta">>=>#{}
+
+    },
+    <<"disk_base">>=>no_entry,
+    <<"cookie">>=><<"INSTANCE_COOK">>
+  },
+  {ok, RECIPE}.
+///////////////////////////////////////////////////////////////////////
+Basic format for a Native Type
+
+{
+  "plugins": [
+    {}
+  ],
+  "bc":{
+    "identity":
+    {
+      "id":"my_first_type",
+      "name":"my_first_type",
+      "taxonomy":{"arti_class":"resource-type","base_type":"my_first_type"}
+    },
+    "capabilities":[],
+    "responsibilities":[],
+    "addresses":{},
+    "meta":{}
+
+  },
+  "disk_base":"my_first_type",
+  "cookie":"BB"
+}
+
+///////////////////////////////////////////////////////////////////////
+JSON format for Guardian plugin
+
+{"name":"guardian_ep",
+  "lib":"my_first_plugin_library",
+  "sector": "ep",
+  "bin_dir": "default",
+  "behaviour":"guardian",
+  "language":"beam"
+}
+
+-behaviour(base_guardian_ep).
+///////////////////////////////////////////////////////////////////////
+JSON format for a task plugin
+
+{"name":"booster_task_ep",
+      "lib":"explorer_plugins",
+      "base_task": "boost",
+      "sector": "ep",
+      "bin_dir": "default",
+      "behaviour":"task",
+      "language":"beam"
+}
+
+-behavior(base_task_ep).
+///////////////////////////////////////////////////////////////////////
+JSON format for a link plugin
+
+
+{"name":"explorer_master_link_ep",
+      "lib":"explorer_plugins",
+      "base_link":"search",
+      "sector": "ep",
+      "bin_dir": "default",
+      "behaviour":"link",
+      "language":"beam"
+}
+
+-behavior(base_link_servant_sp).
+///////////////////////////////////////////////////////////////////////
+JSON format for info handler
+
+{"name":"explorer_info_handler_ep",
+"lib":"explorer_plugins",
+      "tags":["INFO"],
+      "bin_dir": "default",
+      "behaviour":"receptor",
+      "sector": "cm",
+      "language":"beam"
+}
+
+-behavior(base_receptor).
+///////////////////////////////////////////////////////////////////////
+Include file for a communication
+
+-include("../../../base_include_libs/base_terms.hrl").
+///////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////

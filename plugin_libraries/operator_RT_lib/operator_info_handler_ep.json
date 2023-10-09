@@ -1,0 +1,8 @@
+{"name":"operator_info_handler_ep",
+  "lib":"operator_RT_lib",
+  "tags":["INFO"],
+  "bin_dir": "default",
+  "behaviour":"receptor",
+  "sector": "cm",
+  "language":"beam"
+}

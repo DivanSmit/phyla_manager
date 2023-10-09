@@ -1,0 +1,138 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Module base</title>
+<link rel="stylesheet" type="text/css" href="docbuilder" title="EDoc">
+</head>
+<body bgcolor="white">
+<div class="navbar"><a name="#navbar_top"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<hr>
+
+<h1>Module base</h1>
+<ul class="index"><li><a href="#description">Description</a></li><li><a href="#index">Function Index</a></li><li><a href="#functions">Function Details</a></li></ul>
+   This module is an API for various BASE functions and calls that can be used by Plugins to do BASE things
+   It is mainly abstractions of gen_server calls to the CM of the base.
+<p>Copyright © (C) 2021, CYBARETE</p>
+
+<p><b>Authors:</b> Sparrow.</p>
+
+<h2><a name="description">Description</a></h2>
+   This module is an API for various BASE functions and calls that can be used by Plugins to do BASE things
+   It is mainly abstractions of gen_server calls to the CM of the base.
+<h2><a name="index">Function Index</a></h2>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#alert-2">alert/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#backup_sectors-1">backup_sectors/1</a></td><td>Tells the base to make a backup of its sectors.</td></tr>
+<tr><td valign="top"><a href="#component_error-2">component_error/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#critical_error-2">critical_error/2</a></td><td>Used to throw errors to the BASE which can be used to debug or trigger plugins to act.</td></tr>
+<tr><td valign="top"><a href="#error-2">error/2</a></td><td>Used to throw errors to the BASE which can be used to debug or trigger plugins to act.</td></tr>
+<tr><td valign="top"><a href="#get_local_dir-0">get_local_dir/0</a></td><td></td></tr>
+<tr><td valign="top"><a href="#get_my_bc-1">get_my_bc/1</a></td><td>will retun the BC for this BASE.</td></tr>
+<tr><td valign="top"><a href="#get_my_short_bc-1">get_my_short_bc/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#get_origo-0">get_origo/0</a></td><td>Gets unix millis of NOW in system time.</td></tr>
+<tr><td valign="top"><a href="#log-2">log/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#restart-1">restart/1</a></td><td>restarts the BASE.</td></tr>
+<tr><td valign="top"><a href="#shut_down-1">shut_down/1</a></td><td>shuts down a BASE safely, calling all Plugins's "checkout" function.</td></tr>
+<tr><td valign="top"><a href="#wait_for_base_ready-1">wait_for_base_ready/1</a></td><td>This will suspend a process until the BASE has set its base_ready SBB variable to true or continue
+  immediately if it's already true.</td></tr>
+<tr><td valign="top"><a href="#warning-2">warning/2</a></td><td>Used to throw warnings to the BASE which can be used to debug or trigger plugins to act.</td></tr>
+</table>
+
+<h2><a name="functions">Function Details</a></h2>
+
+<h3 class="function"><a name="alert-2">alert/2</a></h3>
+<div class="spec">
+<p><tt>alert(A, BH) -&gt; any()</tt></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="backup_sectors-1">backup_sectors/1</a></h3>
+<div class="spec">
+<p><tt>backup_sectors(BH) -&gt; any()</tt></p>
+<p> </p>
+</div><p>Tells the base to make a backup of its sectors. If the BASE is an instance, it will back up to the Type
+  if it's a type it will back up to the disk ETS sector copies of its ETS tables.
+  If the BASE is a TYPE, dont over use this call since it will saturate the disk with writes
+  (imagine 1000 instances and you back up everything in the type everytime they change state).
+  Instead use the standard type_backup_ep that will back up the sectors every minute</p>
+
+<h3 class="function"><a name="component_error-2">component_error/2</a></h3>
+<div class="spec">
+<p><tt>component_error(E, BH) -&gt; any()</tt></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="critical_error-2">critical_error/2</a></h3>
+<div class="spec">
+<p><tt>critical_error(Base_error, BH) -&gt; any()</tt></p>
+<p> </p>
+</div><p>Used to throw errors to the BASE which can be used to debug or trigger plugins to act. Currently not fully developed
+  a critical base error means the BASE is diasbled and cannot perform as it should. Sector crashes will throw this.</p>
+
+<h3 class="function"><a name="error-2">error/2</a></h3>
+<div class="spec">
+<p><tt>error(E, BH) -&gt; any()</tt></p>
+<p> </p>
+</div><p>Used to throw errors to the BASE which can be used to debug or trigger plugins to act. Currently not fully developed</p>
+
+<h3 class="function"><a name="get_local_dir-0">get_local_dir/0</a></h3>
+<div class="spec">
+<p><tt>get_local_dir() -&gt; any()</tt></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="get_my_bc-1">get_my_bc/1</a></h3>
+<div class="spec">
+<p><tt>get_my_bc(BH) -&gt; any()</tt></p>
+<p> </p>
+</div><p>will retun the BC for this BASE</p>
+
+<h3 class="function"><a name="get_my_short_bc-1">get_my_short_bc/1</a></h3>
+<div class="spec">
+<p><tt>get_my_short_bc(BH) -&gt; any()</tt></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="get_origo-0">get_origo/0</a></h3>
+<div class="spec">
+<p><tt>get_origo() -&gt; any()</tt></p>
+<p> </p>
+</div><p>Gets unix millis of NOW in system time</p>
+
+<h3 class="function"><a name="log-2">log/2</a></h3>
+<div class="spec">
+<p><tt>log(L, BH) -&gt; any()</tt></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="restart-1">restart/1</a></h3>
+<div class="spec">
+<p><tt>restart(BH) -&gt; any()</tt></p>
+<p> </p>
+</div><p>restarts the BASE. @todo check if this works with instance-type relationship</p>
+
+<h3 class="function"><a name="shut_down-1">shut_down/1</a></h3>
+<div class="spec">
+<p><tt>shut_down(BH) -&gt; any()</tt></p>
+<p> </p>
+</div><p>shuts down a BASE safely, calling all Plugins's "checkout" function</p>
+
+<h3 class="function"><a name="wait_for_base_ready-1">wait_for_base_ready/1</a></h3>
+<div class="spec">
+<p><tt>wait_for_base_ready(BH) -&gt; any()</tt></p>
+<p> </p>
+</div><p>This will suspend a process until the BASE has set its base_ready SBB variable to true or continue
+  immediately if it's already true. If you want a BASE to do something as soon as it's started up and ready
+  a process can be spawned with this function at its top. See the BHive boilerlate for an example</p>
+
+<h3 class="function"><a name="warning-2">warning/2</a></h3>
+<div class="spec">
+<p><tt>warning(W, BH) -&gt; any()</tt></p>
+<p> </p>
+</div><p>Used to throw warnings to the BASE which can be used to debug or trigger plugins to act. Currently not fully developed</p>
+<hr>
+
+<div class="navbar"><a name="#navbar_bottom"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<p><i>Generated by EDoc</i></p>
+</body>
+</html>

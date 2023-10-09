@@ -1,0 +1,8 @@
+{"name":"move_fruit_ep",
+  "lib":"operator_RT_lib",
+  "base_task": "moveFruit",
+  "sector": "ep",
+  "bin_dir": "default",
+  "behaviour":"task",
+  "language":"beam"
+}

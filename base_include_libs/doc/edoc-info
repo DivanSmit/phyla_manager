@@ -1,0 +1,6 @@
+%% encoding: UTF-8
+{application,base_include_libs}.
+{modules,[base,base_attributes,base_business_card,base_contract,
+          base_execution,base_recipe,base_schedule,base_signal,
+          base_subscription,base_task_ep,base_task_sp,base_term_convert,
+          base_time_utils,base_variables,bason,bhive]}.

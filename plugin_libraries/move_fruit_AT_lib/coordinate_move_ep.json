@@ -1,0 +1,8 @@
+{"name":"coordinate_move_ep",
+  "lib":"move_fruit_AT_lib",
+  "base_task": "coordinateMove",
+  "sector": "ep",
+  "bin_dir": "default",
+  "behaviour":"task",
+  "language":"beam"
+}

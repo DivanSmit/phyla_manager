@@ -1,0 +1,121 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Module base_time_utils</title>
+<link rel="stylesheet" type="text/css" href="docbuilder" title="EDoc">
+</head>
+<body bgcolor="white">
+<div class="navbar"><a name="#navbar_top"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<hr>
+
+<h1>Module base_time_utils</h1>
+<ul class="index"><li><a href="#description">Description</a></li><li><a href="#index">Function Index</a></li><li><a href="#functions">Function Details</a></li></ul>
+   Some useful functions for working with time.
+<p>Copyright © (C) 2021, CYBARETE</p>
+
+<p><b>Authors:</b> Sparrow.</p>
+
+<h2><a name="description">Description</a></h2>
+   Some useful functions for working with time
+<h2><a name="index">Function Index</a></h2>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#get_date_str-0">get_date_str/0</a></td><td></td></tr>
+<tr><td valign="top"><a href="#get_day_name-1">get_day_name/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#get_day_names-0">get_day_names/0</a></td><td></td></tr>
+<tr><td valign="top"><a href="#get_day_of_week-0">get_day_of_week/0</a></td><td></td></tr>
+<tr><td valign="top"><a href="#get_time-1">get_time/1</a></td><td>Gets the current time of day in {h,min,sec} tuple.</td></tr>
+<tr><td valign="top"><a href="#get_time_in_hours-1">get_time_in_hours/1</a></td><td>Gets the current time of day from ms epoch as decimal hours  (6:30 - 6.5).</td></tr>
+<tr><td valign="top"><a href="#get_today_at-1">get_today_at/1</a></td><td>Givesthe Unix timestamp at the given hour today the hours is given as decimal (i.e.</td></tr>
+<tr><td valign="top"><a href="#get_today_at_0am-0">get_today_at_0am/0</a></td><td>Gives the Unix millis timestamp at 00:00 of today.</td></tr>
+<tr><td valign="top"><a href="#is_between_times-2">is_between_times/2</a></td><td>Checks if a time is between two times given in UNIX millis.</td></tr>
+<tr><td valign="top"><a href="#is_between_times-3">is_between_times/3</a></td><td>Checks if a time is between two times given in UNIX millis.</td></tr>
+<tr><td valign="top"><a href="#is_weekend-1">is_weekend/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#test_module-0">test_module/0</a></td><td></td></tr>
+<tr><td valign="top"><a href="#unix_to_erlang_timestamp-1">unix_to_erlang_timestamp/1</a></td><td></td></tr>
+</table>
+
+<h2><a name="functions">Function Details</a></h2>
+
+<h3 class="function"><a name="get_date_str-0">get_date_str/0</a></h3>
+<div class="spec">
+<p><tt>get_date_str() -&gt; any()</tt></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="get_day_name-1">get_day_name/1</a></h3>
+<div class="spec">
+<p><tt>get_day_name(WeekDay) -&gt; any()</tt></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="get_day_names-0">get_day_names/0</a></h3>
+<div class="spec">
+<p><tt>get_day_names() -&gt; any()</tt></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="get_day_of_week-0">get_day_of_week/0</a></h3>
+<div class="spec">
+<p><tt>get_day_of_week() -&gt; any()</tt></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="get_time-1">get_time/1</a></h3>
+<div class="spec">
+<p><tt>get_time(MS) -&gt; any()</tt></p>
+<p> </p>
+</div><p>Gets the current time of day in {h,min,sec} tuple</p>
+
+<h3 class="function"><a name="get_time_in_hours-1">get_time_in_hours/1</a></h3>
+<div class="spec">
+<p><tt>get_time_in_hours(MS) -&gt; any()</tt></p>
+<p> </p>
+</div><p>Gets the current time of day from ms epoch as decimal hours  (6:30 - 6.5)</p>
+
+<h3 class="function"><a name="get_today_at-1">get_today_at/1</a></h3>
+<div class="spec">
+<p><tt>get_today_at(H) -&gt; any()</tt></p>
+<p> </p>
+</div><p>Givesthe Unix timestamp at the given hour today the hours is given as decimal (i.e. 6:3- = 6.5)</p>
+
+<h3 class="function"><a name="get_today_at_0am-0">get_today_at_0am/0</a></h3>
+<div class="spec">
+<p><tt>get_today_at_0am() -&gt; any()</tt></p>
+<p> </p>
+</div><p>Gives the Unix millis timestamp at 00:00 of today</p>
+
+<h3 class="function"><a name="is_between_times-2">is_between_times/2</a></h3>
+<div class="spec">
+<p><tt>is_between_times(T1, T2) -&gt; any()</tt></p>
+<p> </p>
+</div><p>Checks if a time is between two times given in UNIX millis.</p>
+
+<h3 class="function"><a name="is_between_times-3">is_between_times/3</a></h3>
+<div class="spec">
+<p><tt>is_between_times(T, T1, T2) -&gt; any()</tt></p>
+<p> </p>
+</div><p>Checks if a time is between two times given in UNIX millis.</p>
+
+<h3 class="function"><a name="is_weekend-1">is_weekend/1</a></h3>
+<div class="spec">
+<p><tt>is_weekend(NOW) -&gt; any()</tt></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="test_module-0">test_module/0</a></h3>
+<div class="spec">
+<p><tt>test_module() -&gt; any()</tt></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="unix_to_erlang_timestamp-1">unix_to_erlang_timestamp/1</a></h3>
+<div class="spec">
+<p><tt>unix_to_erlang_timestamp(MS) -&gt; any()</tt></p>
+<p> </p>
+</div>
+<hr>
+
+<div class="navbar"><a name="#navbar_bottom"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<p><i>Generated by EDoc</i></p>
+</body>
+</html>

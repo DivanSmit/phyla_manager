@@ -1,0 +1,20 @@
+{ [ 'evaluate_fruit_sample_AT_lib/src/*'], [
+  {i, "include"},
+  {outdir, "evaluate_fruit_sample_AT_lib/ebin"},
+  debug_info
+]}.
+{ [ 'fta_machine_RT_lib/src/*'], [
+  {i, "include"},
+  {outdir, "fta_machine_RT_lib/ebin"},
+  debug_info
+]}.
+{ [ 'operator_RT_lib/src/*'], [
+  {i, "include"},
+  {outdir, "operator_RT_lib/ebin"},
+  debug_info
+]}.
+{ [ 'move_fruit_AT_lib/src/*'], [
+  {i, "include"},
+  {outdir, "move_fruit_AT_lib/ebin"},
+  debug_info
+]}.

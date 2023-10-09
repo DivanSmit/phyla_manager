@@ -1,0 +1,125 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Module base_variables</title>
+<link rel="stylesheet" type="text/css" href="docbuilder" title="EDoc">
+</head>
+<body bgcolor="white">
+<div class="navbar"><a name="#navbar_top"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<hr>
+
+<h1>Module base_variables</h1>
+<ul class="index"><li><a href="#description">Description</a></li><li><a href="#index">Function Index</a></li><li><a href="#functions">Function Details</a></li></ul>
+   The State Blackboard of a BASE holds volatile variables (disappears if restarted, does not get saved).
+<p>Copyright © (C) 2022, CYBARETE</p>
+
+<p><b>Authors:</b> Dale.</p>
+
+<h2><a name="description">Description</a></h2>
+   The State Blackboard of a BASE holds volatile variables (disappears if restarted, does not get saved)
+<h2><a name="index">Function Index</a></h2>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#merge-4">merge/4</a></td><td>try to merge an attribute that is a map with another map.</td></tr>
+<tr><td valign="top"><a href="#merge_page-3">merge_page/3</a></td><td>try to merge an attribute page with another map.</td></tr>
+<tr><td valign="top"><a href="#read-3">read/3</a></td><td>read an attribute from a specific page.</td></tr>
+<tr><td valign="top"><a href="#read_page-2">read_page/2</a></td><td>Read a variable page.</td></tr>
+<tr><td valign="top"><a href="#read_pages-2">read_pages/2</a></td><td>Read multiple pages.</td></tr>
+<tr><td valign="top"><a href="#subscribe-4">subscribe/4</a></td><td>Subscribe to a variable on a Page with either a module, PID, or AgentHandle.</td></tr>
+<tr><td valign="top"><a href="#take-3">take/3</a></td><td>Get an attribute from a Page with Key and wipe it.</td></tr>
+<tr><td valign="top"><a href="#unsubscribe-4">unsubscribe/4</a></td><td>unsubscribe from a variable on the SBB.</td></tr>
+<tr><td valign="top"><a href="#wipe-3">wipe/3</a></td><td>remove an attribute from a Page with Key.</td></tr>
+<tr><td valign="top"><a href="#wipe_page-2">wipe_page/2</a></td><td>remove a page from attributes.</td></tr>
+<tr><td valign="top"><a href="#write-4">write/4</a></td><td>write an attribute to a specific attributes page.</td></tr>
+<tr><td valign="top"><a href="#write_page-3">write_page/3</a></td><td>write an entire page to state blackboard.</td></tr>
+<tr><td valign="top"><a href="#write_pages-2">write_pages/2</a></td><td>Write multiple pages given as a map of maps.</td></tr>
+</table>
+
+<h2><a name="functions">Function Details</a></h2>
+
+<h3 class="function"><a name="merge-4">merge/4</a></h3>
+<div class="spec">
+<p><tt>merge(Page::binary(), Key::binary(), Map::map(), BH::<a href="#type-base_handle">base_handle()</a>) -&gt; ok</tt><br></p>
+<p> </p>
+</div><p>try to merge an attribute that is a map with another map.
+  Useful for updating map type attributes without having to read, put write.</p>
+
+<h3 class="function"><a name="merge_page-3">merge_page/3</a></h3>
+<div class="spec">
+<p><tt>merge_page(Page::binary(), Data::map(), BH::<a href="#type-base_handle">base_handle()</a>) -&gt; ok</tt><br></p>
+<p> </p>
+</div><p>try to merge an attribute page with another map.</p>
+
+<h3 class="function"><a name="read-3">read/3</a></h3>
+<div class="spec">
+<p><tt>read(Page::binary(), Key::binary(), BH::<a href="#type-base_handle">base_handle()</a>) -&gt; Attribute::term() | no_entry</tt><br></p>
+<p> </p>
+</div><p>read an attribute from a specific page</p>
+
+<h3 class="function"><a name="read_page-2">read_page/2</a></h3>
+<div class="spec">
+<p><tt>read_page(PageName::binary(), BH::<a href="#type-base_handle">base_handle()</a>) -&gt; Page::map() | no_entry</tt><br></p>
+<p> </p>
+</div><p>Read a variable page</p>
+
+<h3 class="function"><a name="read_pages-2">read_pages/2</a></h3>
+<div class="spec">
+<p><tt>read_pages(PageNames::list(), BH::<a href="#type-base_handle">base_handle()</a>) -&gt; Pages::list()</tt><br></p>
+<p> </p>
+</div><p>Read multiple pages</p>
+
+<h3 class="function"><a name="subscribe-4">subscribe/4</a></h3>
+<div class="spec">
+<p><tt>subscribe(Page::binary(), Key::binary(), Subscriber::pid() | module() | <a href="#type-agent_handle">agent_handle()</a>, BH::<a href="#type-base_handle">base_handle()</a>) -&gt; CurrentValue::term()</tt><br></p>
+<p> </p>
+</div><p>Subscribe to a variable on a Page with either a module, PID, or AgentHandle.
+  The module needs to export var_update(Page,Key,Value,BH)
+  the process with PID will receive a message of #base_var_update{}
+  The agent will call the handle_message() callback of the plugin for it.</p>
+
+<h3 class="function"><a name="take-3">take/3</a></h3>
+<div class="spec">
+<p><tt>take(Page::binary(), Key::binary(), BH::<a href="#type-base_handle">base_handle()</a>) -&gt; Attribute::term() | no_entry</tt><br></p>
+<p> </p>
+</div><p>Get an attribute from a Page with Key and wipe it</p>
+
+<h3 class="function"><a name="unsubscribe-4">unsubscribe/4</a></h3>
+<div class="spec">
+<p><tt>unsubscribe(Page::binary(), Key::binary(), Subscriber::pid() | module() | <a href="#type-agent_handle">agent_handle()</a>, BH::<a href="#type-base_handle">base_handle()</a>) -&gt; ok</tt><br></p>
+<p> </p>
+</div><p>unsubscribe from a variable on the SBB</p>
+
+<h3 class="function"><a name="wipe-3">wipe/3</a></h3>
+<div class="spec">
+<p><tt>wipe(Page::binary(), Key::binary(), BH::<a href="#type-base_handle">base_handle()</a>) -&gt; ok</tt><br></p>
+<p> </p>
+</div><p>remove an attribute from a Page with Key</p>
+
+<h3 class="function"><a name="wipe_page-2">wipe_page/2</a></h3>
+<div class="spec">
+<p><tt>wipe_page(Page::binary(), BH::<a href="#type-base_handle">base_handle()</a>) -&gt; ok</tt><br></p>
+<p> </p>
+</div><p>remove a page from attributes. This removes all entries along with the page.</p>
+
+<h3 class="function"><a name="write-4">write/4</a></h3>
+<div class="spec">
+<p><tt>write(Page::binary(), Key::binary(), Value::term(), BH::<a href="#type-base_handle">base_handle()</a>) -&gt; ok</tt><br></p>
+<p> </p>
+</div><p>write an attribute to a specific attributes page.</p>
+
+<h3 class="function"><a name="write_page-3">write_page/3</a></h3>
+<div class="spec">
+<p><tt>write_page(PageName::binary(), Data::map(), BH::<a href="#type-base_handle">base_handle()</a>) -&gt; ok</tt><br></p>
+<p> </p>
+</div><p>write an entire page to state blackboard. This MUST be a key-value map.</p>
+
+<h3 class="function"><a name="write_pages-2">write_pages/2</a></h3>
+<div class="spec">
+<p><tt>write_pages(Pages::map(), BH::<a href="#type-base_handle">base_handle()</a>) -&gt; ok</tt><br></p>
+<p> </p>
+</div><p>Write multiple pages given as a map of maps.</p>
+<hr>
+
+<div class="navbar"><a name="#navbar_bottom"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<p><i>Generated by EDoc</i></p>
+</body>
+</html>

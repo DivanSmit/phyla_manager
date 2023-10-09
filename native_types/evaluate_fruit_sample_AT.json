@@ -1,0 +1,21 @@
+{
+  "plugins": [
+    {"name": "EFS_guardian_sp","lib": "evaluate_fruit_sample_AT_lib","init_args": []},
+    {"name": "EFS_guardian_ep","lib": "evaluate_fruit_sample_AT_lib","init_args": []}
+  ],
+  "bc":{
+    "identity":
+    {
+      "id":"EFS_TYPE",
+      "name":"EFS_TYPE",
+      "taxonomy":{"arti_class":"activity-type","base_type":"EFS_TYPE"}
+    },
+    "capabilities":[],
+    "responsibilities":[],
+    "addresses":{},
+    "meta":{}
+
+  },
+  "disk_base":"EFS_TYPE",
+  "cookie":"BB"
+}

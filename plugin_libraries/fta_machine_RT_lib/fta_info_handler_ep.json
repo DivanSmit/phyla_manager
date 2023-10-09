@@ -1,0 +1,8 @@
+{"name":"fta_info_handler_ep",
+  "lib":"fta_machine_RT_lib",
+  "tags":["INFO"],
+  "bin_dir": "default",
+  "behaviour":"receptor",
+  "sector": "cm",
+  "language":"beam"
+}

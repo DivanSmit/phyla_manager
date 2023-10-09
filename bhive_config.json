@@ -1,0 +1,18 @@
+{
+    "base_core":{
+        "ebin":"C:/Users/LENOVO/Desktop/base-getting-started/base-core/ebin",
+        "version":"0.8.0"
+    },
+    "system_plugins":"C:/Users/LENOVO/Desktop/base-getting-started/base-core/global-plugin-library",
+    "system":
+    {
+        "ram":4000,
+        "max_population":10000,
+        "max_processes":100000
+    },
+    "bhive":{
+        "name":"phyla_manager_BASE",
+        "hive_control_panel_port":50000,
+        "root_dir":"C:/Users/LENOVO/Desktop/base-getting-started/phyla_manager_BASE"
+    }
+}
