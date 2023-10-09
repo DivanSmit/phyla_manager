@@ -47,7 +47,7 @@ generate_instance_recipe(Name, ID, BH) ->
         <<"name">>=>Name,
         <<"taxonomy">>=>#{<<"arti_class">>=><<"resource-instance">>,<<"base_type">>=><<"OPERATOR_TYPE">>}
       },
-      <<"capabilities">>=>[],
+      <<"capabilities">>=>[<<"MoveFruit">>],
       <<"responsibilities">>=>[],
       <<"addresses">>=>#{},
       <<"meta">>=>#{}

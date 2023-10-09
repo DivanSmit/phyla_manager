@@ -1,5 +1,13 @@
+%%%-------------------------------------------------------------------
+%%% @author LENOVO
+%%% @copyright (C) 2023, <COMPANY>
+%%% @doc
+%%%
+%%% @end
+%%% Created : 04. Oct 2023 21:23
+%%%-------------------------------------------------------------------
 -module(scanner_task_sp).
--behavior(base_task_sp).
+-behaviour(base_task_sp).
 -export([init/2, stop/1, handle_task_request/2]).
 
 %% ============================================================================================%%
@@ -17,6 +25,7 @@ stop(BH) ->
   ok.
 
 handle_task_request(Pars, BH) ->
+  io:format("Handeling scanner task~n"),
   Tsched = base:get_origo(),
   Type = <<"scan">>,
   ID = make_ref(),
