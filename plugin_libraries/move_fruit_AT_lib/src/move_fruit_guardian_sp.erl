@@ -31,7 +31,9 @@ instance_spawn_request(Pars, BH) ->
   {ok, Recipe} = generate_instance_recipe(Name, ID, BH),
   Tsched = base:get_origo(),
   Data1 = no_data,
-  base_guardian_sp:schedule_instance_guardian(Tsched,Recipe,Data1,BH),
+  spawn(fun()->
+    base_guardian_sp:schedule_instance_guardian(Tsched,Recipe,Data1,BH)
+        end),
   ok.
 
 generate_instance_recipe(Name, ID, BH) ->
@@ -39,9 +41,9 @@ generate_instance_recipe(Name, ID, BH) ->
     <<"plugins">>=> [
       #{<<"name">>=><<"coordinate_move_sp">>,<<"lib">>=><<"move_fruit_AT_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"coordinate_move_ep">>,<<"lib">>=><<"move_fruit_AT_lib">>,<<"init_args">>=>[]},
-      #{<<"name">>=><<"move_fruit_info_handler_ep">>,<<"lib">>=><<"move_fruit_AT_lib">>,<<"init_args">>=>[]},
-      #{<<"name">>=><<"scanner_task_ep">>,<<"lib">>=><<"move_fruit_AT_lib">>,<<"init_args">>=>[]},
-      #{<<"name">>=><<"scanner_task_sp">>,<<"lib">>=><<"move_fruit_AT_lib">>,<<"init_args">>=>[]}
+      #{<<"name">>=><<"scan_mover_sp">>,<<"lib">>=><<"move_fruit_AT_lib">>,<<"init_args">>=>[]},
+      #{<<"name">>=><<"scan_mover_ep">>,<<"lib">>=><<"move_fruit_AT_lib">>,<<"init_args">>=>[]},
+      #{<<"name">>=><<"move_fruit_info_handler_ep">>,<<"lib">>=><<"move_fruit_AT_lib">>,<<"init_args">>=>[]}
     ],
     <<"bc">> => #{
       <<"identity">>=>#{

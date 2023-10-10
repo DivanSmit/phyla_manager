@@ -4,28 +4,24 @@
 %%% @doc
 %%%
 %%% @end
-%%% Created : 04. Oct 2023 21:23
+%%% Created : 04. Oct 2023 21:22
 %%%-------------------------------------------------------------------
--module(scanner_task_sp).
+-module(scan_mover_sp).
+-author("LENOVO").
 -behaviour(base_task_sp).
+%% API
 -export([init/2, stop/1, handle_task_request/2]).
 
-%% ============================================================================================%%
-%%                                    BASE TASK CALLBACKS
-%% ============================================================================================%%
 
 init(Pars, BH) ->
   base:wait_for_base_ready(BH),
-  handle_task_request(nothing, BH),
-  ListTask = base_schedule:get_all_tasks(BH),
-  io:format("This is the tasks ~p",[ListTask]),
+  handle_task_request(Pars,BH),
   ok.
 
 stop(BH) ->
   ok.
 
 handle_task_request(Pars, BH) ->
-  io:format("Handeling scanner task~n"),
   Tsched = base:get_origo(),
   Type = <<"scan">>,
   ID = make_ref(),

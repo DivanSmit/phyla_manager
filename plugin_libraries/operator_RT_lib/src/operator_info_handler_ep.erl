@@ -23,8 +23,13 @@ handle_signal(Tag, Signal, BH) ->
   erlang:error(not_implemented).
 
 handle_request(<<"MOVE">>,<<"FRUIT">>, FROM, BH)->
+  MyBC = base:get_my_bc(BH),
   io:format("Info handler recieved request~n"),
-  move_fruit_sp:handle_task_request(FROM,BH),
+
+  MyName = base_business_card:get_name(MyBC),
+  spawn(fun()->
+    move_fruit_sp:handle_task_request(FROM,BH)
+    end),
 
   Reply = #{<<"Reply">>=>ok},
   {reply, Reply}.

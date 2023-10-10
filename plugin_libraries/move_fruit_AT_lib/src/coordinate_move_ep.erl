@@ -33,7 +33,7 @@ resume_task(TaskState, ExecutorHandle, BH) ->
 
 start_task(TaskState, ExecutorHandle, BH) ->
   io:format("~nCoordination of move fruit task beginning: ~n"),
-  move_the_fruit(),
+  move_the_fruit(BH),
   {end_task, discard, movedFruit}.
 
 end_task(TaskState, ExecutorHandle, BH) ->
@@ -48,5 +48,5 @@ handle_signal(Tag, Payload, BH) ->
 
 %%Custom tasks here -------------------------------------------------------------------->
 
-move_the_fruit()->
+move_the_fruit(BH)->
   io:format("Coordinating~n").
