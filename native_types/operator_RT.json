@@ -1,7 +1,7 @@
 {
   "plugins": [
     {"name": "operator_guardian_sp","lib": "operator_RT_lib","init_args": [
-      {"name": "Karel", "id": "1"},
+      {"name": "Dylan", "id": "1"},
       {"name": "Ryno", "id": "2"}
     ]},
     {"name": "operator_guardian_ep","lib": "operator_RT_lib","init_args": []}

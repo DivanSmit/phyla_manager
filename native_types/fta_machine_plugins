@@ -1,0 +1,5 @@
+{"name": "fta_machine_guardian_sp","lib": "fta_machine_RT_lib","init_args":[
+      {"name": "fta_machine_1","id": 1},
+      {"name": "fta_machine_3","id": 2}
+    ]},
+    {"name": "fta_machine_guardian_ep","lib": "fta_machine_RT_lib","init_args": []}

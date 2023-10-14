@@ -33,11 +33,13 @@ resume_task(TaskState, ExecutorHandle, BH) ->
 
 start_task(TaskState, ExecutorHandle, BH) ->
   io:format("~nMove fruit task beginning: ~n"),
+%%  move_fruit_rp:start_time(BH),
   move_the_fruit(),
   {end_task, discard, movedFruit}.
 
 end_task(TaskState, ExecutorHandle, BH) ->
   io:format("~nThe move fruit task is complete~n"),
+%%  move_fruit_rp:end_time(BH),
   ok.
 
 handle_request(Tag, Payload, BH) ->

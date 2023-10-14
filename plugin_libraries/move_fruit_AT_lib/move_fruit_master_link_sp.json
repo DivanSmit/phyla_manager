@@ -1,0 +1,8 @@
+{"name":"move_fruit_master_link_sp",
+  "lib":"move_fruit_AT_lib",
+  "base_link":"search",
+  "sector": "sp",
+  "bin_dir": "default",
+  "behaviour":"link",
+  "language":"beam"
+}

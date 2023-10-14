@@ -39,7 +39,9 @@ generate_instance_recipe(Name, ID, BH) ->
     <<"plugins">>=> [
       #{<<"name">>=><<"move_fruit_sp">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"move_fruit_ep">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},
-      #{<<"name">>=><<"operator_info_handler_ep">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]}
+      #{<<"name">>=><<"move_fruit_servant_link_sp">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},
+      #{<<"name">>=><<"move_fruit_servant_link_ep">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]}
+%%      #{<<"name">>=><<"operator_info_handler_ep">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]}
     ],
     <<"bc">> => #{
       <<"identity">>=>#{

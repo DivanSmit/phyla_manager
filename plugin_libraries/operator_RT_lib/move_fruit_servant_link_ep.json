@@ -1,0 +1,8 @@
+{"name":"move_fruit_servant_link_ep",
+  "lib":"operator_RT_lib",
+  "base_link":"search",
+  "sector": "ep",
+  "bin_dir": "default",
+  "behaviour":"link",
+  "language":"beam"
+}

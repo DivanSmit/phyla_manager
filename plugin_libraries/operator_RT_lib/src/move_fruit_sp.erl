@@ -15,7 +15,7 @@
 
 init(Pars, BH) ->
   base:wait_for_base_ready(BH),
-%%  handle_task_request(Pars,BH),
+%%  handle_task_request(Pars,BH),          %% Does not call the function initially. Needs to be called
   ok.
 
 stop(BH) ->
@@ -23,6 +23,7 @@ stop(BH) ->
 
 handle_task_request(Pars, BH) ->
   Tsched = base:get_origo(),
+  io:format("Scheaduled time: ~p~n",[Tsched]),
   Type = <<"moveFruit">>,
   ID = make_ref(),
   Data1 =#{},
