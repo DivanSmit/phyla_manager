@@ -23,10 +23,15 @@ request_start_link(PluginState, ExH, BH) ->
   io:format("The servant link has requested to start~n"),
 
   TasksExe = base_execution:get_all_tasks(BH),
-  case TasksExe of
-    #{} ->
+  KeyE = maps:keys(TasksExe),
+  io:format("Execution: ~p~n",[KeyE]),
+  case KeyE of
+    [] ->
       {start, no_state};
-    _ ->io:format("Operator is busy~n"),
+    _ ->
+      io:format("Operator is busy~n"),
+      base_link_ep:signal_partner(<<"Busy">>,nothing,ExH),
+      io:format("Signal sent~n"),
       {wait, no_state}
   end.
 
@@ -34,9 +39,13 @@ request_resume_link(PluginState, ExH, BH) ->
   {cancel, no_state}.
 
 link_start(PluginState, ExH, BH) ->
-  io:format("The servant link has started~n"),
   spawn(fun()->
-    move_fruit_sp:handle_task_request(PluginState,BH)
+    %% Insert functionality here
+    %%------------------------------------------
+    io:format("Moving the fruit~n"),
+    timer:sleep(5000),
+    io:format("The fruit has been moved~n")
+    %%------------------------------------------
     end),
   {ok, no_state}.
 
@@ -46,7 +55,7 @@ link_resume(PluginState, ExH, BH) ->
 partner_call({<<"AVAILABILITY">>,nothing}, State, ExAgentHandle, BH) ->
   io:format("The servant link has recieved the partner call~n"),
 
-  Reply = #{<<"AVAILABILITY">>=>true},
+  Reply = #{<<"AVAILABILITY">>=>false},
   {reply, Reply, nostate};
 
 partner_call(Value, State, ExAgentHandle, BH) ->

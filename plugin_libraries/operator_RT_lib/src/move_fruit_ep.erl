@@ -39,11 +39,10 @@ start_task(TaskState, ExecutorHandle, BH) ->
 
 end_task(TaskState, ExecutorHandle, BH) ->
   io:format("~nThe move fruit task is complete~n"),
-%%  move_fruit_rp:end_time(BH),
   ok.
 
 handle_request(Tag, Payload, BH) ->
-  erlang:error(not_implemented).
+  {start_task, {}}.
 
 handle_signal(Tag, Payload, BH) ->
   erlang:error(not_implemented).
@@ -51,5 +50,5 @@ handle_signal(Tag, Payload, BH) ->
 %%Custom tasks here -------------------------------------------------------------------->
 
 move_the_fruit()->
-  io:format("Moving the fruit~n"),
-  timer:sleep(10000). %%The fruit is being moved for 5s
+  io:format("Moving the fruit~n").
+%%  timer:sleep(10000). %%The fruit is being moved for 5s

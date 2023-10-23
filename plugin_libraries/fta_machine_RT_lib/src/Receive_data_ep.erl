@@ -36,6 +36,7 @@ start_task(TaskState, ExecutorHandle, BH) ->
 %%  {ok, ListenSocket} = gen_tcp:listen(9910, [{active, true}]),
 %%  accept_connections(ListenSocket),
   ResultList = call_and_accumulate( [], 6, []),
+  storedata(ResultList),
   io:format("The list of numbers is ~p~n", [ResultList]),
   {end_task, discard, measured}.                                     %% Why is this measured
 
@@ -58,6 +59,10 @@ call_and_accumulate(Acc, N, ResultList) ->
   RandomNumber = rand:uniform(10),
   io:format("~p: ~p~n",[N, RandomNumber]),
   call_and_accumulate(Acc, N - 1, [RandomNumber | ResultList]).
+
+storedata(Data)->
+  io:format("Data stored~n"),
+  ok.
 
 %%accept_connections(ListenSocket) ->
 %%  {ok, Socket} = gen_tcp:accept(ListenSocket),

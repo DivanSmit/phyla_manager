@@ -1,0 +1,8 @@
+{"name":"control_center_http_session_ep",
+      "lib":"interface_lib",
+      "base_task": "HTTP_INTERFACE_SERVER",
+      "sector": "ep",
+      "bin_dir": "default",
+      "behaviour":"task",
+      "language":"beam"
+}

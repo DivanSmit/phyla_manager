@@ -32,4 +32,17 @@ handle_request(<<"MOVE">>,<<"FRUIT">>, FROM, BH)->
     end),
 
   Reply = #{<<"Reply">>=>ok},
+  {reply, Reply};
+
+handle_request(<<"INFO">>,<<"INFO">>, FROM, BH)->
+  MyBC = base:get_my_bc(BH),
+  MyName = base_business_card:get_name(MyBC),
+  Reply = #{<<"name">>=>MyName},
+  {reply, Reply};
+
+handle_request(<<"SPAWN">>,Payload, FROM, BH)->
+  Name = maps:get(<<"name">>,Payload),
+  io:format("Spawn request recieved of ~p~n",[Name]),
+  operator_guardian_sp:instance_spawn_request(Payload,BH),
+  Reply = #{<<"name">>=>Name},
   {reply, Reply}.

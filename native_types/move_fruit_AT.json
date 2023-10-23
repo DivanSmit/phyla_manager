@@ -10,7 +10,7 @@
     {
       "id":"MOVE_FRUIT_TYPE",
       "name":"MOVE_FRUIT_TYPE",
-      "taxonomy":{"arti_class":"resource-type","base_type":"MOVE_FRUIT_TYPE"}
+      "taxonomy":{"arti_class":"activity-type","base_type":"MOVE_FRUIT_TYPE"}
     },
     "capabilities":[],
     "responsibilities":[],

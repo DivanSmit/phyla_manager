@@ -1,6 +1,6 @@
 {"name":"operator_info_handler_ep",
   "lib":"operator_RT_lib",
-  "tags":["MOVE"],
+  "tags":["MOVE","INFO","SPAWN"],
   "bin_dir": "default",
   "behaviour":"receptor",
   "sector": "cm",

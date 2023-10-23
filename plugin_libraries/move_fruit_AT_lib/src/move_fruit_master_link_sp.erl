@@ -44,7 +44,6 @@ all_proposals_received(ProposalList, PluginState, NegH, BH) ->
   WinningMap = maps:fold(fun(CandidateBC, Proposal, Acc)->
     #{<<"TIME">>:=CandidateTime} = Proposal,
 
-
     if
       Acc == null ->
         % it is the first proposal being evaluated
@@ -63,11 +62,10 @@ all_proposals_received(ProposalList, PluginState, NegH, BH) ->
     end
                          end, null, ProposalList),
 
-  {_, Sec, _} = calendar:now_to_universal_time({maps:get(<<"Time">>,WinningMap), 0}),
-  {{Year, Month, Day}, {Hour, Minute, Second}} = calendar:gregorian_seconds_to_datetime(Sec),
-  BestTime = {{Year, Month, Day}, {Hour, Minute, Second}},
+  %% Convert time to normal time
+  {{_,_,_},{Hour,Min,Sec}} = calendar:system_time_to_universal_time(maps:get(<<"Time">>, WinningMap), 1000),
+    io:format("The best time is: ~p:~p:~p~n", [Hour,Min,Sec]),
 
-  io:format("The best time is: ~p~n",[BestTime]),
   % retrieve the winning BC
   CandidateBC = if
                   is_map(WinningMap)->

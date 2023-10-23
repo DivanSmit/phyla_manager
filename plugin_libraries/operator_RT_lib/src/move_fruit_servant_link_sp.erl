@@ -24,7 +24,6 @@ request_start_negotiation(MasterBC, NegH, BH) ->
 
 generate_proposal(Requirements, PluginState, NegH, BH) ->
 
-  timer:sleep(2000),
   AvailabilityTime = check_availability(BH),
 
   Result = lists:foldl(fun(Elem, Acc)->
@@ -70,8 +69,10 @@ check_availability(BH) ->
 
   %% Choose the highest time
   if
-    TimeExe > TimeSced -> TimeExe;
-    true -> TimeSced
+    TimeExe > TimeSced ->
+      TimeExe;
+    true ->
+      TimeSced
   end.
 
 extract_sched_time([],_,_)->

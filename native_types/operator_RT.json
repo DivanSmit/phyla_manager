@@ -13,7 +13,7 @@
       "name":"OPERATOR_TYPE",
       "taxonomy":{"arti_class":"resource-type","base_type":"OPERATOR_TYPE"}
     },
-    "capabilities":[],
+    "capabilities":["SPAWN_OPERATOR_INSTANCE"],
     "responsibilities":[],
     "addresses":{},
     "meta":{}

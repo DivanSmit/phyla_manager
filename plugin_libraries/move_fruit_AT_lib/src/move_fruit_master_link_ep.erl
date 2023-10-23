@@ -37,24 +37,29 @@ link_start(PluginState, ExAgentHandle, BH) ->
         end),
 
   ReplyData = base_link_ep:call_partner(<<"AVAILABILITY">>,nothing,ExAgentHandle),
-  io:format("The reply data: ~p~n",[ReplyData]),
   {ok, no_state}.
 
 link_resume(PluginState, ExH, BH) ->
   erlang:error(not_implemented).
 
+partner_call({<<"Busy">>,nothing},State, ExAgentHandle, BH)->
+  io:format("Servant is busy until: sometime~n"),
+  {reply, ok, nostate};
+
 partner_call(Value, State, ExAgentHandle, BH) ->
   io:format("~n PARTNERCALL Value ~p ",[Value]),
   {reply, nothing, nothing}.
 
-partner_signal(_, PluginState, ExH, BH) ->
-  erlang:error(not_implemented).
+partner_signal(Value, PluginState, ExH, BH) ->
+  io:format("Servant is busy until: Signal~n"),
+  ok.
 
 link_end(Reason, PluginState, ExH, BH) ->
   erlang:error(not_implemented).
 
-handle_call(_, PluginState, ExH, BH) ->
-  erlang:error(not_implemented).
+handle_call(Value, PluginState, ExH, BH) ->
+  ok
+  .
 
 base_variable_update(_, PluginState, ExH, BH) ->
   erlang:error(not_implemented).

@@ -18,3 +18,8 @@
   {outdir, "move_fruit_AT_lib/ebin"},
   debug_info
 ]}.
+{ [ 'interface_lib/src/*'], [
+  {i, "include"},
+  {outdir, "interface_lib/ebin"},
+  debug_info
+]}.

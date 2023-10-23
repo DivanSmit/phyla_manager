@@ -23,7 +23,8 @@ stop(BH) ->
 
 handle_task_request(Pars, BH) ->
   Tsched = base:get_origo(),
-  io:format("Scheaduled time: ~p~n",[Tsched]),
+  {{Y,D,M},{Hour,Min,Sec}} = calendar:system_time_to_universal_time(Tsched, 1000),
+  io:format("Scheduled time:~p-~p-~p, ~p:~p:~p~n", [Y,D,M,Hour,Min,Sec]),
   Type = <<"moveFruit">>,
   ID = make_ref(),
   Data1 =#{},

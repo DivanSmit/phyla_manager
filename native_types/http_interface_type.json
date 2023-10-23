@@ -1,0 +1,19 @@
+{
+  "plugins": [
+    {"name":"control_center_http_session_ep","lib":"interface_lib","init_args": ["C:/Users/LENOVO/Desktop/base-getting-started/phyla_manager_BASE/INTERFACE_INETS",9001]}],
+  "bc":{
+    "identity":
+    {
+      "id":"INTERFACE_TYPE",
+      "name":"INTERFACE_TYPE",
+      "taxonomy":{"arti_class":"resource-type","base_type":"INTERFACE_TYPE"}
+    },
+    "capabilities":["INTERFACE_INFO"],
+    "responsibilities":[],
+    "addresses":{},
+    "meta":{}
+
+  },
+  "disk_base":"INTERFACE_TYPE",
+  "cookie":"BB"
+}
