@@ -14,6 +14,7 @@
 
 
 init(Parameters, BH) ->
+  io:format("Recieve data plugin installed~n"),
   ok.
 
 stop(BH) ->
@@ -33,11 +34,11 @@ resume_task(TaskState, ExecutorHandle, BH) ->
 
 start_task(TaskState, ExecutorHandle, BH) ->
   io:format("~nData receive task beginning: ~n"),
-%%  {ok, ListenSocket} = gen_tcp:listen(9910, [{active, true}]),
-%%  accept_connections(ListenSocket),
-  ResultList = call_and_accumulate( [], 6, []),
-  storedata(ResultList),
-  io:format("The list of numbers is ~p~n", [ResultList]),
+  Port = 9910,
+  {ok, ListenSocket} = gen_tcp:listen(Port, [{active, false}, {reuseaddr, true}]),
+  io:format("Server listening on port ~p~n", [Port]),
+  accept_connections(ListenSocket, [], BH),
+%%  io:format("The list of numbers is ~p~n", [ResultList]),
   {end_task, discard, measured}.                                     %% Why is this measured
 
 end_task(TaskState, ExecutorHandle, BH) ->
@@ -52,32 +53,24 @@ handle_signal(Tag, Payload, BH) ->
 
 %%Custom tasks here -------------------------------------------------------------------->
 
-call_and_accumulate(Acc, 0, ResultList) ->
-  ResultList;
-call_and_accumulate(Acc, N, ResultList) ->
-  timer:sleep(1000), % Prints a number every second
-  RandomNumber = rand:uniform(10),
-  io:format("~p: ~p~n",[N, RandomNumber]),
-  call_and_accumulate(Acc, N - 1, [RandomNumber | ResultList]).
+accept_connections(ListenSocket, Values, BH) when length(Values) < 6 ->
+  {ok, Socket} = gen_tcp:accept(ListenSocket),
+  spawn(fun() -> handle_connection(Socket, Values, BH) end),
+  accept_connections(ListenSocket, Values, BH);
+accept_connections(ListenSocket, Values, BH) ->
+  io:format("Received 6 TCP calls. Server is now closing.~n"),
+  gen_tcp:close(ListenSocket),
+  lists:foreach(fun(Value) -> io:format("Received: ~s~n", [Value]) end, Values).
 
-storedata(Data)->
-  io:format("Data stored~n"),
-  ok.
-
-%%accept_connections(ListenSocket) ->
-%%  {ok, Socket} = gen_tcp:accept(ListenSocket),
-%%  spawn(fun() -> handle_connection(Socket) end),
-%%  accept_connections(ListenSocket).
-%%
-%%handle_connection(Socket) ->
-%%  case gen_tcp:recv(Socket, 0) of
-%%    {ok, Data} ->
-%%      io:format("Received: ~s~n", [Data]),
-%%      gen_tcp:send(Socket, "Hello, World!\n"),
-%%      handle_connection(Socket);
-%%    {error, closed} ->
-%%      io:format("Connection closed~n");
-%%    {error, Reason} ->
-%%      io:format("Error: ~p~n", [Reason])
-%%  end,
-%%  gen_tcp:close(Socket).
+handle_connection(Socket, Values, BH) ->
+  case gen_tcp:recv(Socket, 0) of
+    {ok, Data} ->
+      io:format("Received: ~s~n", [Data]),
+      base_variables:write(<<"MEASUREMENTS">>,<<"values">>,[Data|Values],BH),
+      accept_connections(Socket, [Data | Values], BH);
+    {error, closed} ->
+      io:format("Connection closed~n");
+    {error, Reason} ->
+      io:format("Error: ~p~n", [Reason])
+  end,
+  gen_tcp:close(Socket).

@@ -14,6 +14,7 @@
 
 
 init(Parameters, BH) ->
+%%  print_sched(BH,2),
   ok.
 
 stop(BH) ->
@@ -52,3 +53,9 @@ handle_signal(Tag, Payload, BH) ->
 move_the_fruit()->
   io:format("Moving the fruit~n").
 %%  timer:sleep(10000). %%The fruit is being moved for 5s
+print_sched(BH,0)->ok;
+print_sched(BH,Count)->
+  Tasks = base_schedule:get_all_tasks(BH),
+  io:format("The sched is: ~p~n",[Tasks]),
+  timer:sleep(500),
+  print_sched(BH,Count-1).

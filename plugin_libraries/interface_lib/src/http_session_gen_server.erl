@@ -24,33 +24,37 @@ init([#http_state_management{server_dir = ServerDir, port = Port, task_executor_
   {ok, State}.
 
 handle_call({http_request,MSG}, From, State) ->
-  io:format("HTTP request recieved with msg: ~p~n",[MSG]),
+  io:format("HTTP request recieved from: ~p~n",[MSG]),
   BH = State#http_state_management.base_handle,
-  Reply1 = case maps:get(<<"queryParam">>,MSG) of
-             <<"type">>->
-               Tag = maps:get(<<"tag">>,MSG),
+  Query = maps:get(<<"queryParam">>,MSG),
+  Tag = maps:get(<<"tag">>,MSG),
+  Reply1 = case Query of
+             <<"INFO">>->
+
                case bhive:discover_bases(#base_discover_query{capabilities = Tag},BH) of
                  []->
+                   io:format("No INSTANCE found~n"),
                    {error, no_instances};
                  List->
                    ListResult = lists:foldl(fun(Elem, Acc)->
-                     Reply = base_signal:emit_request(Elem,<<"INFO">>,<<"INFO">>,BH),
+                     Reply = base_signal:emit_request(Elem,Query,Query,BH),
                      [Reply|Acc]
                                             end, [],List),
 
                    {ok, ListResult}
                end;
-             <<"addOperator">> ->
-               Tag = maps:get(<<"tag">>, MSG),
+
+             <<"SPAWN">> ->
+               Name = maps:get(<<"name">>, MSG),
                ID = rand:uniform(1000),
-               Init = #{<<"name">>=>Tag,<<"id">>=>ID},
-               TargetBC = bhive:discover_bases(#base_discover_query{capabilities = <<"SPAWN_OPERATOR_INSTANCE">>}, BH),
+               Init = #{<<"name">>=>Name,<<"id">>=>ID},
+               TargetBC = bhive:discover_bases(#base_discover_query{capabilities = Tag}, BH),
                case TargetBC of
                  [] ->
                    {error, no_instances};
                  _ ->
-                   Reply = base_signal:emit_request(TargetBC, <<"SPAWN">>, Init, BH),
-                   {ok, Reply}
+                   ReplyOfSpawn = base_signal:emit_request(TargetBC, Tag, Init, BH),
+                   {ok, ReplyOfSpawn}
                end;
              _ -> {error, no_match}
            end,

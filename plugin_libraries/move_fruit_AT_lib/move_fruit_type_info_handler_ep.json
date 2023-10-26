@@ -1,0 +1,8 @@
+{"name":"move_fruit_type_info_handler_ep",
+  "lib":"move_fruit_AT_lib",
+  "tags":["SPAWN_MOVE_FRUIT_INSTANCE"],
+  "bin_dir": "default",
+  "behaviour":"receptor",
+  "sector": "cm",
+  "language":"beam"
+}

@@ -41,6 +41,7 @@ evaluate_proposal(Proposal, PluginState, NegH, BH) ->
 
 all_proposals_received(ProposalList, PluginState, NegH, BH) ->
   %% proposal evaluation logic
+  io:format("Proposal list: ~p~n",[ProposalList]),
   WinningMap = maps:fold(fun(CandidateBC, Proposal, Acc)->
     #{<<"TIME">>:=CandidateTime} = Proposal,
 
@@ -76,8 +77,8 @@ all_proposals_received(ProposalList, PluginState, NegH, BH) ->
                 end,
   {ok, [CandidateBC], nostate}.
 
-
 promise_received(Promise, PluginState, NegH, BH) ->
+  io:format("Master recieved promise: ~p~n",[Promise]),
   LinkID = list_to_binary(ref_to_list(make_ref())),
   Data1 = #{},
   {ok,LinkID,Data1}.

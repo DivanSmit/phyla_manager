@@ -47,7 +47,7 @@ link_start(PluginState, ExH, BH) ->
     io:format("The fruit has been moved~n")
     %%------------------------------------------
     end),
-  {ok, no_state}.
+  {end_link, no_state}.
 
 link_resume(PluginState, ExH, BH) ->
   erlang:error(not_implemented).
@@ -66,7 +66,8 @@ partner_signal(Cast, State, ExAgentHandle, BH) ->
   erlang:error(not_implemented).
 
 link_end(Reason, State, ExAgentHandle, BH) ->
-  erlang:error(not_implemented).
+  io:format("THe link is finished~n"),
+  ok.
 
 handle_call(Call, TaskState, ExAgentHandle, BH) ->
   erlang:error(not_implemented).

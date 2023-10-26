@@ -1,0 +1,18 @@
+[26/Oct/2023:16:41:08 +0200] access to /erl/http_session_gen_server/fetchdata?MSG=%7B%22queryParam%22%3A%22INFO%22%7D failed for 127.0.0.1, reason: 
+"Not found"
+[26/Oct/2023:16:41:08 +0200], Server: <0.270.0>, Protocol: HTTP, Transport: TCP, URI: /erl/http_session_gen_server/fetchdata?MSG=%7B%22queryParam%22%3A%22INFO%22%7D, Host: 127.0.0.1:9001, Peer: 127.0.0.1:63959, Reason: [{statuscode,404},{description,"Object Not Found"}]
+[26/Oct/2023:16:43:10 +0200] access to /erl/http_session_gen_server/fetchdata?MSG=%7B%22queryParam%22%3A%22SPAWN%22%2C%22tag%22%3A%22SPAWN_OPERATOR_INSTANCE%22%2C%22name%22%3A%22Divan%22%7D failed for 127.0.0.1, reason: 
+"Not found"
+[26/Oct/2023:16:43:10 +0200], Server: <0.270.0>, Protocol: HTTP, Transport: TCP, URI: /erl/http_session_gen_server/fetchdata?MSG=%7B%22queryParam%22%3A%22SPAWN%22%2C%22tag%22%3A%22SPAWN_OPERATOR_INSTANCE%22%2C%22name%22%3A%22Divan%22%7D, Host: 127.0.0.1:9001, Peer: 127.0.0.1:63959, Reason: [{statuscode,404},{description,"Object Not Found"}]
+[26/Oct/2023:16:43:10 +0200] access to /erl/http_session_gen_server/fetchdata?MSG=%7B%22queryParam%22%3A%22INFO%22%2C%22tag%22%3A%22OPERATOR_INSTANCE_INFO%22%7D failed for 127.0.0.1, reason: 
+"Not found"
+[26/Oct/2023:16:43:10 +0200], Server: <0.270.0>, Protocol: HTTP, Transport: TCP, URI: /erl/http_session_gen_server/fetchdata?MSG=%7B%22queryParam%22%3A%22INFO%22%2C%22tag%22%3A%22OPERATOR_INSTANCE_INFO%22%7D, Host: 127.0.0.1:9001, Peer: 127.0.0.1:63959, Reason: [{statuscode,404},{description,"Object Not Found"}]
+[26/Oct/2023:16:43:37 +0200] access to /erl/http_session_gen_server/fetchdata?MSG=%7B%22queryParam%22%3A%22INFO%22%7D failed for 127.0.0.1, reason: 
+"Not found"
+[26/Oct/2023:16:43:37 +0200], Server: <0.274.0>, Protocol: HTTP, Transport: TCP, URI: /erl/http_session_gen_server/fetchdata?MSG=%7B%22queryParam%22%3A%22INFO%22%7D, Host: 127.0.0.1:9001, Peer: 127.0.0.1:63980, Reason: [{statuscode,404},{description,"Object Not Found"}]
+[26/Oct/2023:16:46:43 +0200] access to /erl/http_session_gen_server/fetchdata?MSG=%7B%22queryParam%22%3A%22INFO%22%2C%22tag%22%3A%22OPERATOR_INSTANCE_INFO%22%7D failed for 127.0.0.1, reason: 
+"Not found"
+[26/Oct/2023:16:46:43 +0200], Server: <0.274.0>, Protocol: HTTP, Transport: TCP, URI: /erl/http_session_gen_server/fetchdata?MSG=%7B%22queryParam%22%3A%22INFO%22%2C%22tag%22%3A%22OPERATOR_INSTANCE_INFO%22%7D, Host: 127.0.0.1:9001, Peer: 127.0.0.1:64007, Reason: [{statuscode,404},{description,"Object Not Found"}]
+[26/Oct/2023:16:46:50 +0200] access to /erl/http_session_gen_server/fetchdata?MSG=%7B%22queryParam%22%3A%22INFO%22%2C%22tag%22%3A%22OPERATOR_INSTANCE_INFO%22%7D failed for 127.0.0.1, reason: 
+"Not found"
+[26/Oct/2023:16:46:50 +0200], Server: <0.274.0>, Protocol: HTTP, Transport: TCP, URI: /erl/http_session_gen_server/fetchdata?MSG=%7B%22queryParam%22%3A%22INFO%22%2C%22tag%22%3A%22OPERATOR_INSTANCE_INFO%22%7D, Host: 127.0.0.1:9001, Peer: 127.0.0.1:64007, Reason: [{statuscode,404},{description,"Object Not Found"}]

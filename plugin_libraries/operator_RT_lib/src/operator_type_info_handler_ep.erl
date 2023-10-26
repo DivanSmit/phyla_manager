@@ -4,43 +4,46 @@
 %%% @doc
 %%%
 %%% @end
-%%% Created : 20. Sep 2023 16:50
+%%% Created : 05. Oct 2023 11:47
 %%%-------------------------------------------------------------------
--module(operator_guardian_sp).
+-module(operator_type_info_handler_ep).
 -author("LENOVO").
--behaviour(base_guardian_sp).
+-behaviour(base_receptor).
 %% API
--export([init/2, stop/1, instance_spawn_request/2, generate_instance_recipe/3]).
+-export([init/2, stop/1, handle_signal/3, handle_request/4]).
 
 
 init(Pars, BH) ->
-  %% we want to create an instance
-  base:wait_for_base_ready(BH),
-  lists:foldl(fun(Elem,Acc)->
-    instance_spawn_request(Elem,BH)
-              end, [], Pars),
   ok.
 
 stop(BH) ->
   ok.
 
-instance_spawn_request(Pars, BH) ->
-  Name = maps:get(<<"name">>,Pars),
-  ID = maps:get(<<"id">>,Pars),
+handle_signal(Tag, Signal, BH) ->
+  erlang:error(not_implemented).
 
+handle_request(<<"SPAWN_OPERATOR_INSTANCE">>,Payload, FROM, BH)->
+  Name = maps:get(<<"name">>,Payload),
+  ID = maps:get(<<"id">>,Payload),
   {ok, Recipe} = generate_instance_recipe(Name, ID, BH),
+  io:format("Spawn request recieved of ~p~n",[Name]),
   Tsched = base:get_origo(),
   Data1 = no_data,
-  base_guardian_sp:schedule_instance_guardian(Tsched,Recipe,Data1,BH),
-  ok.
+  spawn(fun()->
+    base_guardian_sp:schedule_instance_guardian(Tsched,Recipe,Data1,BH)
+        end),
+  Reply = #{<<"name">>=>Name},
+  {reply, Reply}.
 
 generate_instance_recipe(Name, ID, BH) ->
   RECIPE = #{
     <<"plugins">>=> [
+      #{<<"name">>=><<"move_fruit_sp">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"move_fruit_ep">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"move_fruit_servant_link_sp">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"move_fruit_servant_link_ep">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"operator_info_handler_ep">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]}
+
     ],
     <<"bc">> => #{
       <<"identity">>=>#{
@@ -58,3 +61,4 @@ generate_instance_recipe(Name, ID, BH) ->
     <<"cookie">>=><<"INSTANCE_COOK">>
   },
   {ok, RECIPE}.
+

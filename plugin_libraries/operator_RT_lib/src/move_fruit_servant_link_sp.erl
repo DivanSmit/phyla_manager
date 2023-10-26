@@ -25,7 +25,7 @@ request_start_negotiation(MasterBC, NegH, BH) ->
 generate_proposal(Requirements, PluginState, NegH, BH) ->
 
   AvailabilityTime = check_availability(BH),
-
+  io:format("Generating proposal: ~p~n",[AvailabilityTime]),
   Result = lists:foldl(fun(Elem, Acc)->
     case Elem of
       #{<<"AVAILABILITY">>:=Time} ->
@@ -50,6 +50,7 @@ generate_proposal(Requirements, PluginState, NegH, BH) ->
   end.
 
 proposal_accepted(PluginState, NegH, BH) ->
+  io:format("Servant accepted promise~n"),
   Tsched = base:get_origo(),
   LinkID = list_to_binary(ref_to_list(make_ref())),
   Data1 = nodata,
@@ -85,8 +86,8 @@ extract_sched_time([Key | Rest], Tasks, MaxTime) ->
                  {_, {task_shell, Time, _, _,
                    _, _, task, 1}, undefined, #{}, #{}, #{}} ->
                    {Time};
-                 _ -> io:format("ERROR!!!!!!~n"),
-                   {error}
+                 _ ->
+                   {base:get_origo()} %% Needs to be fixed later
                end,
 
   {UpdatedMaxTime} = if
@@ -109,7 +110,7 @@ extract_exe_time([Key | Rest], Tasks, MaxTime) ->
                  {_, {task_shell, _, Time, _,
                    _, _, task, 2}, undefined, #{}, #{}, #{}} ->
                    {Time};
-                 _ -> io:format("ERROR!!!!!!~n"),
+                 _ -> io:format("ERROR in exe!!!!!!~n"),
                    {error}
                end,
 

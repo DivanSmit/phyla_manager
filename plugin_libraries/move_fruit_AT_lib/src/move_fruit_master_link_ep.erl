@@ -55,7 +55,8 @@ partner_signal(Value, PluginState, ExH, BH) ->
   ok.
 
 link_end(Reason, PluginState, ExH, BH) ->
-  erlang:error(not_implemented).
+  io:format("THe link is finished~n"),
+  ok.
 
 handle_call(Value, PluginState, ExH, BH) ->
   ok

@@ -14,6 +14,7 @@
 
 
 init(Pars, BH) ->
+  io:format("Info handler plugin installed~n"),
   ok.
 
 stop(BH) ->
@@ -23,7 +24,6 @@ handle_signal(Tag, Signal, BH) ->
   erlang:error(not_implemented).
 
 handle_request(<<"INFO">>,<<"INFO">>, FROM, BH)->
-  MyBC = base:get_my_bc(BH),
-  MyName = base_business_card:get_name(MyBC),
-  Reply = #{},
+  Values = base_variables:read(<<"MEASUREMENTS">>,<<"values">>,BH),
+  Reply = #{<<"content">>=>Values},
   {reply, Reply}.
