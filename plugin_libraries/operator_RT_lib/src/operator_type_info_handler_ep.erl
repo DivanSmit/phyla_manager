@@ -25,7 +25,7 @@ handle_signal(Tag, Signal, BH) ->
 handle_request(<<"SPAWN_OPERATOR_INSTANCE">>,Payload, FROM, BH)->
   Name = maps:get(<<"name">>,Payload),
   ID = maps:get(<<"id">>,Payload),
-  {ok, Recipe} = generate_instance_recipe(Name, ID, BH),
+  {ok, Recipe} = operator_guardian_sp:generate_instance_recipe(Name, ID, BH),
   io:format("Spawn request recieved of ~p~n",[Name]),
   Tsched = base:get_origo(),
   Data1 = no_data,
@@ -34,31 +34,3 @@ handle_request(<<"SPAWN_OPERATOR_INSTANCE">>,Payload, FROM, BH)->
         end),
   Reply = #{<<"name">>=>Name},
   {reply, Reply}.
-
-generate_instance_recipe(Name, ID, BH) ->
-  RECIPE = #{
-    <<"plugins">>=> [
-      #{<<"name">>=><<"move_fruit_sp">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},
-      #{<<"name">>=><<"move_fruit_ep">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},
-      #{<<"name">>=><<"move_fruit_servant_link_sp">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},
-      #{<<"name">>=><<"move_fruit_servant_link_ep">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},
-      #{<<"name">>=><<"operator_info_handler_ep">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]}
-
-    ],
-    <<"bc">> => #{
-      <<"identity">>=>#{
-        <<"id">>=>ID,
-        <<"name">>=>Name,
-        <<"taxonomy">>=>#{<<"arti_class">>=><<"resource-instance">>,<<"base_type">>=><<"OPERATOR_TYPE">>}
-      },
-      <<"capabilities">>=>[<<"MoveFruit">>,<<"OPERATOR_INSTANCE_INFO">>],
-      <<"responsibilities">>=>[],
-      <<"addresses">>=>#{},
-      <<"meta">>=>#{}
-
-    },
-    <<"disk_base">>=>no_entry,
-    <<"cookie">>=><<"INSTANCE_COOK">>
-  },
-  {ok, RECIPE}.
-

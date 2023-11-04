@@ -14,7 +14,7 @@
 
 
 init(Pars, BH) ->
-  io:format("Init guardian installed~n"),
+
   %% we want to create an instance
   base:wait_for_base_ready(BH),
   lists:foldl(fun(Elem,Acc)->

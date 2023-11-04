@@ -10,12 +10,12 @@
 
     const startTask = async () => {
         operatorData = await moveFruitTask();
-        isDataLoaded = true;
+        isDataLoaded = false;
     };
 
     const startMeasure = async() => {
         measureData = await getMeasurements();
-        isDatarecieved = true;
+        isDatarecieved = false;
     };
 
     onMount(() => {
@@ -66,4 +66,11 @@
 <div class="start-button-container">
     <a href="#" class="button start-button" on:click={startTask}>Move Fruit</a>
     <a href="#" class="button start-button" on:click={startMeasure}>Start Measurement</a>
+    <a href="#" class="button start-button" on:click={()=>isDatarecieved=false}>Cancel</a>
 </div>
+<!-- 
+<ul>
+    {#each measureData.content as item (item)}
+      <li>{item[0]}</li>
+    {/each}
+  </ul> -->

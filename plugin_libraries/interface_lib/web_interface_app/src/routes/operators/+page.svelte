@@ -5,12 +5,14 @@
 
     let operator = [];
     let operatorData = [];
-    let isDataLoaded = false;
+    let OLD_Opdata = [];
+    let isDataLoaded = true;
     let isInputVisible = false;
     let inputData = '';
 
     const fetchData = async () => {
         operatorData = await get_data("OPERATOR_INSTANCE_INFO");
+        console.log("Operator "+operatorData)
         isDataLoaded = true;
     };
 
@@ -20,20 +22,29 @@
         }else{
             isInputVisible = true;
         }
-        
     }
-
 
     const addOperatorfunc = async () => {
         isInputVisible = false;
         operator = await addOperator(inputData);
-        operatorData = await get_data("OPERATOR_INSTANCE_INFO");
-        isDataLoaded = true;
-        
+        OLD_Opdata = operatorData;
+        isDataLoaded = false;
     };
 
     onMount(() => {
         fetchData();
+        setInterval(async()=>{
+            
+            if(!isDataLoaded){
+                operatorData = await get_data("OPERATOR_INSTANCE_INFO");
+                console.log(operatorData);
+                console.log(OLD_Opdata);
+                if(OLD_Opdata.length != operatorData.length){
+                    isDataLoaded = true
+                    console.log("Data is different")
+                }
+            }
+        }, 1000)                              
     });
 
     /**

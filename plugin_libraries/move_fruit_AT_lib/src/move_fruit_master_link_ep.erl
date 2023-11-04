@@ -21,7 +21,7 @@ stop(BH) ->
   ok.
 
 request_start_link(State, ExAgentHandle, BH) ->
-  io:format("The master link has requested to start~n"),
+  io:format("The master link has requested to start ~n "),
   {start,no_state}.
 
 request_resume_link(State, ExAgentHandle, BH) ->
@@ -36,8 +36,8 @@ link_start(PluginState, ExAgentHandle, BH) ->
     io:format("~n [Activity: ~p] >>------------------------>>--------------------------->> [Operator: ~p] ~n", [MyName, PartnerName])
         end),
 
-  ReplyData = base_link_ep:call_partner(<<"AVAILABILITY">>,nothing,ExAgentHandle),
-  {ok, no_state}.
+%%  ReplyData = base_link_ep:call_partner(<<"AVAILABILITY">>,nothing,ExAgentHandle),
+  {end_link, no_state}.
 
 link_resume(PluginState, ExH, BH) ->
   erlang:error(not_implemented).
@@ -55,12 +55,11 @@ partner_signal(Value, PluginState, ExH, BH) ->
   ok.
 
 link_end(Reason, PluginState, ExH, BH) ->
-  io:format("THe link is finished~n"),
-  ok.
+  io:format("The link is finished~n"),
+  discard.
 
 handle_call(Value, PluginState, ExH, BH) ->
-  ok
-  .
+  ok.
 
 base_variable_update(_, PluginState, ExH, BH) ->
   erlang:error(not_implemented).

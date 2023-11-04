@@ -15,8 +15,11 @@
 
 
 init(Pars, BH) ->
-%%  timer:sleep(1000),
-  base_link_master_sp:start_link_negotiation(#{<<"AVAILABILITY">>=>any},<<"search">>,BH),
+  base:wait_for_base_ready(BH),
+  spawn(fun()->
+    timer:sleep(1000),
+    base_link_master_sp:start_link_negotiation([#{<<"AVAILABILITY">>=>any}],<<"findOp">>,BH)
+  end),
   ok.
 
 stop(BH) ->
@@ -41,7 +44,7 @@ evaluate_proposal(Proposal, PluginState, NegH, BH) ->
 
 all_proposals_received(ProposalList, PluginState, NegH, BH) ->
   %% proposal evaluation logic
-  io:format("Proposal list: ~p~n",[ProposalList]),
+%%  io:format("Proposal list: ~p~n",[ProposalList]),
   WinningMap = maps:fold(fun(CandidateBC, Proposal, Acc)->
     #{<<"TIME">>:=CandidateTime} = Proposal,
 
@@ -78,7 +81,7 @@ all_proposals_received(ProposalList, PluginState, NegH, BH) ->
   {ok, [CandidateBC], nostate}.
 
 promise_received(Promise, PluginState, NegH, BH) ->
-  io:format("Master recieved promise: ~p~n",[Promise]),
+%%  io:format("Master received promise: ~p~n",[Promise]),
   LinkID = list_to_binary(ref_to_list(make_ref())),
   Data1 = #{},
   {ok,LinkID,Data1}.

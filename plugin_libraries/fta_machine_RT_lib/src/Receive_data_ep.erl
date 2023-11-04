@@ -34,12 +34,15 @@ resume_task(TaskState, ExecutorHandle, BH) ->
 
 start_task(TaskState, ExecutorHandle, BH) ->
   io:format("~nData receive task beginning: ~n"),
-  Port = 9910,
-  {ok, ListenSocket} = gen_tcp:listen(Port, [{active, false}, {reuseaddr, true}]),
-  io:format("Server listening on port ~p~n", [Port]),
-  accept_connections(ListenSocket, [], BH),
-%%  io:format("The list of numbers is ~p~n", [ResultList]),
-  {end_task, discard, measured}.                                     %% Why is this measured
+  spawn(fun()->
+    Port = 9910,
+    {ok, ListenSocket} = gen_tcp:listen(Port, [{active, false}, {reuseaddr, true}]),
+    io:format("Server listening on port ~p~n", [Port]),
+    accept_connections(ListenSocket, [], ExecutorHandle,BH)
+  end),
+
+%%  io:format("Received data from all connections: ~s~n", [lists:flatten(DataAcc)]),
+  {ok, measured}.                                     %% Why is this measured
 
 end_task(TaskState, ExecutorHandle, BH) ->
   io:format("~nThe Recieve data task is complete~n"),
@@ -53,24 +56,52 @@ handle_signal(Tag, Payload, BH) ->
 
 %%Custom tasks here -------------------------------------------------------------------->
 
-accept_connections(ListenSocket, Values, BH) when length(Values) < 6 ->
+accept_connections(ListenSocket, Values,Ex, BH) when length(Values) < 6 ->
   {ok, Socket} = gen_tcp:accept(ListenSocket),
-  spawn(fun() -> handle_connection(Socket, Values, BH) end),
-  accept_connections(ListenSocket, Values, BH);
-accept_connections(ListenSocket, Values, BH) ->
-  io:format("Received 6 TCP calls. Server is now closing.~n"),
-  gen_tcp:close(ListenSocket),
-  lists:foreach(fun(Value) -> io:format("Received: ~s~n", [Value]) end, Values).
+  io:format("Accepted a new connection~n"),
+  spawn(fun() -> handle_connection(Socket, Values, Ex, BH) end),
+  accept_connections(ListenSocket, Values, Ex,BH);
 
-handle_connection(Socket, Values, BH) ->
+accept_connections(_, Values,Ex, BH) when length(Values) == 6 ->
+  io:format("All six values received: ~p~n", [lists:flatten(Values)]).
+
+handle_connection(Socket, Values, Ex, BH) ->
   case gen_tcp:recv(Socket, 0) of
-    {ok, Data} ->
-      io:format("Received: ~s~n", [Data]),
-      base_variables:write(<<"MEASUREMENTS">>,<<"values">>,[Data|Values],BH),
-      accept_connections(Socket, [Data | Values], BH);
+    {ok, ReceivedData} ->
+      add_to_BASE_variable(ReceivedData,Ex, BH),
+      io:format("Received: ~s~n", [ReceivedData]),
+      spawn(fun()->
+        DataMap = #{<<"id">>=>length(Values)+1,<<"sugar_content">>=>ReceivedData,<<"time">>=>base:get_origo()},
+        io:format("Data ~p~n",[DataMap]),
+        postgresql_functions:write_data_to_postgresql_database(DataMap,"Test1")
+      end),
+      NewValues = Values ++ [ReceivedData],
+
+      handle_connection(Socket, NewValues,Ex, BH);
     {error, closed} ->
       io:format("Connection closed~n");
     {error, Reason} ->
       io:format("Error: ~p~n", [Reason])
+  end.
+
+add_to_BASE_variable(Value, Ex,BH)->
+  OldValues = base_variables:read(<<"MEASUREMENTS">>, <<"values">>, BH),
+  case OldValues of
+    no_entry ->
+      io:format("First entry~n"),
+      base_variables:write(<<"MEASUREMENTS">>, <<"values">>, [Value], BH);
+    _ ->
+      NewList = [Value | OldValues],
+      io:format("Values: ~p~n", [NewList]),
+      base_variables:write(<<"MEASUREMENTS">>, <<"values">>, NewList, BH)
   end,
-  gen_tcp:close(Socket).
+
+  if
+    length(OldValues) >= 5 ->
+      io:format("Ending the task~n"),
+    base_task_ep:end_task(Ex, end_task, BH);
+    true -> ok
+  end.
+
+
+

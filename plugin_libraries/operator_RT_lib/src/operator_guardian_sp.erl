@@ -37,7 +37,8 @@ instance_spawn_request(Pars, BH) ->
 generate_instance_recipe(Name, ID, BH) ->
   RECIPE = #{
     <<"plugins">>=> [
-      #{<<"name">>=><<"move_fruit_ep">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},
+      #{<<"name">>=><<"fse_operator_servant_link_sp">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},
+      #{<<"name">>=><<"fse_operator_servant_link_sp">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"move_fruit_servant_link_sp">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"move_fruit_servant_link_ep">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"operator_info_handler_ep">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]}
@@ -48,7 +49,11 @@ generate_instance_recipe(Name, ID, BH) ->
         <<"name">>=>Name,
         <<"taxonomy">>=>#{<<"arti_class">>=><<"resource-instance">>,<<"base_type">>=><<"OPERATOR_TYPE">>}
       },
-      <<"capabilities">>=>[<<"MoveFruit">>,<<"OPERATOR_INSTANCE_INFO">>],
+      <<"capabilities">>=>[
+        <<"MoveFruit">>,
+        <<"OPERATOR_INSTANCE_INFO">>,
+        <<"TAKE_MEASUREMENT">>
+      ],
       <<"responsibilities">>=>[],
       <<"addresses">>=>#{},
       <<"meta">>=>#{}
@@ -58,3 +63,6 @@ generate_instance_recipe(Name, ID, BH) ->
     <<"cookie">>=><<"INSTANCE_COOK">>
   },
   {ok, RECIPE}.
+
+%%#{<<"name">>=><<"move_fruit_ep">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},
+%%#{<<"name">>=><<"move_fruit_sp">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},

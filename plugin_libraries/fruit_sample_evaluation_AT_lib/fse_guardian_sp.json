@@ -1,0 +1,7 @@
+{"name":"fse_guardian_sp",
+  "lib":"fruit_sample_evaluation_AT_lib",
+  "sector": "sp",
+  "bin_dir": "default",
+  "behaviour":"guardian",
+  "language":"beam"
+}

@@ -37,7 +37,6 @@ instance_spawn_request(Pars, BH) ->
 generate_instance_recipe(Name, ID, BH) ->
   RECIPE = #{
     <<"plugins">>=> [
-      #{<<"name">>=><<"coordinate_move_ep">>,<<"lib">>=><<"move_fruit_AT_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"move_fruit_master_link_sp">>,<<"lib">>=><<"move_fruit_AT_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"move_fruit_master_link_ep">>,<<"lib">>=><<"move_fruit_AT_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"move_fruit_info_handler_ep">>,<<"lib">>=><<"move_fruit_AT_lib">>,<<"init_args">>=>[]}
@@ -46,7 +45,7 @@ generate_instance_recipe(Name, ID, BH) ->
       <<"identity">>=>#{
         <<"id">>=>ID,
         <<"name">>=>Name,
-        <<"taxonomy">>=>#{<<"arti_class">>=><<"activity-instance">>,<<"base_type">>=><<"MOVE_FRUIT_TYPE">>}
+        <<"taxonomy">>=>#{<<"arti_class">>=><<"resource-instance">>,<<"base_type">>=><<"MOVE_FRUIT_TYPE">>}
       },
       <<"capabilities">>=>[<<"MOVEFRUIT_INSTANCE_INFO">>],
       <<"responsibilities">>=>[],

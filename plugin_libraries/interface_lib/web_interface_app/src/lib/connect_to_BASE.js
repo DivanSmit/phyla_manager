@@ -67,7 +67,7 @@ export async function moveFruitTask() {
 export async function getMeasurements() {
 
     var randomNumber = Math.floor(Math.random() * 1000);
-    let MSG = { queryParam:"SPAWN", tag: "SPAWN_FTA_MACHINE_INSTANCE",name:"fta_machine_"+randomNumber};
+    let MSG = { queryParam:"SPAWN", tag: "SPAWN_FTA_MACHINE_INSTANCE",name:"fse_"+randomNumber};
 
     try {
         let url = new URL("http://localhost:9001/erl/http_session_gen_server/fetchdata");

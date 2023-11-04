@@ -27,7 +27,7 @@ handle_request(<<"SPAWN_MOVE_FRUIT_INSTANCE">>,Payload, FROM, BH)->
   io:format("Spawn request recieved of ~p~n",[Name]),
   ID = maps:get(<<"id">>,Payload),
 
-  {ok, Recipe} = generate_instance_recipe(Name, ID, BH),
+  {ok, Recipe} = move_fruit_guardian_sp:generate_instance_recipe(Name, ID, BH),
   Tsched = base:get_origo(),
   Data1 = no_data,
   spawn(fun()->
@@ -35,28 +35,3 @@ handle_request(<<"SPAWN_MOVE_FRUIT_INSTANCE">>,Payload, FROM, BH)->
   end),
   Reply = #{<<"name">>=>Name},
   {reply, Reply}.
-
-generate_instance_recipe(Name, ID, BH) ->
-  RECIPE = #{
-    <<"plugins">>=> [
-      #{<<"name">>=><<"move_fruit_master_link_sp">>,<<"lib">>=><<"move_fruit_AT_lib">>,<<"init_args">>=>[]},
-      #{<<"name">>=><<"move_fruit_master_link_ep">>,<<"lib">>=><<"move_fruit_AT_lib">>,<<"init_args">>=>[]},
-      #{<<"name">>=><<"move_fruit_info_handler_ep">>,<<"lib">>=><<"move_fruit_AT_lib">>,<<"init_args">>=>[]}
-
-    ],
-    <<"bc">> => #{
-      <<"identity">>=>#{
-        <<"id">>=>ID,
-        <<"name">>=>Name,
-        <<"taxonomy">>=>#{<<"arti_class">>=><<"activity-instance">>,<<"base_type">>=><<"MOVE_FRUIT_TYPE">>}
-      },
-      <<"capabilities">>=>[<<"MOVEFRUIT_INSTANCE_INFO">>],
-      <<"responsibilities">>=>[],
-      <<"addresses">>=>#{},
-      <<"meta">>=>#{}
-
-    },
-    <<"disk_base">>=>no_entry,
-    <<"cookie">>=><<"INSTANCE_COOK">>
-  },
-  {ok, RECIPE}.

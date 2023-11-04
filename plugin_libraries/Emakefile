@@ -18,3 +18,13 @@
   {outdir, "fta_machine_RT_lib/ebin"},
   debug_info
 ]}.
+{ [ 'fruit_sample_evaluation_AT_lib/src/*'], [
+  {i, "include"},
+  {outdir, "fruit_sample_evaluation_AT_lib/ebin"},
+  debug_info
+]}.
+{ [ 'supplementary_modules/src/*'], [
+  {i, "include"},
+  {outdir, "supplementary_modules/ebin"},
+  debug_info
+]}.

@@ -1,0 +1,22 @@
+{
+  "plugins": [
+    {"name": "fse_guardian_sp","lib": "fruit_sample_evaluation_AT_lib","init_args": []},
+    {"name": "fse_guardian_ep","lib": "fruit_sample_evaluation_AT_lib","init_args": []},
+    {"name": "fse_type_info_handler_ep","lib": "fruit_sample_evaluation_AT_lib","init_args": []}
+  ],
+  "bc":{
+    "identity":
+    {
+      "id":"FSE_TYPE",
+      "name":"FSE_TYPE",
+      "taxonomy":{"arti_class":"resource-type","base_type":"FSE_TYPE"}
+    },
+    "capabilities":["SPAWN_FSE_INSTANCE"],
+    "responsibilities":[],
+    "addresses":{},
+    "meta":{}
+
+  },
+  "disk_base":"FSE_TYPE",
+  "cookie":"BB"
+}

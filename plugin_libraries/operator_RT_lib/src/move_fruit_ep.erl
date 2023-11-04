@@ -33,13 +33,13 @@ resume_task(TaskState, ExecutorHandle, BH) ->
   erlang:error(not_implemented).
 
 start_task(TaskState, ExecutorHandle, BH) ->
-  io:format("~nMove fruit task beginning: ~n"),
+  io:format("~n Move fruit task beginning: ~n"),
 %%  move_fruit_rp:start_time(BH),
   move_the_fruit(),
   {end_task, discard, movedFruit}.
 
 end_task(TaskState, ExecutorHandle, BH) ->
-  io:format("~nThe move fruit task is complete~n"),
+  io:format("~n The move fruit task is complete~n"),
   ok.
 
 handle_request(Tag, Payload, BH) ->

@@ -34,7 +34,7 @@ handle_call({http_request,MSG}, From, State) ->
                case bhive:discover_bases(#base_discover_query{capabilities = Tag},BH) of
                  []->
                    io:format("No INSTANCE found~n"),
-                   {error, no_instances};
+                   {ok, []};
                  List->
                    ListResult = lists:foldl(fun(Elem, Acc)->
                      Reply = base_signal:emit_request(Elem,Query,Query,BH),
@@ -47,7 +47,7 @@ handle_call({http_request,MSG}, From, State) ->
              <<"SPAWN">> ->
                Name = maps:get(<<"name">>, MSG),
                ID = rand:uniform(1000),
-               Init = #{<<"name">>=>Name,<<"id">>=>ID},
+               Init = #{<<"name">>=>Name,<<"id">>=><<ID>>},
                TargetBC = bhive:discover_bases(#base_discover_query{capabilities = Tag}, BH),
                case TargetBC of
                  [] ->

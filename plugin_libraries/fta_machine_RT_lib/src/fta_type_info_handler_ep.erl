@@ -27,7 +27,7 @@ handle_request(<<"SPAWN_FTA_MACHINE_INSTANCE">>,Payload, FROM, BH)->
   io:format("Spawn request recieved of ~p~n",[Name]),
   ID = maps:get(<<"id">>,Payload),
 
-  {ok, Recipe} = generate_instance_recipe(Name, ID, BH),
+  {ok, Recipe} = fta_machine_guardian_sp:generate_instance_recipe(Name, ID, BH),
   Tsched = base:get_origo(),
   Data1 = no_data,
   spawn(fun()->
@@ -35,27 +35,3 @@ handle_request(<<"SPAWN_FTA_MACHINE_INSTANCE">>,Payload, FROM, BH)->
         end),
   Reply = #{<<"name">>=>Name},
   {reply, Reply}.
-
-generate_instance_recipe(Name,ID, BH) ->
-  RECIPE = #{
-    <<"plugins">>=> [
-      #{<<"name">>=><<"Receive_data_sp">>,<<"lib">>=><<"fta_machine_RT_lib">>,<<"init_args">>=>[]},
-      #{<<"name">>=><<"Receive_data_ep">>,<<"lib">>=><<"fta_machine_RT_lib">>,<<"init_args">>=>[]},
-      #{<<"name">>=><<"fta_info_handler_ep">>,<<"lib">>=><<"fta_machine_RT_lib">>,<<"init_args">>=>[]}
-    ],
-    <<"bc">> => #{
-      <<"identity">>=>#{
-        <<"id">>=>ID,
-        <<"name">>=>Name,
-        <<"taxonomy">>=>#{<<"arti_class">>=><<"resource-instance">>,<<"base_type">>=><<"FTA_MACHINE_TYPE">>}
-      },
-      <<"capabilities">>=>[<<"MEASURE_FTA_VALUES">>],
-      <<"responsibilities">>=>[],
-      <<"addresses">>=>#{},
-      <<"meta">>=>#{}
-
-    },
-    <<"disk_base">>=>no_entry,
-    <<"cookie">>=><<"INSTANCE_COOK">>
-  },
-  {ok, RECIPE}.
