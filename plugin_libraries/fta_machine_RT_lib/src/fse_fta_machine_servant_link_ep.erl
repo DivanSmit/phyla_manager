@@ -4,54 +4,83 @@
 %%% @doc
 %%%
 %%% @end
-%%% Created : 21. Sep 2023 14:27
+%%% Created : 01. Nov 2023 18:10
 %%%-------------------------------------------------------------------
--module('Receive_data_ep').
+-module(fse_fta_machine_servant_link_ep).
 -author("LENOVO").
--behaviour(base_task_ep).
+-behaviour(base_link_ep).
 %% API
--export([init/2, stop/1, request_start/2, start_task_error/3, request_resume/2, resume_task/3, start_task/3, end_task/3, handle_request/3, handle_signal/3]).
+-export([init/2, stop/1, request_start_link/3, request_resume_link/3, link_start/3, link_resume/3, partner_call/4, partner_signal/4, link_end/4, handle_call/4, base_variable_update/4]).
 
 
-init(Parameters, BH) ->
-  io:format("Recieve data plugin installed~n"),
+init(Pars, BH) ->
   ok.
 
 stop(BH) ->
   ok.
 
-request_start(ExecutorHandle, BH) ->
-  {start_task, {}}.
+request_start_link(PluginState, ExH, BH) ->
+  io:format("The fta servant link has requested to start ~n "),
 
-start_task_error(Reason, ExecutorHandle, BH) ->
+  TasksExe = base_execution:get_all_tasks(BH),
+  KeyE = maps:keys(TasksExe),
+
+  io:format("Execution: ~p ~n ",[KeyE]),
+  case KeyE of
+    [] ->
+      {start, no_state};
+    _ ->
+      io:format("FTA machine is busy ~n"),
+      base_link_ep:signal_partner(<<"Busy">>,nothing,ExH),
+      io:format("Signal sent ~n"),
+      {wait, no_state}
+  end.
+
+request_resume_link(PluginState, ExH, BH) ->
+  {cancel, no_state}.
+
+link_start(PluginState, ExH, BH) ->
+
+  %% Insert functionality here
+  %%------------------------------------------
+  io:format("FTA machine is measuring the data ~n "),
+  Port = 9910,
+  {ok, ListenSocket} = gen_tcp:listen(Port, [{active, false}, {reuseaddr, true}]),
+  io:format("Server listening on port ~p~n", [Port]),
+  accept_connections(ListenSocket, [], ExH,BH),
+  io:format("The values have been measured ~n "),
+  %%------------------------------------------
+
+  {ok, no_state}.
+
+link_resume(PluginState, ExH, BH) ->
   erlang:error(not_implemented).
 
-request_resume(ExecutorHandle, BH) ->
-  {end_task, discard, no_state}.
+partner_call({<<"AVAILABILITY">>,nothing}, State, ExAgentHandle, BH) ->
+  io:format("The servant link has recieved the partner call~n"),
 
-resume_task(TaskState, ExecutorHandle, BH) ->
+  Reply = #{<<"AVAILABILITY">>=>false},
+  {reply, Reply, nostate};
+
+partner_call(Value, State, ExAgentHandle, BH) ->
+  io:format("~n PARTNERCALL Value ~p ",[Value]),
+  {reply, nothing, nothing}.
+
+partner_signal(Cast, State, ExAgentHandle, BH) ->
   erlang:error(not_implemented).
 
-start_task(TaskState, ExecutorHandle, BH) ->
-  io:format("~nData receive task beginning: ~n"),
-  spawn(fun()->
-    Port = 9910,
-    {ok, ListenSocket} = gen_tcp:listen(Port, [{active, false}, {reuseaddr, true}]),
-    io:format("Server listening on port ~p~n", [Port]),
-    accept_connections(ListenSocket, [], ExecutorHandle,BH)
-  end),
+link_end(Reason, State, ExAgentHandle, BH) ->
+  io:format("THe link is finished~n"),
+  discard.
 
-%%  io:format("Received data from all connections: ~s~n", [lists:flatten(DataAcc)]),
-  {ok, measured}.                                     %% Why is this measured
-
-end_task(TaskState, ExecutorHandle, BH) ->
-  io:format("~nThe Recieve data task is complete~n"),
-  ok.
-
-handle_request(Tag, Payload, BH) ->
+handle_call(Call, TaskState, ExAgentHandle, BH) ->
   erlang:error(not_implemented).
 
-handle_signal(Tag, Payload, BH) ->
+handle_message(Cast, TaskState, ExAgentHandle, BH) ->
+  io:format("~n MESSAGE Value ~p ",[Cast]),
+  {ok, nothing}.
+
+base_variable_update(_, PluginState, ExH, BH) ->
   erlang:error(not_implemented).
 
 %%Custom tasks here -------------------------------------------------------------------->
@@ -74,7 +103,7 @@ handle_connection(Socket, Values, Ex, BH) ->
         DataMap = #{<<"id">>=>length(Values)+1,<<"sugar_content">>=>ReceivedData,<<"time">>=>base:get_origo()},
         io:format("Data ~p~n",[DataMap]),
         postgresql_functions:write_data_to_postgresql_database(DataMap,"Test1")
-      end),
+            end),
       NewValues = Values ++ [ReceivedData],
 
       handle_connection(Socket, NewValues,Ex, BH);
@@ -99,9 +128,6 @@ add_to_BASE_variable(Value, Ex,BH)->
   if
     length(OldValues) >= 5 ->
       io:format("Ending the task~n"),
-    base_task_ep:end_task(Ex, end_task, BH);
+      base_task_ep:end_task(Ex, end_task, BH);
     true -> ok
   end.
-
-
-

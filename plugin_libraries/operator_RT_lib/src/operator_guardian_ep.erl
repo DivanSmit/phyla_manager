@@ -10,7 +10,7 @@
 -author("LENOVO").
 -behaviour(base_guardian_ep).
 %% API
--export([init/2, stop/1, request_spawn_instance/2, spawn_cancelled/4, request_start_instance/3, instance_started/3, request_respawn_instance/2, request_resume_instance/3, instance_resumed/3, instance_end/3, handle_instance_call/4]).
+-export([init/2, stop/1, request_spawn_instance/2, spawn_cancelled/4, request_start_instance/3, instance_started/3, request_respawn_instance/2, request_resume_instance/3, instance_resumed/3, instance_end/3, handle_instance_call/4, base_variable_update/4]).
 
 
 init(Pars, BH) ->
@@ -51,6 +51,9 @@ instance_end(State, GuardianHandle, BH) ->
   {ok, archive}.
 
 handle_instance_call(Call, State, GuardianHandle, BH) ->
+  erlang:error(not_implemented).
+
+base_variable_update(_, State, GuardianHandle, BH) ->
   erlang:error(not_implemented).
 
 %% Handling custom functions--------------------------------------------------------------------------

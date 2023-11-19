@@ -1,7 +1,19 @@
+%%% ====================================================================================== %%%
+%%% ====================================================================================== %%%
+%%% @copyright (C) 2023, Cybarete Pty Ltd
+%%% @doc
+%%% The bason module defines the functions for JSON and binary transformation.
+%%% @end
+%%% ====================================================================================== %%%
+%%% ====================================================================================== %%%
+
 -module(bason).
 -include("base_terms.hrl").
-
 -export([json_to_map/1, map_to_json/1, base_record_from_map/2, base_term_to_map/1, read_json_file/1]).
+
+%%% ====================================================================================== %%%
+%%%                                 EXTERNAL FUNCTIONS
+%%% ====================================================================================== %%%
 
 read_json_file(FILE)->
   case file:read_file(FILE) of
@@ -63,17 +75,18 @@ base_record_from_map(<<"base_discovery_query">>,BDQ_MAP)->
   #base_discover_query{id = ID,name = NAME,capabilities = CAPAS,responsibilities = REPS};
 
 base_record_from_map(<<"base_beam_plugin">>,BDQ_MAP)->
-  {error,not_implemented}. %% TODO
-%%  #base_beam_plugin{id = ID,name = NAME,capabilities = CAPAS,responsibilities = REPS}.
+  {error,not_implemented}.
 
 base_term_to_map(#business_card{identity = IDENT,capabilities = CAPAS, responsibilities = REPS, addresses = ADDR})->
   IDENTITY_MAP = base_term_to_map(IDENT),
   ADDRESSES_MAP = base_term_to_map(ADDR),
   #{<<"identity">>=>IDENTITY_MAP,<<"capabilities">>=>CAPAS,<<"responsibilities">>=>REPS, <<"addresses">>=>ADDRESSES_MAP};
+
 base_term_to_map(#identity{name = NAME,id = ID,taxonomy = TAXONOMY})->
   ARTICLASS = TAXONOMY#base_taxonomy.arti_class,
   TYPECODE = TAXONOMY#base_taxonomy.base_type_code,
   #{<<"name">>=>NAME,<<"id">>=>ID,<<"taxonomy">>=>#{<<"arti_class">>=>ARTICLASS,<<"btype_code">>=>TYPECODE}};
+
 base_term_to_map(_E)->
   <<"unknown_term">>.
 

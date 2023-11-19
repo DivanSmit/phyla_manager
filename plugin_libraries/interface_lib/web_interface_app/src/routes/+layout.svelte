@@ -5,10 +5,13 @@
             <a href="/">Home</a>
         </li>
         <li>
-            <a href="/operators">Operators</a>
+            <a href="/operators">Resources</a>
         </li>
         <li>
             <a href="/tasks">Tasks</a>
+        </li>
+        <li>
+            <a href="/currentUser">User</a>
         </li>
 
     </ul>

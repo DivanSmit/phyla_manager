@@ -1,20 +1,23 @@
 <script>
+// @ts-nocheck
+
     import {onMount} from "svelte";
-    import { get_data} from "$lib/connect_to_BASE.js";
-    import { addOperator} from "$lib/connect_to_BASE.js";
-
-    let operator = [];
-    let operatorData = [];
-    let OLD_Opdata = [];
-    let isDataLoaded = true;
+    import {spawnInstance} from "$lib/connect_to_BASE.js";
+    import { get_data } from "$lib/connect_to_BASE.js";
+    
     let isInputVisible = false;
-    let inputData = '';
+    let response = [];
+    let inputData = "";
 
-    const fetchData = async () => {
-        operatorData = await get_data("OPERATOR_INSTANCE_INFO");
-        console.log("Operator "+operatorData)
-        isDataLoaded = true;
-    };
+    let operatorSpawnTag = "SPAWN_OPERATOR_INSTANCE";
+    let operatorInfoTag = "OPERATOR_INSTANCE_INFO";
+    let machineInfoTag = "FTA_INSTANCE_INFO";
+    let machineSpawnTag = "SPAWN_FTA_MACHINE_INSTANCE";
+
+    let listOfTags= [operatorInfoTag,machineInfoTag];
+    let listOfData = [];
+    let operatorData = [];
+    let machineData = [];
 
     function showInput(){
         if(isInputVisible){
@@ -24,42 +27,33 @@
         }
     }
 
-    const addOperatorfunc = async () => {
-        isInputVisible = false;
-        operator = await addOperator(inputData);
-        OLD_Opdata = operatorData;
-        isDataLoaded = false;
-    };
-
-    onMount(() => {
-        fetchData();
-        setInterval(async()=>{
-            
-            if(!isDataLoaded){
-                operatorData = await get_data("OPERATOR_INSTANCE_INFO");
-                console.log(operatorData);
-                console.log(OLD_Opdata);
-                if(OLD_Opdata.length != operatorData.length){
-                    isDataLoaded = true
-                    console.log("Data is different")
-                }
-            }
-        }, 1000)                              
-    });
-
-    /**
-     * @param {number} buttonId
-     */
-    function buttonClicked(buttonId) {
-        if (buttonId===5){
-            //async()=>{operatorData = await get_data();};
-            console.log("The function is called")
-        }
+    async function spawnInstanceRequest(tag1 = "", tag2 = "nothing"){
+        isInputVisible =false;
+        response = await spawnInstance(tag1,tag2);
     }
+
+    async function fetchData(){
+        let len = listOfTags.length;
+        listOfData = [];
+
+        for (let i = 0; i < len; i++) {
+            const currentItem = listOfTags[i];
+            const responseList = await get_data(currentItem);
+            listOfData.push(responseList);
+        }
+
+        operatorData = listOfData[0];
+        machineData = listOfData[1];
+    }
+
+    onMount(()=>{
+        fetchData();
+    })
+
 </script>
 
 <style>
-    body {
+    /* body {
         font-family: Arial, sans-serif;
         background-color: #f0faff;
         text-align: center;
@@ -70,7 +64,7 @@
         justify-content: center;
         align-items: center;
         min-height: 100vh;
-    }
+    } */
 
     .button-container {
         display: flex;
@@ -180,12 +174,6 @@
         padding: 10px;
     }
 
-    .main-block {
-        background-color: #f0f0f0;
-        border: 1px solid #ccc;
-        padding: 20px;
-    }
-
     .column-blocks{
         display: flex;
         flex-direction: column;
@@ -206,6 +194,8 @@
 <div class="two-column-layout">
     <div class="column">
         <div class="container">
+
+            <a href="#" class="button" on:click={fetchData}>Refresh</a>
             <div class="header">
                 <h1>Operators</h1>
             </div>
@@ -227,14 +217,36 @@
                 </div>
             </div>
         </div>
+        <div class="container">
+            <div class="header">
+                <h1>Machines</h1>
+            </div>
+
+            <div class="column-blocks">
+                <div class="operator-container">
+
+                    {#if operatorData.length > 0}
+                        <div class="data-container">
+                            {#each machineData as item}
+                                <div class="block">
+                                    <p>{item.name}</p>
+                                </div>
+                            {/each}
+                        </div>
+                    {:else}
+                        <p>No data available.</p>
+                    {/if}
+                </div>
+            </div>
+        </div>
     </div>
     <div class="column data-column">
         <p class="mainText">Click on a button below:</p>
         <div class="button-container">
             <a href="#" class="button" on:click={showInput}>Add Operator</a>
-            <a href="#" class="button" on:click={() => buttonClicked(2)}>Add Machine</a>
-            <a href="#" class="button" on:click={() => buttonClicked(3)}>Add Room</a>
-            <a href="#" class="button" on:click={() => buttonClicked(4)}>Add Measurement</a>
+            <a href="#" class="button" on:click={() => spawnInstanceRequest(machineSpawnTag)}>Add Machine</a>
+            <a href="#" class="button" >Add Room</a>
+            <a href="#" class="button" >Add Measurement</a>
         </div>
         
         <div class="button-container">
@@ -244,7 +256,7 @@
                 </div>
                 Name: 
                 <input type="text" bind:value={inputData} placeholder="Enter data" />
-                <a href="#" class="button" on:click={addOperatorfunc}>Save</a>
+                <a href="#" class="button" on:click={spawnInstanceRequest(operatorSpawnTag,inputData)}>Save</a>
                 <a href="#" class="button" on:click={showInput}>Cancel</a>
 
             {/if}

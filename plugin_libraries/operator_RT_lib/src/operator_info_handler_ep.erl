@@ -9,6 +9,8 @@
 -module(operator_info_handler_ep).
 -author("LENOVO").
 -behaviour(base_receptor).
+-include("../../../base_include_libs/base_terms.hrl").
+
 %% API
 -export([init/2, stop/1, handle_signal/3, handle_request/4]).
 
@@ -38,4 +40,39 @@ handle_request(<<"INFO">>,<<"INFO">>, FROM, BH)->
   MyBC = base:get_my_bc(BH),
   MyName = base_business_card:get_name(MyBC),
   Reply = #{<<"name">>=>MyName},
+  {reply, Reply};
+
+handle_request(<<"INFO">>,<<"TASKSID">>, FROM, BH)->
+  TaskIDs = myFuncs:get_task_id_from_BH(BH),
+  TaskTimes = myFuncs:get_task_shell_element(2,BH),
+  io:format("Times are: ~p~n",[TaskTimes]),
+  TaskTimesC = lists:map(fun(Time) -> myFuncs:convert_unix_time_to_normal(Time) end, TaskTimes),
+  Reply = #{<<"id">>=>TaskIDs,<<"time">>=>TaskTimesC},
+  {reply, Reply};
+
+handle_request(<<"TASKS">>,Request, FROM, BH)->
+  ID = maps:get(<<"taskID">>,Request),
+  Param = maps:get(<<"param">>,Request),
+  Exe = base_variables:read(<<"TaskStatus">>,ID,BH),
+
+  case Param of
+    <<"StartTask">> ->
+      io:format("~nSTARTING TASK~n"),
+      base_link_ep:start_link(Exe);
+    <<"EndTask">> ->
+      io:format("~nEnding TASK~n"),
+      base_link_ep:end_link(Exe,no_state)
+  end,
+  MyBC = base:get_my_bc(BH),
+  MyName = base_business_card:get_name(MyBC),
+  Reply = #{<<"name">>=>MyName},
   {reply, Reply}.
+
+%%      Tasks = #task_shell_query{field = id, range = ID},
+%%      io:format("Tasks in exe: ~p~n",[Tasks]),
+%%      Task = case base_execution:query_task_shells(Tasks, BH) of
+%%               [LastTask | _] ->
+%%                 LastTask;
+%%               _ -> do_nothing
+%%             end,
+%%      TaskEx = base_execution:get_executor_handle(Task,BH),

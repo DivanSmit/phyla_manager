@@ -9,6 +9,8 @@
 -module(fse_operator_master_link_ep).
 -author("LENOVO").
 -behaviour(base_link_ep).
+-include("../../../base_include_libs/base_terms.hrl").
+
 %% API
 -export([init/2, stop/1, request_start_link/3, request_resume_link/3, link_start/3, link_resume/3, partner_call/4, partner_signal/4, link_end/4, handle_call/4, base_variable_update/4]).
 
@@ -27,6 +29,8 @@ request_resume_link(State, ExAgentHandle, BH) ->
   {cancel, no_state}.
 
 link_start(PluginState, ExAgentHandle, BH) ->
+  io:format("~nLINK TASK IS STARING MASTER~n"),
+
   spawn(fun()->
     MyBC = base:get_my_bc(BH),
     MyName = base_business_card:get_name(MyBC),
@@ -36,7 +40,7 @@ link_start(PluginState, ExAgentHandle, BH) ->
         end),
 
 %%  ReplyData = base_link_ep:call_partner(<<"AVAILABILITY">>,nothing,ExAgentHandle),
-  {end_link, no_state}.
+  {ok, no_state}.
 
 link_resume(PluginState, ExH, BH) ->
   erlang:error(not_implemented).
@@ -54,7 +58,18 @@ partner_signal(Value, PluginState, ExH, BH) ->
   ok.
 
 link_end(Reason, PluginState, ExH, BH) ->
-  io:format("The link is finished~n"),
+%%  io:format("The link is finished~n"),
+%%  Tasks = #task_shell_query{field = type, range = <<"fse_operator">>},
+%%%%  io:format("Tasks in exe: ~p~n",[Tasks]),
+%%  Task = case base_execution:query_task_shells(Tasks, BH) of
+%%           [LastTask | _] ->
+%%             LastTask;
+%%           _ -> do_nothing
+%%         end,
+%%  TaskEx = base_execution:get_executor_handle(Task,BH),
+%%%%  io:format("~n The TASKE is: ~p~n",[TaskEx]),
+%%  base_link_ep:end_link(TaskEx,done),
+  io:format("The link has ended~n"),
   discard.
 
 handle_call(Value, PluginState, ExH, BH) ->

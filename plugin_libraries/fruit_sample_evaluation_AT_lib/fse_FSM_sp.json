@@ -1,0 +1,8 @@
+{"name":"fse_FSM_sp",
+  "lib":"fruit_sample_evaluation_AT_lib",
+  "base_task": "fse_FSM",
+  "sector": "sp",
+  "bin_dir": "default",
+  "behaviour":"task",
+  "language":"beam"
+}

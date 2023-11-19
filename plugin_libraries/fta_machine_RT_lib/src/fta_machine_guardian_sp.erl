@@ -37,8 +37,10 @@ instance_spawn_request(Pars, BH) ->
 generate_instance_recipe(Name,ID, BH) ->
   RECIPE = #{
     <<"plugins">>=> [
-      #{<<"name">>=><<"Receive_data_sp">>,<<"lib">>=><<"fta_machine_RT_lib">>,<<"init_args">>=>[]},
-      #{<<"name">>=><<"Receive_data_ep">>,<<"lib">>=><<"fta_machine_RT_lib">>,<<"init_args">>=>[]},
+      #{<<"name">>=><<"fse_fta_machine_servant_link_sp">>,<<"lib">>=><<"fta_machine_RT_lib">>,<<"init_args">>=>[]},
+      #{<<"name">>=><<"fse_fta_machine_servant_link_ep">>,<<"lib">>=><<"fta_machine_RT_lib">>,<<"init_args">>=>[]},
+      #{<<"name">>=><<"receive_data_sp">>,<<"lib">>=><<"fta_machine_RT_lib">>,<<"init_args">>=>[]},
+      #{<<"name">>=><<"receive_data_ep">>,<<"lib">>=><<"fta_machine_RT_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"fta_info_handler_ep">>,<<"lib">>=><<"fta_machine_RT_lib">>,<<"init_args">>=>[]}
     ],
     <<"bc">> => #{
@@ -47,7 +49,7 @@ generate_instance_recipe(Name,ID, BH) ->
         <<"name">>=>Name,
         <<"taxonomy">>=>#{<<"arti_class">>=><<"resource-instance">>,<<"base_type">>=><<"FTA_MACHINE_TYPE">>}
       },
-      <<"capabilities">>=>[<<"MEASURE_FTA_VALUES">>],
+      <<"capabilities">>=>[<<"MEASURE_FTA_VALUES">>,<<"FTA_INSTANCE_INFO">>],
       <<"responsibilities">>=>[],
       <<"addresses">>=>#{},
       <<"meta">>=>#{}

@@ -1,7 +1,7 @@
-{"name":"Receive_data_sp",
+{"name":"receive_data_ep",
   "lib":"fta_machine_RT_lib",
   "base_task": "receiveData",
-  "sector": "sp",
+  "sector": "ep",
   "bin_dir": "default",
   "behaviour":"task",
   "language":"beam"

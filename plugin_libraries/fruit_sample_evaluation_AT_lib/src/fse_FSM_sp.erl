@@ -4,9 +4,9 @@
 %%% @doc
 %%%
 %%% @end
-%%% Created : 21. Sep 2023 14:27
+%%% Created : 18. Nov 2023 13:42
 %%%-------------------------------------------------------------------
--module('Receive_data_sp').
+-module(fse_FSM_sp).
 -author("LENOVO").
 -behaviour(base_task_sp).
 %% API
@@ -14,16 +14,15 @@
 
 
 init(Pars, BH) ->
-  base:wait_for_base_ready(BH),
   handle_task_request(Pars,BH),
   ok.
 
 stop(BH) ->
-  ok.
+  erlang:error(not_implemented).
 
 handle_task_request(Pars, BH) ->
   Tsched = base:get_origo(),
-  Type = <<"receiveData">>,
+  Type = <<"fse_FSM">>,
   ID = make_ref(),
-  Data1 =#{},
+  Data1 =Pars,
   base_task_sp:schedule_task(Tsched,Type, ID, Data1, BH).

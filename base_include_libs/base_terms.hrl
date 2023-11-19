@@ -1,14 +1,25 @@
-%% @doc secotr codes are often used to refer to a specific BASE sector
+%%% ====================================================================================== %%%
+%%% ====================================================================================== %%%
+%%% @copyright (C) 2023, Cybarete Pty Ltd
+%%% @doc
+%%% The base_terms header file defines the records to be use in the base platform
+%%% @end
+%%% ====================================================================================== %%%
+%%% ====================================================================================== %%%
+
+%% @doc sector codes are often used to refer to a specific BASE sector
 -export_type([sector_code/0, agent_handle/0, base_handle/0, base_task/0, task_shell/0]).
 
 
-%% TODO IF ANY TYPE DEFS UPDATE THEN THIS SHOULD REFLECT IN BASE_INTERNAL.hrl
 %% AGENT is a generalisation of Negotators, Executors, Reflectors, Analysers.
 -record(agent_handle,{agent_pid::pid(),cookie::term(),plugin::term(),shell::term(),instance_handle::term(),link_handle::term()}).
+
 %% @doc This record is for INTERNAL BASE use only. Its the functional token BASE processes use to access their own BASE.
 -record(base_handle,{cm::pid(),cookie::binary(),'B'::pid(),'A'::pid(),'S'::pid(),'E'::pid(),sbb::pid()}).
+
 -record(base_task, {task_shell::term(),meta::term(),data1=#{},data2=#{},data3=#{}}).
-%% A Shell is the outermost visible part of a task. Like it's packaging label that can be used to identify, sort, and control
+
+%% A shell is the outermost visible part of a task. Like it's packaging label that can be used to identify, sort, and control
 -record(task_shell,{tsched::integer(),tstart::integer(),tend::integer(),id::term(),type::term(),class::task|link|guardian,stage::1|2|3}).
 
 -type sector_code()::'B'|'A'|'S'|'E'.
@@ -41,11 +52,11 @@
 -record(base_taxonomy,{arti_class::{resource,type}|{activity,type}|{resource,instance}|{activity,instance},base_type_code::binary()}).
 
 %% @doc a base_guardianship is metadata indicating his task is about managing an instance of a BASE
-%%%%%%%%%%%%%%%%%% 3SAL %%%%%%%%%%%%%%%%%%%%
 -record(link_promise,{shell::term(),
   bc::term(),
   cookie::term(),
   signature::term()}).
+
 %% A record used to specify a query to look up shells in a sector
 -record(task_shell_query,{field::tstart|tend|tsched|id|type,range::{number(),number()}|term()}).
 
@@ -62,15 +73,13 @@
   master_bc::term(),
   servant_bc::term()
 }).
+
 %%%%%%%%%%%%%%%%%% BASE PLUGIN AGENTS AND DATA STRUCTS %%%%%%%%%%%%%%%%%%%%
 
 %% @doc identity is the same as BC identity, purpose same as BC purpose, location tbd
 -record(base_discover_query,{id::term(),responsibilities::list(),capabilities::list(),location::term(),name::term(),type::term()}).
-
 -record(bhive_address,{hive_id::binary(),hive_pid::pid(),global_pid::pid()}).
-
 -record(guardian_handle,{pid::pid(),token::binary(),instance_cm}).
-
 
 %% @doc the record structure of a BASE BC as used by an erlang BASE
 %% |---------------  BASE PURPOSE --------------|

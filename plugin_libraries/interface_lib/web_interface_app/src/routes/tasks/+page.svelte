@@ -1,30 +1,45 @@
 <script>
-    import {onMount} from "svelte";
-    import { get_data } from "$lib/connect_to_BASE.js";
-    import {moveFruitTask} from "$lib/connect_to_BASE.js";
-    import { getMeasurements } from "$lib/connect_to_BASE.js";
+// @ts-nocheck
+    import { onMount } from 'svelte';
+    import {spawnInstance} from "$lib/connect_to_BASE.js";
 
-    let operatorData = [];
-    let measureData = [];
-    let isDatarecieved = false;
+    let isDatarecieved = true;
+    let selectedDate = '';
+    let selectedTime = '';
+    let unixTimestamp = null;
 
-    const startTask = async () => {
-        operatorData = await moveFruitTask();
-        isDataLoaded = false;
-    };
+    let timeOptions = generateTimeOptions();
 
-    const startMeasure = async() => {
-        measureData = await getMeasurements();
-        isDatarecieved = false;
-    };
+    let fseSpawnTag = "SPAWN_FSE_INSTANCE";
+    let ftaMeasureSpawnTag = "";
+    let moveFruitSpawnTag = "SPAWN_MOVE_FRUIT_INSTANCE";
+
+    async function spawnTaskRequest(tag1 = "", tag2 = ""){
+        let response = await spawnInstance(tag1, tag2);
+        isDatarecieved = true;
+    }
+    
+    function generateTimeOptions() {
+      const options = [];
+      for (let hour = 0; hour < 24; hour++) {
+        for (let minute = 0; minute < 60; minute += 15) {
+          const formattedHour = hour.toString().padStart(2, '0');
+          const formattedMinute = minute.toString().padStart(2, '0');
+          options.push(`${formattedHour}:${formattedMinute}`);
+        }
+      }
+      return options;
+    }
+
+    function calculateUnixTimestamp() {
+        const selectedDateTime = new Date(`${selectedDate}T${selectedTime}`);
+        unixTimestamp = selectedDateTime.getTime(); // Convert milliseconds to seconds
+        console.log(unixTimestamp);
+    }
 
     onMount(() => {
-        setInterval(async()=>{
-            if(isDatarecieved){
-                measureData = await get_data("MEASURE_FTA_VALUES");
-                console.log("Data: ",measureData);
-            }
-                }, 2000);
+        // Your code to run after the component is mounted
+        isDatarecieved = true;
     });
 
 </script>
@@ -55,7 +70,7 @@
         color: #000;
     }
 
-    .start-button-container {
+    .start-container {
         display: flex;
         justify-content: center;
         align-items: center;
@@ -63,14 +78,37 @@
     }
 </style>
 
-<div class="start-button-container">
-    <a href="#" class="button start-button" on:click={startTask}>Move Fruit</a>
-    <a href="#" class="button start-button" on:click={startMeasure}>Start Measurement</a>
-    <a href="#" class="button start-button" on:click={()=>isDatarecieved=false}>Cancel</a>
+<div class="start-container">
+    <a href="#" class="button start-button" on:click={() =>spawnTaskRequest(moveFruitSpawnTag)}>Move Fruit</a>
+    <a href="#" class="button start-button" on:click={() =>spawnTaskRequest(fseSpawnTag, unixTimestamp)}>Start FSE</a>
 </div>
+<div class="start-container">
+    <h1 class="header">Select Date and Time</h1>
+    <div class="input-container">
+        <label for="date">Date:</label>
+        <input type="date" id="date" bind:value={selectedDate} />
+    </div>
+    <div class="input-container">
+        <label for="time">Time:</label>
+        <select id="time" bind:value={selectedTime}>
+            {#each timeOptions as timeOption}
+            <option value={timeOption}>{timeOption}</option>
+            {/each}
+        </select>
+    </div>
+    <div class="selected-info">
+        <p>Selected Date: {selectedDate}</p>
+        <p>Selected Time: {selectedTime}</p>
+    </div>
+    <button on:click={() => calculateUnixTimestamp()}>Start</button>
+</div>
+
 <!-- 
 <ul>
     {#each measureData.content as item (item)}
       <li>{item[0]}</li>
     {/each}
   </ul> -->
+
+  <!-- <a href="#" class="button start-button" on:click={spawnTaskRequest}>Start Measurement</a> -->
+    <!-- <a href="#" class="button start-button" o>Cancel</a> -->

@@ -16,10 +16,9 @@
 
 init(Pars, BH) ->
   base:wait_for_base_ready(BH),
-  spawn(fun()->
-    timer:sleep(1000),
-    base_link_master_sp:start_link_negotiation([#{<<"AVAILABILITY">>=>any}],<<"fse_operator">>,BH)
-        end),
+  [P1] = Pars,
+  StartTime = maps:get(<<"startTime">>,P1),
+
   ok.
 
 stop(BH) ->
@@ -28,8 +27,8 @@ stop(BH) ->
 generate_requirements(Pars, NegH, BH) ->
   % the Pars parameter must be a list of maps per resource or just one map if there is only one resource requirement
   if
-    is_list(Pars)->{requirements, Pars, base:get_origo() + 5000, nostate};
-    is_map(Pars)->{requirements, [Pars], base:get_origo() + 5000, nostate};
+    is_list(Pars)->{requirements, Pars, base:get_origo() + 600000, nostate};
+    is_map(Pars)->{requirements, [Pars], base:get_origo() + 600000, nostate};
     true-> {error, unknown}
   end.
 
@@ -43,7 +42,7 @@ evaluate_proposal(Proposal, PluginState, NegH, BH) ->
   {ok,nostate}.
 
 all_proposals_received(ProposalList, PluginState, NegH, BH) ->
-  %% proposal evaluation logic
+%% proposal evaluation logic
 %%  io:format("Proposal list: ~p~n",[ProposalList]),
   WinningMap = maps:fold(fun(CandidateBC, Proposal, Acc)->
     #{<<"TIME">>:=CandidateTime} = Proposal,
@@ -81,7 +80,7 @@ all_proposals_received(ProposalList, PluginState, NegH, BH) ->
   {ok, [CandidateBC], nostate}.
 
 promise_received(Promise, PluginState, NegH, BH) ->
-%%  io:format("Master received promise: ~p~n",[Promise]),
+  base_variables:write(<<"FSE_FSM_INFO">>,<<"FSE_FSM_status">>, found_operator,BH),
   LinkID = list_to_binary(ref_to_list(make_ref())),
   Data1 = #{},
   {ok,LinkID,Data1}.

@@ -9,8 +9,10 @@
 -module(coordinate_move_ep).
 -author("LENOVO").
 -behaviour(base_task_ep).
+-include("../../../base_include_libs/base_terms.hrl").
+
 %% API
--export([init/2, stop/1, request_start/2, start_task_error/3, request_resume/2, resume_task/3, start_task/3, end_task/3, handle_request/3, handle_signal/3]).
+-export([init/2, stop/1, request_start/2, start_task_error/3, request_resume/2, resume_task/3, start_task/3, end_task/3, handle_request/3, handle_signal/3, base_variable_update/4]).
 
 
 init(Parameters, BH) ->
@@ -46,6 +48,9 @@ handle_request(Tag, Payload, BH) ->
 
 handle_signal(Tag, Payload, BH) ->
   erlang:error(not_implemented).
+
+base_variable_update({<<"POSITION">>, Variable, Value}, PluginState, Agent, BH)->
+  ok.
 
 %%Custom tasks here -------------------------------------------------------------------->
 

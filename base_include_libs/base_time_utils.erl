@@ -1,7 +1,13 @@
--module(base_time_utils).
--author("Sparrow").
+%%% ====================================================================================== %%%
+%%% ====================================================================================== %%%
+%%% @copyright (C) 2023, Cybarete Pty Ltd
+%%% @doc
+%%% The base_time_utils module defines the functions for time manipulation.
+%%% @end
+%%% ====================================================================================== %%%
+%%% ====================================================================================== %%%
 
-%% API
+-module(base_time_utils).
 -export([get_today_at_0am/0,
   get_today_at/1,
   is_weekend/1,
@@ -16,6 +22,9 @@
   get_date_str/0,
   get_day_of_week/0]).
 
+%%% ====================================================================================== %%%
+%%%                                 EXTERNAL FUNCTIONS
+%%% ====================================================================================== %%%
 
 get_day_name(WeekDay) when WeekDay < 8, WeekDay > 0 ->
   lists:nth(WeekDay,get_day_names()).
@@ -55,7 +64,7 @@ get_today_at_0am()->
   STRING = binary_to_list(<<Y/binary,"-",M/binary,"-",D/binary,"T00:00:00+02:00">>),
   NEWSTAMP = calendar:rfc3339_to_system_time(STRING,[{unit,millisecond}]).
 
-%% @doc Givesthe Unix timestamp at the given hour today the hours is given as decimal (i.e. 6:3- = 6.5)
+%% @doc Gives the Unix timestamp at the given hour today the hours is given as decimal (i.e. 6:3- = 6.5)
 get_today_at(H)->
   get_today_at_0am() + (H*60*60*1000).
 
@@ -81,8 +90,7 @@ test_module()->
   D1 = 1646633935000, % NOT WEEKEND
   IS_D1_WEEKEND = is_weekend(D1),
   D2 = 1640067535000, %IS WEEKEND,
-  WEEKENDRESULT = [NOW,D1,D2],
-  io:format("~n WEEKEND TEST: ~p SHOULD BE ~p",[WEEKENDRESULT,[any,false,true]]).
+  WEEKENDRESULT = [NOW,D1,D2].
 
 %% @doc Gets the current time of day from ms epoch as decimal hours  (6:30 - 6.5)
 get_time_in_hours(MS)->
@@ -204,25 +212,22 @@ day_difference(D1, {D2, _}) ->
 day_difference(D1, D2) ->
   Days1 = calendar:date_to_gregorian_days(D1)
   , Days2 = calendar:date_to_gregorian_days(D2)
-  , Days1 - Days2
-.
+  , Days1 - Days2.
 
 is_time_sooner_than({Date, Time}, Mark) ->
   is_time_sooner_than(calendar:datetime_to_gregorian_seconds({Date, Time})
     , Mark);
+
 is_time_sooner_than(Time, {DateMark, TimeMark}) ->
-  is_time_sooner_than(Time
-    , calendar:datetime_to_gregorian_seconds({DateMark, TimeMark}));
+  is_time_sooner_than(Time,calendar:datetime_to_gregorian_seconds({DateMark, TimeMark}));
+
 is_time_sooner_than(Time, Mark)  when is_integer(Time), is_integer(Mark) ->
-  Time > Mark
-.
+  Time > Mark.
 
 subtract(Date, {days, N}) ->
   New = calendar:date_to_gregorian_days(Date) - N
-  , calendar:gregorian_days_to_date(New)
-.
+  , calendar:gregorian_days_to_date(New).
 
 add(Date, {days, N}) ->
   New = calendar:date_to_gregorian_days(Date) + N
-  , calendar:gregorian_days_to_date(New)
-.
+  , calendar:gregorian_days_to_date(New).

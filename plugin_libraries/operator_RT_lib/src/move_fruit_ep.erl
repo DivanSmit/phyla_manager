@@ -10,7 +10,7 @@
 -author("LENOVO").
 -behaviour(base_task_ep).
 %% API
--export([init/2, stop/1, request_start/2, start_task_error/3, request_resume/2, resume_task/3, start_task/3, end_task/3, handle_request/3, handle_signal/3]).
+-export([init/2, stop/1, request_start/2, start_task_error/3, request_resume/2, resume_task/3, start_task/3, end_task/3, handle_request/3, handle_signal/3, task_cancel/4, base_variable_update/4]).
 
 
 init(Parameters, BH) ->
@@ -48,6 +48,12 @@ handle_request(Tag, Payload, BH) ->
 handle_signal(Tag, Payload, BH) ->
   erlang:error(not_implemented).
 
+task_cancel(Reason, TaskState, ExecutorHandle, BH) ->
+  erlang:error(not_implemented).
+
+base_variable_update(_, TaskState, ExecutorHandle, BH) ->
+  erlang:error(not_implemented).
+
 %%Custom tasks here -------------------------------------------------------------------->
 
 move_the_fruit()->
@@ -59,3 +65,4 @@ print_sched(BH,Count)->
   io:format("The sched is: ~p~n",[Tasks]),
   timer:sleep(500),
   print_sched(BH,Count-1).
+

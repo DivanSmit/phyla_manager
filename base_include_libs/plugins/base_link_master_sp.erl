@@ -1,17 +1,26 @@
+%%% ====================================================================================== %%%
+%%% ====================================================================================== %%%
+%%% @copyright (C) 2023, Cybarete Pty Ltd
+%%% @doc
+%%% The behaviour SP module for the master of base link service negotiation
+%%% @end
+%%% ====================================================================================== %%%
+%%% ====================================================================================== %%%
 
 -module(base_link_master_sp).
+-include("../base_terms.hrl").
 
-%%%===================================================================
-%%%                     Callback Functions
-%%%===================================================================
+%%% ====================================================================================== %%%
+%%%                                 CALLBACK FUNCTIONS
+%%% ====================================================================================== %%%
 
 %% @doc this function is called when the plugin is first initialised
 -callback init(Pars::term(),BH::term())->
-  ok | {error,Desc::term()}.
+  ok.
 
 %% @doc this function is called when the plugin is removed from the system
 -callback stop(BH::term())->
-  ok  | {error,Desc::term()}.
+  ok.
 
 %% @doc this function is called when the link negotiation is started.
 %% The deadline format deadline epoch time in milliseconds.
@@ -44,10 +53,9 @@
 -callback negotiations_end(PromisesMade::map(),PluginState::term(), NegH::term(),BH::term()) ->
   ok.
 
-
-%%%===================================================================
-%%%                     External Functions
-%%%===================================================================
+%%% ====================================================================================== %%%
+%%%                                 EXTERNAL FUNCTIONS
+%%% ====================================================================================== %%%
 
 -export([start_link_negotiation/3]).
 

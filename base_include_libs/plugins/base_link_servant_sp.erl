@@ -1,17 +1,26 @@
+%%% ====================================================================================== %%%
+%%% ====================================================================================== %%%
+%%% @copyright (C) 2023, Cybarete Pty Ltd
+%%% @doc
+%%% The behaviour SP module for the servant of base link service negotiation
+%%% @end
+%%% ====================================================================================== %%%
+%%% ====================================================================================== %%%
 
 -module(base_link_servant_sp).
+-include("../base_terms.hrl").
 
-%%%===================================================================
-%%%                     Callback Functions
-%%%===================================================================
+%%% ====================================================================================== %%%
+%%%                                 CALLBACK FUNCTIONS
+%%% ====================================================================================== %%%
 
-%% @doc This function is called when the plugin is first initialised
+%% @doc this function is called when the plugin is first initialised
 -callback init(Pars::term(),BH::term())->
-  ok | {error,Desc::term()}.
+  ok.
 
-%% @doc This function is called when the plugin is removed from the system
+%% @doc this function is called when the plugin is removed from the system
 -callback stop(BH::term())->
-  ok  | {error,Desc::term()}.
+  ok.
 
 %% @doc This callback is triggered when the service provider is contacted
 -callback request_start_negotiation(MasterBC::term(),NegH::term(), BH::term()) ->
@@ -31,7 +40,7 @@
   |{error, Description::term()}
   |{refuse, Reason::term()}.
 
-%%%===================================================================
-%%%                     External Functions
-%%%===================================================================
+%%% ====================================================================================== %%%
+%%%                                 EXTERNAL FUNCTIONS
+%%% ====================================================================================== %%%
 

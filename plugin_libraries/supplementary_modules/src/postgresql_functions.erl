@@ -80,23 +80,34 @@ write_data_to_postgresql_database(DataMap, Table) ->
 
 connect_to_database(Host, Username, Password, Database, Port) ->
 
-  %Connect to the PostgreSQL database
-  {ok, C} = epgsql:connect(#{host => Host,
+%%  %Connect to the PostgreSQL database
+%%  {ok, C} = epgsql:connect(#{host => Host,
+%%    username => Username,
+%%    password => Password,
+%%    database => Database,
+%%    port => Port
+%%  }),
+
+  Something = epgsql:connect(#{host => Host,
     username => Username,
     password => Password,
     database => Database,
     port => Port
   }),
 
-  %% Check if the connection has been established successfully %%
-  case {ok, C} =:= {ok, C} of
-    true->
-      io:format("~n Connection has been established, C: ~p~n", [C]);
-    false->
-      io:format("~n Connection failed ~n")
-  end,
+  io:format("~n Something: ~p~n", [Something]),
 
-  C.
+
+%%  %% Check if the connection has been established successfully %%
+%%  case {ok, C} =:= {ok, C} of
+%%    true->
+%%      io:format("~n Connection has been established, C: ~p~n", [C]);
+%%    false->
+%%      io:format("~n Connection failed ~n")
+%%  end,
+%%DataMap = #{<<"id">>=>1,<<"sugar_content">>=>3,<<"time">>=>12}.
+%%  C.
+  ok.
 
 close_connection(Pid)->
   io:format("~n Closing connection: ~p ~n",[Pid]),

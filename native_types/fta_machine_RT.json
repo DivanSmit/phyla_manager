@@ -1,6 +1,8 @@
 {
   "plugins": [
-    {"name": "fta_machine_guardian_sp","lib": "fta_machine_RT_lib","init_args": []},
+    {"name": "fta_machine_guardian_sp","lib": "fta_machine_RT_lib","init_args": [
+      {"name":  "fta_01","id":  "11"}
+    ]},
     {"name": "fta_machine_guardian_ep","lib": "fta_machine_RT_lib","init_args": []},
     {"name": "fta_type_info_handler_ep","lib": "fta_machine_RT_lib","init_args": []}
   ],

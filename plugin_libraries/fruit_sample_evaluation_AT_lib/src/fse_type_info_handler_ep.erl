@@ -23,13 +23,15 @@ handle_signal(Tag, Signal, BH) ->
   erlang:error(not_implemented).
 
 handle_request(<<"SPAWN_FSE_INSTANCE">>,Payload, FROM, BH)->
-  Name = maps:get(<<"name">>,Payload),
+  IDInt = rand:uniform(1000),
+  ID = integer_to_binary(IDInt),
+  Name = list_to_binary("FSE_" ++ integer_to_list(IDInt)),
   io:format("Spawn request recieved of ~p~n",[Name]),
-  ID = maps:get(<<"id">>,Payload),
+  StartTime = maps:get(<<"param">>,Payload),
 
-  {ok, Recipe} = fse_guardian_sp:generate_instance_recipe(Name, ID, BH),
+  {ok, Recipe} = fse_guardian_sp:generate_instance_recipe(Name, ID, StartTime,BH),
   Tsched = base:get_origo(),
-  Data1 = no_data,
+  Data1 = nodata,
   spawn(fun()->
     base_guardian_sp:schedule_instance_guardian(Tsched,Recipe,Data1,BH)
         end),

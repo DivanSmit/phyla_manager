@@ -1,3 +1,13 @@
+%%% ====================================================================================== %%%
+%%% ====================================================================================== %%%
+%%% @copyright (C) 2023, Cybarete Pty Ltd
+%%% @doc
+%%% The base_contract module defines the functions for handling a
+%%% base contract.
+%%% @end
+%%% ====================================================================================== %%%
+%%% ====================================================================================== %%%
+
 -module(base_contract).
 -include("base_terms.hrl").
 -export([
@@ -15,20 +25,18 @@
   get_requirements/1,
   accept_proposal/1,
   reject_proposal/1,
-  refuse_contract/1, get_proposal_bc/1]).
+  refuse_contract/1, get_proposal_bc/1, create_contract/3]).
 
-
-record_to_map(ContractRecord)->
-  not_implimented_yet.
-
-map_to_record(ContractMap)->
-  not_implimented_yet.
+%%% ====================================================================================== %%%
+%%%                                 EXTERNAL FUNCTIONS
+%%% ====================================================================================== %%%
 
 create_contract(Requirements,MasterBC,ServantBC)->
   #base_contract{master_bc = MasterBC,servant_bc = ServantBC, requirements = Requirements, state = pending}.
 
 get_my_role(Contract)->
   Contract#base_contract.my_role.
+
 get_partner_role(Contract)->
   case  Contract#base_contract.my_role of
     master->
@@ -131,5 +139,3 @@ get_master_promise(Contract)->
 
 get_servant_promise(Contract)->
   Contract#base_contract.servant_promise.
-
-

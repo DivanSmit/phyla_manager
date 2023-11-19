@@ -1,20 +1,20 @@
+%%% ====================================================================================== %%%
+%%% ====================================================================================== %%%
+%%% @copyright (C) 2023, Cybarete Pty Ltd
+%%% @doc
+%%% The base_business_card module defines the functions for handling
+%%% a business card.
+%%% @end
+%%% ====================================================================================== %%%
+%%% ====================================================================================== %%%
+
 -module(base_business_card).
 -include("base_terms.hrl").
-
-%% TODO Consider adding spawnpoint to the identity for if the base goes to a hive where someone has the same ID as it
-%% TODO taxonomy should be something like : {<<"car_door">>,resource,instance}
-%% TODO for now its just {<<"BASE_TYPE">>,resource|activity,instance|type}
-%% API
 -compile(export_all).
 
-%A business card has the following structure:
-% |=========================================
-% |identity: {name: <<"some_binary">>, id:<<"somebinary">>}
-% |address: [{type: gen_server/ipv4/web_socket/rest, ip:/pid:/url:}]}
-% |protocols: [{commsxml,[json/erl_gen_serv/erl_tuple
-% |---------------------------------------
-% |purpose: responsibilities, capabilities
-% |=========================================
+%%% ====================================================================================== %%%
+%%%                                 EXTERNAL FUNCTIONS
+%%% ====================================================================================== %%%
 
 record_to_map(#business_card{addresses = Addresses,identity = Identity, responsibilities = Reses, capabilities = Capas, meta = Meta})->
   #{<<"addresses">>=> Addresses,
@@ -96,7 +96,6 @@ address_value_valid(AddrType,AddrVal)->
       is_list(AddrVal)
   end.
 
-%% TODO what whas my thinking behind this? -- 2022-08-31 I still don't know
 get_bhive_id_tuple(BC)->
   ID = get_id(BC),
   Name = get_name(BC),
@@ -172,7 +171,6 @@ has_capabilities(CAP,BC) when is_binary(CAP)->
 has_capabilities(_CAP,_BC)->
   false.
 
-%% @doc Checks if any of the given capabilities are listed in the given BC
 has_responsibilities(REPS,BC) when is_list(REPS)->
   BC_REPS = get_responsibilities(BC),
   lists:foldl(fun(FILTER_REP,Acc)->
@@ -184,10 +182,10 @@ has_responsibilities(REPS,BC) when is_list(REPS)->
     end
               end,false,REPS);
 
-%% @doc matches to this func if given capabilities was singular not list
 has_responsibilities(RESP,BC) when is_binary(RESP)->
   BC_REPS = get_responsibilities(BC),
   lists:member(RESP,BC_REPS);
+
 has_responsibilities(_,_BC)->
   false.
 
@@ -198,8 +196,10 @@ has_id(ID,BC) when is_binary(ID)->
     _->
       false
   end;
+
 has_id(_ID,_BC)->
   false.
+
 has_name(ID,BC) when is_binary(ID)->
   case get_name(BC) of
     ID->
@@ -210,9 +210,9 @@ has_name(ID,BC) when is_binary(ID)->
 has_name(_,_BC)->
   false.
 
-%% @doc a function that checks if a BC matches a BASE query
 discovery_query_match( #base_discover_query{name = all},BC)->
   true;
+
 discovery_query_match( #base_discover_query{capabilities = Caps,id = ID, name = NAME},BC)->
   MATCHLIST = [has_id(ID,BC),has_name(NAME,BC),has_capabilities(Caps,BC)],
   case MATCHLIST of

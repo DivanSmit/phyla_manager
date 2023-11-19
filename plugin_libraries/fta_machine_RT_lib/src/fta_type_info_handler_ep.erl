@@ -23,9 +23,11 @@ handle_signal(Tag, Signal, BH) ->
   erlang:error(not_implemented).
 
 handle_request(<<"SPAWN_FTA_MACHINE_INSTANCE">>,Payload, FROM, BH)->
-  Name = maps:get(<<"name">>,Payload),
+
+  IDInt = rand:uniform(1000),
+  ID = integer_to_binary(IDInt),
+  Name = list_to_binary("FTA_machine_" ++ integer_to_list(IDInt)),
   io:format("Spawn request recieved of ~p~n",[Name]),
-  ID = maps:get(<<"id">>,Payload),
 
   {ok, Recipe} = fta_machine_guardian_sp:generate_instance_recipe(Name, ID, BH),
   Tsched = base:get_origo(),

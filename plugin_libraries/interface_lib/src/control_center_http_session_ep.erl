@@ -20,6 +20,9 @@
 
 init([ConnectorServerFolder,Port], BH) ->
   io:format("Interface has started~n"),
+  code:add_patha("C:/Users/LENOVO/Desktop/base-getting-started/phyla_manager_BASE/plugin_libraries/supplementary_modules/ebin"),
+
+
   spawn(fun()->
     base:wait_for_base_ready(BH),
     schedule_this_behaviour(ConnectorServerFolder,Port,BH)end),

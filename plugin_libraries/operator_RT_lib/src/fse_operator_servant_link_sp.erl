@@ -14,6 +14,7 @@
 
 
 init(Pars, BH) ->
+  base_variables:write(<<"TaskDurations">>,<<"fse_operator">>,1800000,BH),
   ok.
 
 stop(BH) ->
@@ -24,107 +25,34 @@ request_start_negotiation(MasterBC, NegH, BH) ->
 
 generate_proposal(Requirements, PluginState, NegH, BH) ->
 
-  AvailabilityTime = check_availability(BH), % Change to check availability
-
-  Result = lists:foldl(fun(Elem, Acc)->
-    case Elem of
-      #{<<"AVAILABILITY">>:=Time} ->
-        case Time of                %% ADD all the cases here
-          any-> true;
-          true-> if
-                   AvailabilityTime =< Time ->
-                     Acc;
-                   true ->
-                     false
-                 end
-        end;
-      _other->Acc
-    end
-                       end, true, Requirements),
+  StartTime = maps:get(<<"AVAILABILITY">>,lists:nth(1, Requirements)),
+  {Result,AvailabilityTime} = case StartTime of
+                       any -> {ok,base:get_origo()};
+                       _ ->
+                         myFuncs:check_availability(StartTime,BH)
+                     end,
 
   case Result of
-    true->
-      Proposal = #{<<"TIME">>=>AvailabilityTime},
-      {proposal,Proposal,nostate};
+    ok->
+      Proposal = #{<<"proposal">>=>accept,<<"TIME">>=>AvailabilityTime},
+      {proposal,Proposal,AvailabilityTime};
+    not_possible->
+      Proposal = #{<<"proposal">>=>not_possible,<<"TIME">>=>AvailabilityTime},
+      {proposal,Proposal,AvailabilityTime};
     false-> {refuse,not_qualified}
   end.
 
 proposal_accepted(PluginState, NegH, BH) ->
 %%  io:format("Servant accepted promise~n"),
+  io:format("The pluginstate is: ~p~n",[PluginState]),
+%%  Tsched = PluginState,
   Tsched = base:get_origo(),
   LinkID = list_to_binary(ref_to_list(make_ref())),
-  Data1 = nodata,
+  Data1 = #{<<"LinkID">>=>LinkID},
   {promise, Tsched, LinkID,Data1, no_state}.
 
 %% ________________________________________________________________
 %% External Functions
 %% ________________________________________________________________
 
-check_availability(BH) ->
-%%  MyBC = base:get_my_bc(BH),
-%%  MyName = base_business_card:get_name(MyBC),
 
-  TasksSched = base_schedule:get_all_tasks(BH),
-  TasksExe = base_execution:get_all_tasks(BH),
-%%  io:format("~p Sched:~p~n",[MyName,TasksSched]),
-%%  io:format("~p Exe:~p~n",[MyName,TasksExe]),
-  KeyS = maps:keys(TasksSched),
-  KeyE = maps:keys(TasksExe),
-  TimeSced = extract_sched_time(KeyS, TasksSched, 0),
-  TimeExe = extract_exe_time(KeyE, TasksExe, 0),
-
-  %% Choose the highest time
-  if
-    TimeExe > TimeSced ->
-      TimeExe;
-    true ->
-      TimeSced
-  end.
-
-extract_sched_time([],_,_)->
-  base:get_origo();
-
-extract_sched_time([Key | Rest], Tasks, MaxTime) ->
-  TaskShell = maps:get(Key, Tasks),
-
-  {ThisTime} = case TaskShell of
-                 {_, {task_shell, Time, _, _,
-                   _, _, task, 1}, undefined, #{}, #{}, #{}} ->
-                   {Time};
-                 _ ->
-                   {base:get_origo()} %% Needs to be fixed later
-               end,
-
-  {UpdatedMaxTime} = if
-                       ThisTime > MaxTime -> {ThisTime};
-                       true -> {MaxTime}
-                     end,
-
-  case Rest of
-    [] -> UpdatedMaxTime;
-    _ -> extract_sched_time(Rest, Tasks, UpdatedMaxTime)
-  end.
-
-extract_exe_time([],_,_)->
-  base:get_origo();
-
-extract_exe_time([Key | Rest], Tasks, MaxTime) ->
-  TaskShell = maps:get(Key, Tasks),
-
-  {ThisTime} = case TaskShell of
-                 {_, {task_shell, _, Time, _,
-                   _, _, task, 2}, undefined, #{}, #{}, #{}} ->
-                   {Time};
-                 _ ->
-                   {base:get_origo()}
-               end,
-
-  {UpdatedMaxTime} = if
-                       ThisTime > MaxTime -> {ThisTime};
-                       true -> {MaxTime}
-                     end,
-
-  case Rest of
-    [] -> UpdatedMaxTime;
-    _ -> extract_exe_time(Rest, Tasks, UpdatedMaxTime)
-  end.

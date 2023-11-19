@@ -1,20 +1,27 @@
+%%% ====================================================================================== %%%
+%%% ====================================================================================== %%%
+%%% @copyright (C) 2023, Cybarete Pty Ltd
+%%% @doc
+%%% The Link Task behaviour for an execution plugin.
+%%% @end
+%%% ====================================================================================== %%%
+%%% ====================================================================================== %%%
 
 -module(base_link_ep).
--include("../base_terms.hrl").
--record(end_link,{reason::term()}).
 -export([get_partner_bc/1, start_link/1, signal_partner/3, get_shell/1, end_link/2, call_partner/3]).
+-include("../base_terms.hrl").
 
-%%%===================================================================
-%%%                     Callback Functions
-%%%===================================================================
+%%% ====================================================================================== %%%
+%%%                                 CALLBACK FUNCTIONS
+%%% ====================================================================================== %%%
 
-%% @doc This function is called when the plugin is first initialised.
+%% @doc this function is called when the plugin is first initialised
 -callback init(Pars::term(),BH::term())->
-    ok | {error,Desc::term()}.
+    ok.
 
-%% @doc This function is called when the plugin is removed from the system.
+%% @doc this function is called when the plugin is removed from the system
 -callback stop(BH::term())->
-    ok  | {error,Desc::term()}.
+    ok.
 
 %% @doc This is called to ask whether the link should start or wait for the partner to start it first.
 -callback request_start_link(PluginState::term(),ExH::term(),BH::term())->
@@ -54,19 +61,19 @@
 -callback link_end(Reason::term(),PluginState::term(),ExH::term(),BH::term())->
     reflect | discard | archive.
 
-%% @doc Called when the service executor has been called by another BASE holon but the partner BASE holon
--callback handle_call({Call::term(), From::term()}, PluginState::term(),ExH::term(),BH::term())->
-    {reply, Reply::term(), NewPluginState::term()} % will send a reply to the calling holon
-    |{end_link, Reason::term(), NewPluginState::term()}. % will trigger the end_link callback and inform the link partner
-
 %% @doc Called when the executor was subscribed to a state variable and the state variable is updated
 -callback base_variable_update({Page::term(), Key::term(), Value::term()}, PluginState::term(), ExH::term(), BH::term())->
     {ok, NewPluginState::term()} % will continue normally
     |{end_link, Reason::term(), NewPluginState::term()}. % will trigger the end_link callback and inform the link partner
 
-%%%===================================================================
-%%%                     External Functions
-%%%===================================================================
+%%% ====================================================================================== %%%
+%%%                                 EXTERNAL FUNCTIONS
+%%% ====================================================================================== %%%
+
+% This function will return the task shell for this link task.
+-spec get_shell(ExH::agent_handle())-> Shell::term().
+get_shell(ExH)->
+    base_link_executor:get_shell(ExH).
 
 % This function sends a message to the link partner and waits for a reply.
 -spec call_partner(Tag::term(), Payload::term(), ExH::term()) -> Reply::term().
@@ -89,11 +96,6 @@ start_link(ExH)->
 -spec get_partner_bc(ExH::agent_handle())-> BC::term().
 get_partner_bc(ExH)->
     base_link_executor:get_partner_bc(ExH).
-
-% This function will return the task shell for this link task.
--spec get_shell(ExH::agent_handle())-> Shell::term().
-get_shell(ExH)->
-    base_link_executor:get_shell(ExH).
 
 % This function will either abort the link (if it has not started yet) or end the link (if it has started).
 % Aborting the link will immediately discard the link task off the schedule.

@@ -23,12 +23,14 @@ handle_signal(Tag, Signal, BH) ->
   erlang:error(not_implemented).
 
 handle_request(<<"SPAWN_OPERATOR_INSTANCE">>,Payload, FROM, BH)->
-  Name = maps:get(<<"name">>,Payload),
-  ID = maps:get(<<"id">>,Payload),
+  IDInt = rand:uniform(1000),
+  ID = integer_to_binary(IDInt),
+  Name = maps:get(<<"param">>,Payload),
+
   {ok, Recipe} = operator_guardian_sp:generate_instance_recipe(Name, ID, BH),
   io:format("Spawn request recieved of ~p~n",[Name]),
   Tsched = base:get_origo(),
-  Data1 = no_data,
+  Data1 = nodata,
   spawn(fun()->
     base_guardian_sp:schedule_instance_guardian(Tsched,Recipe,Data1,BH)
         end),
