@@ -21,10 +21,8 @@ stop(BH) ->
   ok.
 
 request_start_link(PluginState, ExH, BH) ->
-  io:format("The operator servant link has requested to start ~n "),
+  io:format("The operator servant link has requested to start ~n"),
   ID = myFuncs:get_task_id_from_BH(BH),
-
-%%  io:format("The ExH is: ~p~n",[ExH]),
   base_variables:write(<<"TaskStatus">>,lists:nth(1,ID),ExH,BH),
   {wait, lists:nth(1,ID)}.
 
@@ -37,13 +35,6 @@ link_start(PluginState, ExH, BH) ->
   base_variables:write(<<"TaskStatus">>,PluginState,ExH,BH),
   Shell = base_task_ep:get_shell(ExH),
   base_execution:put_task_data(#{<<"StartTime">>=>base:get_origo()},Shell,BH),
-
-  %% Insert functionality here
-  %%------------------------------------------
-  io:format("Operator is evaluatiing the fruit ~n "),
-  timer:sleep(2000),
-  io:format("The fruit has been evaluated ~n "),
-  %%------------------------------------------
 
   {ok, no_state}.
 
@@ -63,7 +54,7 @@ partner_signal(Cast, State, ExAgentHandle, BH) ->
   erlang:error(not_implemented).
 
 link_end(Reason, State, ExAgentHandle, BH) ->
-  io:format("THe link is finished~n"),
+  io:format("The link is finished~n"),
   Shell = base_task_ep:get_shell(ExAgentHandle),
   {ok,ExecutionMap} = base_execution:get_task_execution_data(Shell,BH),
   base_execution:put_task_data(maps:put(<<"EndTime">>,base:get_origo(),ExecutionMap),Shell,BH),

@@ -14,7 +14,6 @@
 
 
 init(Pars, BH) ->
-  io:format("Reflection installed~n"),
   ok.
 
 stop(BH) ->

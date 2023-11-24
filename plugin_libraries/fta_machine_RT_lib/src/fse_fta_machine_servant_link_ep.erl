@@ -21,20 +21,7 @@ stop(BH) ->
 
 request_start_link(PluginState, ExH, BH) ->
   io:format("The fta servant link has requested to start ~n "),
-
-  TasksExe = base_execution:get_all_tasks(BH),
-  KeyE = maps:keys(TasksExe),
-
-  io:format("Execution: ~p ~n ",[KeyE]),
-  case KeyE of
-    [] ->
-      {start, no_state};
-    _ ->
-      io:format("FTA machine is busy ~n"),
-      base_link_ep:signal_partner(<<"Busy">>,nothing,ExH),
-      io:format("Signal sent ~n"),
-      {wait, no_state}
-  end.
+  {wait, no_state}.
 
 request_resume_link(PluginState, ExH, BH) ->
   {cancel, no_state}.

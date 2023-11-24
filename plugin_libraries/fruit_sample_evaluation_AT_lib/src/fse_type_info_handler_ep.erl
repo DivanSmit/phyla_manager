@@ -26,7 +26,6 @@ handle_request(<<"SPAWN_FSE_INSTANCE">>,Payload, FROM, BH)->
   IDInt = rand:uniform(1000),
   ID = integer_to_binary(IDInt),
   Name = list_to_binary("FSE_" ++ integer_to_list(IDInt)),
-  io:format("Spawn request recieved of ~p~n",[Name]),
   StartTime = maps:get(<<"param">>,Payload),
 
   {ok, Recipe} = fse_guardian_sp:generate_instance_recipe(Name, ID, StartTime,BH),

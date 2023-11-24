@@ -39,42 +39,50 @@ evaluate_proposal(Proposal, PluginState, NegH, BH) ->
   {ok,nostate}.
 
 all_proposals_received(ProposalList, PluginState, NegH, BH) ->
-  %% proposal evaluation logic
+%% proposal evaluation logic
 %%  io:format("Proposal list: ~p~n",[ProposalList]),
-  WinningMap = maps:fold(fun(CandidateBC, Proposal, Acc)->
-    #{<<"TIME">>:=CandidateTime} = Proposal,
 
-    if
-      Acc == null ->
-        % it is the first proposal being evaluated
-        #{<<"Time">>=>CandidateTime,<<"proposal">>=>Proposal,<<"candidateBC">>=>CandidateBC};
-      true->
-        % it is not the first proposal being evaluated
-        PreviousTime = maps:get(<<"Time">>, Acc), % get the current best proposal
+  case ProposalList of
+    [] ->
+      base_variables:write(<<"FSE_FSM_INFO">>, <<"FSE_FSM_status">>, no_operator, BH),
+      {ok, [], nostate};
+    _ ->
+      WinningMap = maps:fold(fun(CandidateBC, Proposal, Acc) ->
+        #{<<"TIME">> := CandidateTime} = Proposal,
+
         if
-          CandidateTime < PreviousTime ->
-            % the latest proposal is better, update the current best proposal
-            #{<<"Time">>=>CandidateTime,<<"proposal">>=>Proposal,<<"candidateBC">>=>CandidateBC};
+          Acc == null ->
+            % it is the first proposal being evaluated
+            #{<<"Time">> => CandidateTime, <<"proposal">> => Proposal, <<"candidateBC">> => CandidateBC};
           true ->
-            % the latest proposal is not better, keep the old proposal
-            Acc
+            % it is not the first proposal being evaluated
+            PreviousTime = maps:get(<<"Time">>, Acc), % get the current best proposal
+            if
+              CandidateTime < PreviousTime ->
+                % the latest proposal is better, update the current best proposal
+                #{<<"Time">> => CandidateTime, <<"proposal">> => Proposal, <<"candidateBC">> => CandidateBC};
+              true ->
+                % the latest proposal is not better, keep the old proposal
+                Acc
+            end
         end
-    end
-                         end, null, ProposalList),
+                             end, null, ProposalList),
 
-  %% Convert time to normal time
-  {{_,_,_},{Hour,Min,Sec}} = calendar:system_time_to_universal_time(maps:get(<<"Time">>, WinningMap), 1000),
-  io:format("The best time is: ~p:~p:~p~n", [Hour,Min,Sec]),
+      %% Convert time to normal time
+      {{_, _, _}, {Hour, Min, Sec}} = calendar:system_time_to_universal_time(maps:get(<<"Time">>, WinningMap), 1000),
+      io:format("The best time for FSE--FTA is: ~p:~p:~p~n", [Hour, Min, Sec]),
 
-  % retrieve the winning BC
-  CandidateBC = if
-                  is_map(WinningMap)->
-                    % if the winning proposal is a map, then get the winning candidateBC
-                    maps:get(<<"candidateBC">>, WinningMap);
-                  true ->
-                    []
-                end,
-  {ok, [CandidateBC], nostate}.
+      % retrieve the winning BC
+      CandidateBC = if
+                      is_map(WinningMap) ->
+                        % if the winning proposal is a map, then get the winning candidateBC
+                        maps:get(<<"candidateBC">>, WinningMap);
+                      true ->
+                        []
+                    end,
+
+      {ok, [CandidateBC], nostate}
+  end.
 
 promise_received(Promise, PluginState, NegH, BH) ->
   base_variables:write(<<"FSE_FSM_INFO">>,<<"FSE_FSM_status">>, found_fta_machine,BH),

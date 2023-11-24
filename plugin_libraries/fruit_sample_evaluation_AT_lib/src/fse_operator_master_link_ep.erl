@@ -21,9 +21,9 @@ init(Pars, BH) ->
 stop(BH) ->
   ok.
 
-request_start_link(State, ExAgentHandle, BH) ->
-  io:format("The master link has requested to start ~n "),
-  {start,no_state}.
+request_start_link(State, ExH, BH) ->
+  base_variables:write(<<"INFO">>,<<"OPERATOR_LINK">>,ExH,BH),
+  {start, no_state}.
 
 request_resume_link(State, ExAgentHandle, BH) ->
   {cancel, no_state}.
@@ -31,11 +31,14 @@ request_resume_link(State, ExAgentHandle, BH) ->
 link_start(PluginState, ExAgentHandle, BH) ->
   io:format("~nLINK TASK IS STARING MASTER~n"),
 
+  base_variables:write(<<"FSE_FSM_INFO">>,<<"FSE_FSM_status">>, task_started ,BH),
+
   spawn(fun()->
     MyBC = base:get_my_bc(BH),
     MyName = base_business_card:get_name(MyBC),
     PartnerBC = base_link_ep:get_partner_bc(ExAgentHandle),
     PartnerName = base_business_card:get_name(PartnerBC),
+
     io:format("~n [Activity: ~p] >>------------------------>>--------------------------->> [Operator: ~p] ~n", [MyName, PartnerName])
         end),
 
@@ -58,17 +61,8 @@ partner_signal(Value, PluginState, ExH, BH) ->
   ok.
 
 link_end(Reason, PluginState, ExH, BH) ->
-%%  io:format("The link is finished~n"),
-%%  Tasks = #task_shell_query{field = type, range = <<"fse_operator">>},
-%%%%  io:format("Tasks in exe: ~p~n",[Tasks]),
-%%  Task = case base_execution:query_task_shells(Tasks, BH) of
-%%           [LastTask | _] ->
-%%             LastTask;
-%%           _ -> do_nothing
-%%         end,
-%%  TaskEx = base_execution:get_executor_handle(Task,BH),
-%%%%  io:format("~n The TASKE is: ~p~n",[TaskEx]),
-%%  base_link_ep:end_link(TaskEx,done),
+  base_variables:write(<<"FSE_FSM_INFO">>,<<"FSE_FSM_status">>, task_finished ,BH),
+
   io:format("The link has ended~n"),
   discard.
 

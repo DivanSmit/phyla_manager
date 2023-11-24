@@ -19,9 +19,9 @@ init(Pars, BH) ->
 stop(BH) ->
   ok.
 
-request_start_link(State, ExAgentHandle, BH) ->
-  io:format("The master link has requested to start ~n "),
-  {start,no_state}.
+request_start_link(State, ExH, BH) ->
+  base_variables:write(<<"INFO">>,<<"FTA_LINK">>,ExH,BH),
+  {wait,no_state}.
 
 request_resume_link(State, ExAgentHandle, BH) ->
   {cancel, no_state}.
@@ -35,7 +35,6 @@ link_start(PluginState, ExAgentHandle, BH) ->
     io:format("~n [Activity: ~p] >>------------------------>>--------------------------->> [FTA_machine: ~p] ~n", [MyName, PartnerName])
         end),
 
-%%  ReplyData = base_link_ep:call_partner(<<"AVAILABILITY">>,nothing,ExAgentHandle),
   {ok, no_state}.
 
 link_resume(PluginState, ExH, BH) ->

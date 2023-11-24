@@ -14,7 +14,6 @@
 
 
 init(Parameters, BH) ->
-  io:format("Recieve data plugin installed~n"),
   code:add_patha("C:/Users/LENOVO/Desktop/base-getting-started/phyla_manager_BASE/plugin_libraries/supplementary_modules/ebin"),
   ok.
 

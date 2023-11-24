@@ -31,12 +31,17 @@ request_resume(ExecutorHandle, BH) ->
 start_task(TaskState, ExecutorHandle, BH) ->
   io:format("FSM task starting~n"),
 
-  Data1 = base_task_ep:get_schedule_data(ExecutorHandle,BH),
+  {ok, [Data1]} = base_task_ep:get_schedule_data(ExecutorHandle,BH),
+  StartTime = maps:get(<<"startTime">>,Data1),
+  base_variables:write(<<"FSE_FSM_INFO">>,<<"startTime">>, StartTime,BH),
+
   Pars = #{<<"BH">> => BH, <<"ExecutorHandle">> => ExecutorHandle},
-  {ok, StateMachinePID} = gen_statem:start_link({global, base_business_card:get_id(base:get_my_bc(BH))},fse_FSM, maps:merge(Data1,Pars), []),
+  {ok, StateMachinePID} = gen_statem:start_link({global, base_business_card:get_id(base:get_my_bc(BH))},fse_FSM, Pars, []),
+
   base_variables:write(<<"FSE_FSM_INFO">>,<<"FSE_FSM_PID">>, StateMachinePID,BH),
   base_variables:write(<<"FSE_FSM_INFO">>,<<"FSE_FSM_status">>, start,BH),
   base_variables:subscribe(<<"FSE_FSM_INFO">>,<<"FSE_FSM_status">>,self(),BH),
+
   {ok, TaskState}.
 
 resume_task(TaskState, ExecutorHandle, BH) ->
@@ -44,20 +49,10 @@ resume_task(TaskState, ExecutorHandle, BH) ->
 
 base_variable_update({<<"FSE_FSM_INFO">>,<<"FSE_FSM_status">>,Status}, TaskState, ExecutorHandle, BH) ->
 
-  case Status of
-    found_operator ->
 
-      %CAST FSM TO NEW STATE
-      FSM_PID = base_variables:read(<<"FSE_FSM_INFO">>,<<"FSE_FSM_PID">>,BH),
-      gen_statem:cast(FSM_PID,found_operator);
-
-    found_fta_machine->
-
-      %CAST FSM TO NEW STATE
-      FSM_PID = base_variables:read(<<"FSE_FSM_INFO">>,<<"FSE_FSM_PID">>,BH),
-      gen_statem:cast(FSM_PID,found_fta_machine)
-
-  end,
+  %CAST FSM TO NEW STATE
+  FSM_PID = base_variables:read(<<"FSE_FSM_INFO">>,<<"FSE_FSM_PID">>,BH),
+  gen_statem:cast(FSM_PID,Status),
 
   {ok, TaskState}.
 

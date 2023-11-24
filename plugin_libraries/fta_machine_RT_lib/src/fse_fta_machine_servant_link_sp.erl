@@ -29,12 +29,12 @@ generate_proposal(Requirements, PluginState, NegH, BH) ->
   {Result,AvailabilityTime} = case StartTime of
                                 any -> {ok,base:get_origo()};
                                 _ ->
-                                  myFuncs:check_availability(StartTime,BH)
+                                  TaskDuration = base_variables:read(<<"TaskDurations">>, <<"fse_fta">>, BH),
+                                  myFuncs:check_availability(StartTime, TaskDuration,earliest_from_now,BH)
                               end,
   case Result of
     ok->
       Proposal = #{<<"proposal">>=>accept,<<"TIME">>=>AvailabilityTime},
-      io:format("Proposal of FTA: ~p~n",[Proposal]),
       {proposal,Proposal,AvailabilityTime};
     not_possible->
       Proposal = #{<<"proposal">>=>not_possible,<<"TIME">>=>AvailabilityTime},
@@ -43,8 +43,8 @@ generate_proposal(Requirements, PluginState, NegH, BH) ->
   end.
 
 proposal_accepted(PluginState, NegH, BH) ->
-%%  io:format("Servant accepted promise~n"),
-  Tsched = base:get_origo(),
+
+  Tsched = PluginState,
   LinkID = list_to_binary(ref_to_list(make_ref())),
   Data1 = nodata,
   {promise, Tsched, LinkID,Data1, no_state}.
