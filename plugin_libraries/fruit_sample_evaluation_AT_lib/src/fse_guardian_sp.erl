@@ -43,9 +43,9 @@ generate_instance_recipe(Name, ID, TStart,BH) ->
       #{<<"name">>=><<"fse_operator_master_link_ep">>,<<"lib">>=><<"fruit_sample_evaluation_AT_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"fse_info_handler_ep">>,<<"lib">>=><<"fruit_sample_evaluation_AT_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"fse_FSM_ep">>,<<"lib">>=><<"fruit_sample_evaluation_AT_lib">>,<<"init_args">>=>[]},
-      #{<<"name">>=><<"fse_FSM_sp">>,<<"lib">>=><<"fruit_sample_evaluation_AT_lib">>,<<"init_args">>=>[
+      #{<<"name">>=><<"fse_FSM_sp">>,<<"lib">>=><<"fruit_sample_evaluation_AT_lib">>,<<"init_args">>=>
         #{<<"startTime">>=>TStart}
-      ]}
+      }
     ],
     <<"bc">> => #{
       <<"identity">>=>#{
@@ -53,7 +53,7 @@ generate_instance_recipe(Name, ID, TStart,BH) ->
         <<"name">>=>Name,
         <<"taxonomy">>=>#{<<"arti_class">>=><<"resource-instance">>,<<"base_type">>=><<"FSE_TYPE">>}
       },
-      <<"capabilities">>=>[<<"FSE_INSTANCE_INFO">>],
+      <<"capabilities">>=>[<<"FSE_INSTANCE_INFO">>,<<"EXECUTABLE_TASK">>],
       <<"responsibilities">>=>[],
       <<"addresses">>=>#{},
       <<"meta">>=>#{}

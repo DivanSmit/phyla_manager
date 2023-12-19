@@ -1,0 +1,7 @@
+{"name":"facility_room_guardian_ep",
+  "lib":"facility_room_RT_lib",
+  "sector": "ep",
+  "bin_dir": "default",
+  "behaviour":"guardian",
+  "language":"beam"
+}

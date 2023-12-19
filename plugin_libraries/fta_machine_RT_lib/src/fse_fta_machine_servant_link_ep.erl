@@ -21,23 +21,12 @@ stop(BH) ->
 
 request_start_link(PluginState, ExH, BH) ->
   io:format("The fta servant link has requested to start ~n "),
-  {wait, no_state}.
+  {start, no_state}.
 
 request_resume_link(PluginState, ExH, BH) ->
   {cancel, no_state}.
 
 link_start(PluginState, ExH, BH) ->
-
-  %% Insert functionality here
-  %%------------------------------------------
-  io:format("FTA machine is measuring the data ~n "),
-  Port = 9910,
-  {ok, ListenSocket} = gen_tcp:listen(Port, [{active, false}, {reuseaddr, true}]),
-  io:format("Server listening on port ~p~n", [Port]),
-  accept_connections(ListenSocket, [], ExH,BH),
-  io:format("The values have been measured ~n "),
-  %%------------------------------------------
-
   {ok, no_state}.
 
 link_resume(PluginState, ExH, BH) ->
@@ -58,7 +47,7 @@ partner_signal(Cast, State, ExAgentHandle, BH) ->
 
 link_end(Reason, State, ExAgentHandle, BH) ->
   io:format("THe link is finished~n"),
-  discard.
+  reflect.
 
 handle_call(Call, TaskState, ExAgentHandle, BH) ->
   erlang:error(not_implemented).

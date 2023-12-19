@@ -14,7 +14,6 @@
 
 
 init(Pars, BH) ->
-
   ok.
 
 stop(BH) ->
@@ -22,9 +21,10 @@ stop(BH) ->
 
 request_start_link(PluginState, ExH, BH) ->
   io:format("The operator servant link has requested to start ~n"),
-  ID = myFuncs:get_task_id_from_BH(BH),
-  base_variables:write(<<"TaskStatus">>,lists:nth(1,ID),ExH,BH),
-  {wait, lists:nth(1,ID)}.
+  TaskShell = base_task_ep:get_shell(ExH),
+  ID = myFuncs:get_task_id(TaskShell),
+  base_variables:write(<<"TaskStatus">>,ID,ExH,BH),
+  {wait, nostate}.
 
 
 request_resume_link(PluginState, ExH, BH) ->
@@ -32,9 +32,6 @@ request_resume_link(PluginState, ExH, BH) ->
 
 link_start(PluginState, ExH, BH) ->
   io:format("~nLINK TASK IS STARING SERVANT~n"),
-  base_variables:write(<<"TaskStatus">>,PluginState,ExH,BH),
-  Shell = base_task_ep:get_shell(ExH),
-  base_execution:put_task_data(#{<<"StartTime">>=>base:get_origo()},Shell,BH),
 
   {ok, no_state}.
 
@@ -55,9 +52,6 @@ partner_signal(Cast, State, ExAgentHandle, BH) ->
 
 link_end(Reason, State, ExAgentHandle, BH) ->
   io:format("The link is finished~n"),
-  Shell = base_task_ep:get_shell(ExAgentHandle),
-  {ok,ExecutionMap} = base_execution:get_task_execution_data(Shell,BH),
-  base_execution:put_task_data(maps:put(<<"EndTime">>,base:get_origo(),ExecutionMap),Shell,BH),
   reflect.
 
 handle_call(Call, TaskState, ExAgentHandle, BH) ->

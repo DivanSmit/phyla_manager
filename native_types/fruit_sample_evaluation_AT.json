@@ -13,7 +13,7 @@
       "name":"FSE_TYPE",
       "taxonomy":{"arti_class":"resource-type","base_type":"FSE_TYPE"}
     },
-    "capabilities":["SPAWN_FSE_INSTANCE"],
+    "capabilities":["SPAWN_FSE_INSTANCE","END_FSE_INSTANCE"],
     "responsibilities":[],
     "addresses":{},
     "meta":{}

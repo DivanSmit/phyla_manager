@@ -39,6 +39,7 @@ generate_instance_recipe(Name,ID, BH) ->
     <<"plugins">>=> [
       #{<<"name">>=><<"fse_fta_machine_servant_link_sp">>,<<"lib">>=><<"fta_machine_RT_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"fse_fta_machine_servant_link_ep">>,<<"lib">>=><<"fta_machine_RT_lib">>,<<"init_args">>=>[]},
+      #{<<"name">>=><<"fse_fta_machine_servant_link_rp">>,<<"lib">>=><<"fta_machine_RT_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"receive_data_sp">>,<<"lib">>=><<"fta_machine_RT_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"receive_data_ep">>,<<"lib">>=><<"fta_machine_RT_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"fta_info_handler_ep">>,<<"lib">>=><<"fta_machine_RT_lib">>,<<"init_args">>=>[]}

@@ -14,7 +14,8 @@
 
 
 init(Pars, BH) ->
-  base_variables:write(<<"TaskDurations">>,<<"fse_fta">>,1200000,BH),
+  base_attributes:write(<<"TaskDurations">>,<<"fse_fta">>,1200000,BH),
+  base_attributes:write(<<"TaskDurationList">>,<<"fse_fta">>,[1200000],BH),
   ok.
 
 stop(BH) ->
@@ -29,7 +30,7 @@ generate_proposal(Requirements, PluginState, NegH, BH) ->
   {Result,AvailabilityTime} = case StartTime of
                                 any -> {ok,base:get_origo()};
                                 _ ->
-                                  TaskDuration = base_variables:read(<<"TaskDurations">>, <<"fse_fta">>, BH),
+                                  TaskDuration = base_attributes:read(<<"TaskDurations">>, <<"fse_fta">>, BH),
                                   myFuncs:check_availability(StartTime, TaskDuration,earliest_from_now,BH)
                               end,
   case Result of

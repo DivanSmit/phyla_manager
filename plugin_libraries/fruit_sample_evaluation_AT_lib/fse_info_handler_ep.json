@@ -1,6 +1,6 @@
 {"name":"fse_info_handler_ep",
   "lib":"fruit_sample_evaluation_AT_lib",
-  "tags":["INFO"],
+  "tags":["INFO","StartTask","EndTask"],
   "bin_dir": "default",
   "behaviour":"receptor",
   "sector": "cm",

@@ -12,9 +12,9 @@
 %% API
 -export([init/2, stop/1, request_start_negotiation/3, generate_proposal/4, proposal_accepted/3]).
 
-
 init(Pars, BH) ->
-  base_variables:write(<<"TaskDurations">>,<<"fse_operator">>,1800000,BH),
+  base_attributes:write(<<"TaskDurations">>,<<"fse_operator">>,1800000,BH),
+  base_attributes:write(<<"TaskDurationList">>,<<"fse_operator">>,[1800000],BH),
   ok.
 
 stop(BH) ->
@@ -29,7 +29,7 @@ generate_proposal(Requirements, PluginState, NegH, BH) ->
   {Result,AvailabilityTime} = case StartTime of
                        any -> {ok,base:get_origo()};
                        _ ->
-                         TaskDuration = base_variables:read(<<"TaskDurations">>, <<"fse_operator">>, BH),
+                         TaskDuration = base_attributes:read(<<"TaskDurations">>, <<"fse_operator">>, BH),
                          myFuncs:check_availability(StartTime, TaskDuration,earliest_from_now,BH)
                      end,
 

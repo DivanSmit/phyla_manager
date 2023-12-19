@@ -31,28 +31,21 @@ request_resume(ExecutorHandle, BH) ->
 start_task(TaskState, ExecutorHandle, BH) ->
   io:format("FSM task starting~n"),
 
-  {ok, [Data1]} = base_task_ep:get_schedule_data(ExecutorHandle,BH),
-  StartTime = maps:get(<<"startTime">>,Data1),
-  base_variables:write(<<"FSE_FSM_INFO">>,<<"startTime">>, StartTime,BH),
+  PreviousState = base_variables:read(<<"FSE_FSM_INFO">>,<<"FSE_FSM_PID">>,BH),
+  gen_statem:stop(PreviousState),
 
-  Pars = #{<<"BH">> => BH, <<"ExecutorHandle">> => ExecutorHandle},
-  {ok, StateMachinePID} = gen_statem:start_link({global, base_business_card:get_id(base:get_my_bc(BH))},fse_FSM, Pars, []),
+  Pars = #{<<"BH">> => BH},
+  {ok, StateMachinePID} = gen_statem:start_link({global, base_business_card:get_id(base:get_my_bc(BH))},fse_exe_FSM, Pars, []),
 
   base_variables:write(<<"FSE_FSM_INFO">>,<<"FSE_FSM_PID">>, StateMachinePID,BH),
-  base_variables:write(<<"FSE_FSM_INFO">>,<<"FSE_FSM_status">>, start,BH),
-  base_variables:subscribe(<<"FSE_FSM_INFO">>,<<"FSE_FSM_status">>,self(),BH),
+  base_variables:write(<<"FSE_FSM_INFO">>,<<"FSE_FSM_status">>, task_in_execution,BH),
 
   {ok, TaskState}.
 
 resume_task(TaskState, ExecutorHandle, BH) ->
   erlang:error(not_implemented).
 
-base_variable_update({<<"FSE_FSM_INFO">>,<<"FSE_FSM_status">>,Status}, TaskState, ExecutorHandle, BH) ->
-
-
-  %CAST FSM TO NEW STATE
-  FSM_PID = base_variables:read(<<"FSE_FSM_INFO">>,<<"FSE_FSM_PID">>,BH),
-  gen_statem:cast(FSM_PID,Status),
+base_variable_update(_, TaskState, ExecutorHandle, BH) ->
 
   {ok, TaskState}.
 

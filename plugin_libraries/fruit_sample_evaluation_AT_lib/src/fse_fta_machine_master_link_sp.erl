@@ -33,7 +33,16 @@ get_candidates(Requirements, PluginState, NegH, BH) ->
   % search for all planets as candidates and let the planets decide.receive
   DR = #base_discover_query{capabilities = <<"MEASURE_FTA_VALUES">>},
   CandidateBCs = bhive:discover_bases(DR,BH),
-  {candidates,CandidateBCs, nostate}.
+  case CandidateBCs of
+    [] ->
+      FSM_PID = base_variables:read(<<"FSE_FSM_INFO">>, <<"FSE_FSM_PID">>, BH),
+      gen_statem:cast(FSM_PID, no_fta_machine),
+      base_variables:write(<<"FSE_FSM_INFO">>, <<"FSE_FSM_status">>, no_fta_machine, BH),
+      {candidates, CandidateBCs, nostate}
+    ;
+    _ ->
+      {candidates, CandidateBCs, nostate}
+  end.
 
 evaluate_proposal(Proposal, PluginState, NegH, BH) ->
   {ok,nostate}.
@@ -44,7 +53,7 @@ all_proposals_received(ProposalList, PluginState, NegH, BH) ->
 
   case ProposalList of
     [] ->
-      base_variables:write(<<"FSE_FSM_INFO">>, <<"FSE_FSM_status">>, no_operator, BH),
+
       {ok, [], nostate};
     _ ->
       WinningMap = maps:fold(fun(CandidateBC, Proposal, Acc) ->
@@ -69,8 +78,9 @@ all_proposals_received(ProposalList, PluginState, NegH, BH) ->
                              end, null, ProposalList),
 
       %% Convert time to normal time
+      PartnerName = base_business_card:get_name(maps:get(<<"candidateBC">>,WinningMap)),
       {{_, _, _}, {Hour, Min, Sec}} = calendar:system_time_to_universal_time(maps:get(<<"Time">>, WinningMap), 1000),
-      io:format("The best time for FSE--FTA is: ~p:~p:~p~n", [Hour, Min, Sec]),
+      io:format("The best time for FSE--FTA is: ~p:~p:~p by:~p~n", [Hour+2, Min, Sec, PartnerName]),
 
       % retrieve the winning BC
       CandidateBC = if
@@ -85,6 +95,8 @@ all_proposals_received(ProposalList, PluginState, NegH, BH) ->
   end.
 
 promise_received(Promise, PluginState, NegH, BH) ->
+  FSM_PID = base_variables:read(<<"FSE_FSM_INFO">>,<<"FSE_FSM_PID">>,BH),
+  gen_statem:cast(FSM_PID,found_fta_machine),
   base_variables:write(<<"FSE_FSM_INFO">>,<<"FSE_FSM_status">>, found_fta_machine,BH),
   LinkID = list_to_binary(ref_to_list(make_ref())),
   Data1 = #{},

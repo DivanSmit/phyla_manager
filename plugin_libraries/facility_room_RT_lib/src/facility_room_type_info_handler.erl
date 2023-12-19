@@ -4,9 +4,9 @@
 %%% @doc
 %%%
 %%% @end
-%%% Created : 05. Oct 2023 11:47
+%%% Created : 19. Dec 2023 17:49
 %%%-------------------------------------------------------------------
--module(operator_type_info_handler_ep).
+-module(facility_room_type_info_handler).
 -author("LENOVO").
 -behaviour(base_receptor).
 %% API
@@ -14,38 +14,33 @@
 
 
 init(Pars, BH) ->
-  ok.
+  erlang:error(not_implemented).
 
 stop(BH) ->
-  ok.
+  erlang:error(not_implemented).
 
 handle_signal(Tag, Signal, BH) ->
   erlang:error(not_implemented).
 
-handle_request(<<"SPAWN_OPERATOR_INSTANCE">>,Payload, FROM, BH)->
+handle_request(<<"SPAWN_FACILITY_ROOM_INSTANCE">>,Payload, FROM, BH)->
   Jsondata = maps:get(<<"param">>,Payload),
-
   Params =  bason:json_to_map(Jsondata),
 
-  Name = list_to_binary(lists:concat([
-    binary_to_list(maps:get(<<"name">>, Params)),
-    " ",
-    binary_to_list(maps:get(<<"surname">>, Params))
-    ])),
-
-  ID = maps:get(<<"workerID">>,Params),
+  Type = maps:get(<<"type">>,Params),
+  Name = maps:get(<<"name">>, Params),
 
   AttributesMap = #{
-    <<"password">>=>maps:get(<<"password">>,Params),
-    <<"BreakTime">>=>maps:get(<<"lunchTime">>,Params)
+
   },
 
-  {ok, Recipe} = operator_guardian_sp:generate_instance_recipe(Name, ID, BH),
+  {ok, Recipe} = facility_room_guardian_sp:generate_instance_recipe(Type, Name, BH),
   io:format("Spawn request recieved of ~p~n",[Name]),
+
   Tsched = base:get_origo(),
   Data1 = AttributesMap,
   spawn(fun()->
     base_guardian_sp:schedule_instance_guardian(Tsched,Recipe,Data1,BH)
         end),
+
   Reply = #{<<"name">>=>Name},
   {reply, Reply}.

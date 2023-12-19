@@ -53,20 +53,21 @@ handle_request(<<"INFO">>,<<"TASKSID">>, FROM, BH)->
 handle_request(<<"TASKS">>,Request, FROM, BH)->
   ID = maps:get(<<"taskID">>,Request),
   Param = maps:get(<<"param">>,Request),
-%%  TODO ExH needs to be received once task is scheduled and not only when request starts link starts.
-%% Possible solution is variable update
-  Exe = base_variables:read(<<"TaskStatus">>,ID,BH),
 
-  % TODO change the manner in which a task starts.
-  % It should only be changed if the FSM is in waiting for task start
+  Shell = myFuncs:get_task_shell_from_id(ID,BH),
+  case myFuncs:get_task_sort(Shell) of
+    link ->
+      PartnerID = myFuncs:get_partner_task_id(Shell),
+      TaskHolons = bhive:discover_bases(#base_discover_query{capabilities = <<"EXECUTABLE_TASK">>}, BH),
+      Reply1 = base_signal:emit_signal(TaskHolons, Param, PartnerID, BH)
+  end,
 
+  TaskExH = base_variables:read(<<"TaskStatus">>,ID,BH),
   case Param of
     <<"StartTask">> ->
-      io:format("~nSTARTING TASK FROM RECEPTOR~n"),
-      base_link_ep:start_link(Exe);
+      base_link_ep:start_link(TaskExH);
     <<"EndTask">> ->
-      io:format("~nEnding TASK FROM RECEPTOR~n"),
-      base_link_ep:end_link(Exe,no_state)
+      base_link_ep:end_link(TaskExH, done)
   end,
 
   MyBC = base:get_my_bc(BH),

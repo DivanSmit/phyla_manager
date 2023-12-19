@@ -1,0 +1,8 @@
+{"name":"fse_fta_machine_servant_link_rp",
+  "lib":"fta_machine_RT_lib",
+  "base_link":"fse_fta",
+  "sector": "rp",
+  "bin_dir": "default",
+  "behaviour":"link",
+  "language":"beam"
+}

@@ -26,9 +26,9 @@ handle_request(<<"SPAWN_MOVE_FRUIT_INSTANCE">>,Payload, FROM, BH)->
   IDInt = rand:uniform(1000),
   ID = integer_to_binary(IDInt),
   Name = list_to_binary("move_fruit_" ++ integer_to_list(IDInt)),
-  io:format("Spawn request recieved of ~p~n",[Name]),
+  StartTime = maps:get(<<"param">>,Payload),
 
-  {ok, Recipe} = move_fruit_guardian_sp:generate_instance_recipe(Name, ID, BH),
+  {ok, Recipe} = move_fruit_guardian_sp:generate_instance_recipe(Name, ID, StartTime, BH),
   Tsched = base:get_origo(),
   Data1 = no_data,
   spawn(fun()->

@@ -4,9 +4,9 @@
 %%% @doc
 %%%
 %%% @end
-%%% Created : 20. Sep 2023 16:50
+%%% Created : 19. Dec 2023 15:01
 %%%-------------------------------------------------------------------
--module(operator_guardian_ep).
+-module(facility_room_guardian_ep).
 -author("LENOVO").
 -behaviour(base_guardian_ep).
 %% API
@@ -28,12 +28,6 @@ spawn_cancelled(Reason, State, ManagerHandle, BH) ->
 request_start_instance(State, GuardianHandle, BH) ->
 
   Data = base_task_ep:get_schedule_data(GuardianHandle,BH),
-
-  Pass = maps:get(<<"password">>,Data),
-  Break = maps:get(<<"BreakTime">>,Data),
-  base_guardian_ep:write_instance_attribute(<<"Parameters">>,<<"password">>, Pass,GuardianHandle,BH),
-  base_guardian_ep:write_instance_attribute(<<"Parameters">>,<<"BreakTime">>, Break,GuardianHandle,BH),
-
   {start_instance, State}.
 
 instance_started(State, GuardianHandle, BH) ->
@@ -53,7 +47,7 @@ instance_resumed(State, GuardianHandle, BH) ->
   erlang:error(not_implemented).
 
 instance_end(State, GuardianHandle, BH) ->
-  io:format("~n Bye Bye operator Instance~n"),
+  io:format("~n Bye Bye facility room Instance~n"),
   {ok, archive}.
 
 handle_instance_call(Call, State, GuardianHandle, BH) ->

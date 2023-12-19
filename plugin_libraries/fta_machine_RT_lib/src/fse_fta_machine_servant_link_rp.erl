@@ -4,9 +4,9 @@
 %%% @doc
 %%%
 %%% @end
-%%% Created : 13. Nov 2023 20:30
+%%% Created : 13. Dec 2023 13:00
 %%%-------------------------------------------------------------------
--module(fse_operator_servant_link_rp).
+-module(fse_fta_machine_servant_link_rp).
 -author("LENOVO").
 -behaviour(base_task_rp).
 %% API
@@ -29,11 +29,11 @@ start_reflection(PluginState, ReflectorHandle, BH) ->
 
   Duration = EndTime-StartTime,
 
-  TaskList = base_attributes:read(<<"TaskDurationList">>,<<"fse_operator">>,BH),
+  TaskList = base_attributes:read(<<"TaskDurationList">>,<<"fse_fta">>,BH),
 
   {Average,NewList} = myFuncs:update_list_and_average(TaskList,Duration),
 
-  base_attributes:write(<<"TaskDurations">>,<<"fse_operator">>,Average,BH),
-  base_attributes:write(<<"TaskDurationList">>,<<"fse_operator">>,NewList,BH),
+  base_attributes:write(<<"TaskDurations">>,<<"fse_fta">>,Average,BH),
+  base_attributes:write(<<"TaskDurationList">>,<<"fse_fta">>,NewList,BH),
 
   ok.

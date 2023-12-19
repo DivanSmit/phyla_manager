@@ -19,8 +19,11 @@ init(Pars, BH) ->
 stop(BH) ->
   ok.
 
-handle_signal(Tag, Signal, BH) ->
-  erlang:error(not_implemented).
+handle_signal(<<"END">>, ID, BH) ->
+%%  TODO end instance call
+  GH = base_guardian_ep:get_guardian_of_id(ID,BH),
+  base_guardian_ep:end_instance(GH,BH),
+  ok.
 
 handle_request(<<"SPAWN_FSE_INSTANCE">>,Payload, FROM, BH)->
   IDInt = rand:uniform(1000),

@@ -23,7 +23,13 @@ stop(BH) ->
 
 request_start_link(State, ExH, BH) ->
   base_variables:write(<<"INFO">>,<<"OPERATOR_LINK">>,ExH,BH),
-  {start, no_state}.
+
+  TaskShell = base_task_ep:get_shell(ExH),
+  ID = myFuncs:get_task_id(TaskShell),
+
+  base_variables:write(<<"TaskStatus">>,ID,ExH,BH),
+
+  {wait, no_state}.
 
 request_resume_link(State, ExAgentHandle, BH) ->
   {cancel, no_state}.

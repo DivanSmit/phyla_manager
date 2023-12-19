@@ -1,6 +1,6 @@
-{"name":"coordinate_move_sp",
+{"name":"move_fruit_FSM_sp",
   "lib":"move_fruit_AT_lib",
-  "base_task": "coordinateMove",
+  "base_task": "move_fruit_FSM",
   "sector": "sp",
   "bin_dir": "default",
   "behaviour":"task",
