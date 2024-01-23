@@ -6,7 +6,7 @@
 %%% @end
 %%% Created : 19. Dec 2023 17:49
 %%%-------------------------------------------------------------------
--module(facility_room_type_info_handler).
+-module(facility_room_type_info_handler_ep).
 -author("LENOVO").
 -behaviour(base_receptor).
 %% API
@@ -14,7 +14,7 @@
 
 
 init(Pars, BH) ->
-  erlang:error(not_implemented).
+  ok.
 
 stop(BH) ->
   erlang:error(not_implemented).
@@ -23,6 +23,7 @@ handle_signal(Tag, Signal, BH) ->
   erlang:error(not_implemented).
 
 handle_request(<<"SPAWN_FACILITY_ROOM_INSTANCE">>,Payload, FROM, BH)->
+  io:format("Spawn request recieved for ROOM~n"),
   Jsondata = maps:get(<<"param">>,Payload),
   Params =  bason:json_to_map(Jsondata),
 

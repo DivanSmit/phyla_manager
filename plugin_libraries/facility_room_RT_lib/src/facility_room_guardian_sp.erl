@@ -37,10 +37,13 @@ instance_spawn_request(Pars, BH) ->
 generate_instance_recipe(Type, Name, BH) ->
 
   case Type of
-    cold_storage_room ->
+    <<"cold_storage_room">> ->
+      io:format("~p~n",[Type]),
       RECIPE = #{
         <<"plugins">> => [
-
+          #{<<"name">>=><<"mf_storage_servant_link_ep">>,<<"lib">>=><<"facility_room_RT_lib">>,<<"init_args">>=>[]},
+          #{<<"name">>=><<"mf_storage_servant_link_sp">>,<<"lib">>=><<"facility_room_RT_lib">>,<<"init_args">>=>[]},
+          #{<<"name">>=><<"facility_room_info_handler_ep">>,<<"lib">>=><<"facility_room_RT_lib">>,<<"init_args">>=>[]}
         ],
         <<"bc">> => #{
           <<"identity">> => #{
@@ -49,12 +52,12 @@ generate_instance_recipe(Type, Name, BH) ->
             <<"taxonomy">> => #{<<"arti_class">> => <<"resource-instance">>, <<"base_type">> => <<"FACILITY_ROOM_TYPE">>}
           },
           <<"capabilities">> => [
-            <<"FACILITY_ROOM_INSTANCE_INFO">>
+            <<"FACILITY_ROOM_INSTANCE_INFO">>,
+            <<"COLD_STORE_FRUIT">>
           ],
           <<"responsibilities">> => [],
           <<"addresses">> => #{},
           <<"meta">> => #{}
-
         },
         <<"disk_base">> => no_entry,
         <<"cookie">> => <<"INSTANCE_COOK">>
@@ -62,7 +65,7 @@ generate_instance_recipe(Type, Name, BH) ->
     ca_room->
       RECIPE = #{
         <<"plugins">> => [
-
+          #{<<"name">>=><<"facility_room_info_handler_ep">>,<<"lib">>=><<"facility_room_RT_lib">>,<<"init_args">>=>[]}
         ],
         <<"bc">> => #{
           <<"identity">> => #{

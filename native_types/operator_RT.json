@@ -1,7 +1,7 @@
 {
   "plugins": [
     {"name": "operator_guardian_sp","lib": "operator_RT_lib","init_args": [
-      {"name":  "Divan","id": "11"}
+
     ]},
     {"name": "operator_guardian_ep","lib": "operator_RT_lib","init_args": []},
     {"name": "operator_type_info_handler_ep","lib": "operator_RT_lib","init_args": []}

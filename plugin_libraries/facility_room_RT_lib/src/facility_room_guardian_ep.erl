@@ -28,6 +28,7 @@ spawn_cancelled(Reason, State, ManagerHandle, BH) ->
 request_start_instance(State, GuardianHandle, BH) ->
 
   Data = base_task_ep:get_schedule_data(GuardianHandle,BH),
+%%  TODO add the attributes
   {start_instance, State}.
 
 instance_started(State, GuardianHandle, BH) ->

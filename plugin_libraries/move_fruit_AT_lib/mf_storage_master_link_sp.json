@@ -1,7 +1,7 @@
-{"name":"move_fruit_master_link_ep",
+{"name":"mf_storage_master_link_sp",
   "lib":"move_fruit_AT_lib",
-  "base_link":"findOp",
-  "sector": "ep",
+  "base_link":"mfFindStorage",
+  "sector": "sp",
   "bin_dir": "default",
   "behaviour":"link",
   "language":"beam"

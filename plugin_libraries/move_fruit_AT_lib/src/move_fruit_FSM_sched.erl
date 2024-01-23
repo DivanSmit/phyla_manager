@@ -17,7 +17,7 @@
 
 init(Pars) ->
   io:format("~n *[MF STATE]*: FSM installed ~n"),
-  {ok, searching_for_operator, Pars}.
+  {ok, searching_for_storage, Pars}.
 
 callback_mode() ->
   [state_functions, state_enter].
@@ -30,7 +30,7 @@ searching_for_storage(enter, OldState, State)->
   StartTime = base_variables:read(<<"MF_FSM_INFO">>,<<"startTime">>,BH),
   spawn(fun()->
     % Change link tag
-    base_link_master_sp:start_link_negotiation(#{<<"AVAILABILITY">>=>StartTime},<<"fse_fta">>,BH)
+    base_link_master_sp:start_link_negotiation(#{<<"AVAILABILITY">>=>StartTime},<<"mfFindStorage">>,BH)
         end),
   {keep_state, State};
 
@@ -39,7 +39,7 @@ searching_for_storage(cast, found_storage, State)->
 
   {next_state, searching_for_operator, State};
 
-searching_for_storage(cast, no_storage_available, State)->
+searching_for_storage(cast, no_storage, State)->
   io:format("~n *[MF STATE]*: No storage available ~n"),
 
 %%  TODO add functionality for no storage found
@@ -58,7 +58,7 @@ searching_for_operator(enter, OldState, State)->
   StartTime = base_variables:read(<<"MF_FSM_INFO">>,<<"startTime">>,BH),
   spawn(fun()->
     % Change the link tag
-    base_link_master_sp:start_link_negotiation(#{<<"AVAILABILITY">>=>StartTime},<<"fse_operator">>,BH)
+    base_link_master_sp:start_link_negotiation(#{<<"AVAILABILITY">>=>StartTime},<<"mf_operator">>,BH)
         end),
   {keep_state, State};
 

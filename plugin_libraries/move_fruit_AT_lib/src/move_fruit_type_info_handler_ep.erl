@@ -26,7 +26,11 @@ handle_request(<<"SPAWN_MOVE_FRUIT_INSTANCE">>,Payload, FROM, BH)->
   IDInt = rand:uniform(1000),
   ID = integer_to_binary(IDInt),
   Name = list_to_binary("move_fruit_" ++ integer_to_list(IDInt)),
-  StartTime = maps:get(<<"param">>,Payload),
+
+  Jsondata = maps:get(<<"param">>,Payload),
+  Params =  bason:json_to_map(Jsondata),
+
+  StartTime = maps:get(<<"time">>,Params),
 
   {ok, Recipe} = move_fruit_guardian_sp:generate_instance_recipe(Name, ID, StartTime, BH),
   Tsched = base:get_origo(),

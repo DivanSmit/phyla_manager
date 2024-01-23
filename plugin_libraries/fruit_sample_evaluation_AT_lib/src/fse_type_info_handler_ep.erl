@@ -29,7 +29,11 @@ handle_request(<<"SPAWN_FSE_INSTANCE">>,Payload, FROM, BH)->
   IDInt = rand:uniform(1000),
   ID = integer_to_binary(IDInt),
   Name = list_to_binary("FSE_" ++ integer_to_list(IDInt)),
-  StartTime = maps:get(<<"param">>,Payload),
+
+  Jsondata = maps:get(<<"param">>,Payload),
+  Params =  bason:json_to_map(Jsondata),
+
+  StartTime = maps:get(<<"time">>,Params),
 
   {ok, Recipe} = fse_guardian_sp:generate_instance_recipe(Name, ID, StartTime,BH),
   Tsched = base:get_origo(),

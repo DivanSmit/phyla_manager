@@ -6,7 +6,7 @@
 %%% @end
 %%% Created : 10. Oct 2023 15:14
 %%%-------------------------------------------------------------------
--module(move_fruit_master_link_ep).
+-module(mf_storage_master_link_ep).
 -author("LENOVO").
 -behaviour(base_link_ep).
 -include("../../../base_include_libs/base_terms.hrl").
@@ -20,9 +20,9 @@ init(Pars, BH) ->
 stop(BH) ->
   ok.
 
-request_start_link(State, ExAgentHandle, BH) ->
-  io:format("The master link has requested to start ~n "),
-  {start,no_state}.
+request_start_link(State, ExH, BH) ->
+  base_variables:write(<<"INFO">>,<<"STORAGE_LINK">>,ExH,BH),
+  {wait,no_state}.
 
 request_resume_link(State, ExAgentHandle, BH) ->
   {cancel, no_state}.
@@ -33,11 +33,10 @@ link_start(PluginState, ExAgentHandle, BH) ->
     MyName = base_business_card:get_name(MyBC),
     PartnerBC = base_link_ep:get_partner_bc(ExAgentHandle),
     PartnerName = base_business_card:get_name(PartnerBC),
-    io:format("~n [Activity: ~p] >>------------------------>>--------------------------->> [Operator: ~p] ~n", [MyName, PartnerName])
+    io:format("~n [Activity: ~p] >>------------------------>>--------------------------->> [Room: ~p] ~n", [MyName, PartnerName])
         end),
 
-%%  ReplyData = base_link_ep:call_partner(<<"AVAILABILITY">>,nothing,ExAgentHandle),
-  {end_link, no_state}.
+  {ok, no_state}.
 
 link_resume(PluginState, ExH, BH) ->
   erlang:error(not_implemented).
