@@ -1,6 +1,6 @@
-{"name":"move_fruit_servant_link_ep",
+{"name":"mf_operator_servant_link_ep",
   "lib":"operator_RT_lib",
-  "base_link":"findOp",
+  "base_link":"mf_operator",
   "sector": "ep",
   "bin_dir": "default",
   "behaviour":"link",

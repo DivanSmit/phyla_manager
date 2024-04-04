@@ -25,10 +25,7 @@ handle_signal(Tag, Signal, BH) ->
   erlang:error(not_implemented).
 
 handle_request(<<"MOVE">>,<<"FRUIT">>, FROM, BH)->
-  MyBC = base:get_my_bc(BH),
-  io:format("Info handler recieved request~n"),
 
-  MyName = base_business_card:get_name(MyBC),
   spawn(fun()->
     move_fruit_sp:handle_task_request(FROM,BH)
     end),
@@ -44,10 +41,10 @@ handle_request(<<"INFO">>,<<"INFO">>, FROM, BH)->
 
 handle_request(<<"INFO">>,<<"TASKSID">>, FROM, BH)->
   TaskIDs = myFuncs:get_task_id_from_BH(BH),
+  TaskTypes  = myFuncs:get_task_type_from_BH(BH),
   TaskTimes = myFuncs:get_task_shell_element(2,BH),
-  io:format("Times are: ~p~n",[TaskTimes]),
   TaskTimesC = lists:map(fun(Time) -> myFuncs:convert_unix_time_to_normal(Time) end, TaskTimes),
-  Reply = #{<<"id">>=>TaskIDs,<<"time">>=>TaskTimesC},
+  Reply = #{<<"id">>=>TaskIDs,<<"time">>=>TaskTimesC, <<"type">>=>TaskTypes},
   {reply, Reply};
 
 handle_request(<<"TASKS">>,Request, FROM, BH)->
@@ -60,14 +57,6 @@ handle_request(<<"TASKS">>,Request, FROM, BH)->
       PartnerID = myFuncs:get_partner_task_id(Shell),
       TaskHolons = bhive:discover_bases(#base_discover_query{capabilities = <<"EXECUTABLE_TASK">>}, BH),
       Reply1 = base_signal:emit_signal(TaskHolons, Param, PartnerID, BH)
-  end,
-
-  TaskExH = base_variables:read(<<"TaskStatus">>,ID,BH),
-  case Param of
-    <<"StartTask">> ->
-      base_link_ep:start_link(TaskExH);
-    <<"EndTask">> ->
-      base_link_ep:end_link(TaskExH, done)
   end,
 
   MyBC = base:get_my_bc(BH),

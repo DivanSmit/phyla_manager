@@ -27,7 +27,7 @@ callback_mode() ->
 searching_for_storage(enter, OldState, State)->
   io:format("~n *[MF STATE]*: Searching for an available storage ~n"),
   BH = maps:get(<<"BH">>,State),
-  StartTime = base_variables:read(<<"MF_FSM_INFO">>,<<"startTime">>,BH),
+  StartTime = base_variables:read(<<"FSM_INFO">>,<<"startTime">>,BH),
   spawn(fun()->
     % Change link tag
     base_link_master_sp:start_link_negotiation(#{<<"AVAILABILITY">>=>StartTime},<<"mfFindStorage">>,BH)
@@ -55,7 +55,7 @@ searching_for_operator(enter, OldState, State)->
   io:format("~n *[MF STATE]*: Searching for an operator ~n"),
 
   BH = maps:get(<<"BH">>,State),
-  StartTime = base_variables:read(<<"MF_FSM_INFO">>,<<"startTime">>,BH),
+  StartTime = base_variables:read(<<"FSM_INFO">>,<<"startTime">>,BH),
   spawn(fun()->
     % Change the link tag
     base_link_master_sp:start_link_negotiation(#{<<"AVAILABILITY">>=>StartTime},<<"mf_operator">>,BH)
@@ -65,7 +65,7 @@ searching_for_operator(enter, OldState, State)->
 searching_for_operator(cast, found_operator, State)->
   io:format("~n *[MF STATE]*: Found an operator ~n"),
 
-  {next_state, searching_for_fta_machine, State};
+  {next_state, task_scheduled, State};
 
 searching_for_operator(cast, no_operator_available, State)->
   io:format("~n *[MF STATE]*: Did not find an available operator ~n"),
@@ -117,7 +117,7 @@ task_in_execution(enter, OldState, State)->
 
   BH = maps:get(<<"BH">>,State),
   Tsched = base:get_origo(),
-  Type = <<"fse_FSM">>,
+  Type = <<"mf_FSM">>, %% To change
   ID = make_ref(),
   Data1 =State,
   base_task_sp:schedule_task(Tsched,Type, ID, Data1, BH),

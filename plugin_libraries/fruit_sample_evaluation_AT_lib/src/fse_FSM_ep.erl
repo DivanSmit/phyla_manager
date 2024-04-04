@@ -31,14 +31,14 @@ request_resume(ExecutorHandle, BH) ->
 start_task(TaskState, ExecutorHandle, BH) ->
   io:format("FSM task starting~n"),
 
-  PreviousState = base_variables:read(<<"FSE_FSM_INFO">>,<<"FSE_FSM_PID">>,BH),
+  PreviousState = base_variables:read(<<"FSM_INFO">>,<<"FSM_PID">>,BH),
   gen_statem:stop(PreviousState),
 
   Pars = #{<<"BH">> => BH},
   {ok, StateMachinePID} = gen_statem:start_link({global, base_business_card:get_id(base:get_my_bc(BH))},fse_exe_FSM, Pars, []),
 
-  base_variables:write(<<"FSE_FSM_INFO">>,<<"FSE_FSM_PID">>, StateMachinePID,BH),
-  base_variables:write(<<"FSE_FSM_INFO">>,<<"FSE_FSM_status">>, task_in_execution,BH),
+  base_variables:write(<<"FSM_INFO">>,<<"FSM_PID">>, StateMachinePID,BH),
+  base_variables:write(<<"FSM_INFO">>,<<"FSM_status">>, task_in_execution,BH),
 
   {ok, TaskState}.
 

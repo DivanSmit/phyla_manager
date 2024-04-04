@@ -21,10 +21,7 @@ stop(BH) ->
 
 request_start_link(PluginState, ExH, BH) ->
   io:format("The operator servant link has requested to start ~n"),
-  TaskShell = base_task_ep:get_shell(ExH),
-  ID = myFuncs:get_task_id(TaskShell),
-  base_variables:write(<<"TaskStatus">>,ID,ExH,BH),
-  {wait, nostate}.
+  {start, nostate}.
 
 
 request_resume_link(PluginState, ExH, BH) ->

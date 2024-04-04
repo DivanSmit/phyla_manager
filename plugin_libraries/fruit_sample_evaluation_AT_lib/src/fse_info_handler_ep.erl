@@ -32,9 +32,9 @@ handle_signal(<<"StartTask">>,ID, BH)->
 
   case myFuncs:check_if_my_task(ID, BH) of
     my_task ->
-      FSM_PID = base_variables:read(<<"FSE_FSM_INFO">>, <<"FSE_FSM_PID">>, BH),
+      FSM_PID = base_variables:read(<<"FSM_INFO">>, <<"FSM_PID">>, BH),
       gen_statem:cast(FSM_PID, task_started),
-      base_variables:write(<<"FSE_FSM_INFO">>, <<"FSE_FSM_status">>, task_started, BH);
+      base_variables:write(<<"FSM_INFO">>, <<"FSM_status">>, task_started, BH);
     _ ->
       true
   end,
@@ -43,9 +43,9 @@ handle_signal(<<"StartTask">>,ID, BH)->
 handle_signal(<<"EndTask">>,ID, BH)->
   case myFuncs:check_if_my_task(ID, BH) of
     my_task ->
-      FSM_PID = base_variables:read(<<"FSE_FSM_INFO">>, <<"FSE_FSM_PID">>, BH),
+      FSM_PID = base_variables:read(<<"FSM_INFO">>, <<"FSM_PID">>, BH),
       gen_statem:cast(FSM_PID, task_finished),
-      base_variables:write(<<"FSE_FSM_INFO">>, <<"FSE_FSM_status">>, task_finished, BH);
+      base_variables:write(<<"FSM_INFO">>, <<"FSM_status">>, task_finished, BH);
     _ ->
       true
   end,

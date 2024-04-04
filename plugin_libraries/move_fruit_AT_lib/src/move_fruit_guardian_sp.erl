@@ -39,6 +39,8 @@ generate_instance_recipe(Name, ID, TStart, BH) ->
     <<"plugins">>=> [
       #{<<"name">>=><<"mf_storage_master_link_ep">>,<<"lib">>=><<"move_fruit_AT_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"mf_storage_master_link_sp">>,<<"lib">>=><<"move_fruit_AT_lib">>,<<"init_args">>=>[]},
+      #{<<"name">>=><<"mf_operator_master_link_ep">>,<<"lib">>=><<"move_fruit_AT_lib">>,<<"init_args">>=>[]},
+      #{<<"name">>=><<"mf_operator_master_link_sp">>,<<"lib">>=><<"move_fruit_AT_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"move_fruit_FSM_sp">>,<<"lib">>=><<"move_fruit_AT_lib">>,<<"init_args">>=>
         #{<<"startTime">>=>TStart}
       },
@@ -50,7 +52,7 @@ generate_instance_recipe(Name, ID, TStart, BH) ->
         <<"name">>=>Name,
         <<"taxonomy">>=>#{<<"arti_class">>=><<"resource-instance">>,<<"base_type">>=><<"MOVE_FRUIT_TYPE">>}
       },
-      <<"capabilities">>=>[<<"MOVEFRUIT_INSTANCE_INFO">>],
+      <<"capabilities">>=>[<<"MOVEFRUIT_INSTANCE_INFO">>,<<"EXECUTABLE_TASK">>],
       <<"responsibilities">>=>[],
       <<"addresses">>=>#{},
       <<"meta">>=>#{}

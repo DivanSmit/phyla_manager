@@ -1,6 +1,6 @@
 {"name":"move_fruit_info_handler_ep",
   "lib":"move_fruit_AT_lib",
-  "tags":["INFO"],
+  "tags":["INFO","StartTask","EndTask"],
   "bin_dir": "default",
   "behaviour":"receptor",
   "sector": "cm",

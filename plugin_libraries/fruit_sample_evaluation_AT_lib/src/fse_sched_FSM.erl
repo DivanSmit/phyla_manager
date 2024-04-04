@@ -28,7 +28,7 @@ searching_for_operator(enter, OldState, State)->
   io:format("~n *[STATE]*: Searching for an operator ~n"),
 
   BH = maps:get(<<"BH">>,State),
-  StartTime = base_variables:read(<<"FSE_FSM_INFO">>,<<"startTime">>,BH),
+  StartTime = base_variables:read(<<"FSM_INFO">>,<<"startTime">>,BH),
   spawn(fun()->
     base_link_master_sp:start_link_negotiation(#{<<"AVAILABILITY">>=>StartTime},<<"fse_operator">>,BH)
       end),
@@ -52,7 +52,7 @@ searching_for_operator(cast, _, State)->
 searching_for_fta_machine(enter, OldState, State)->
   io:format("~n *[STATE]*: Searching for an fta machine ~n"),
   BH = maps:get(<<"BH">>,State),
-  StartTime = base_variables:read(<<"FSE_FSM_INFO">>,<<"startTime">>,BH),
+  StartTime = base_variables:read(<<"FSM_INFO">>,<<"startTime">>,BH),
   spawn(fun()->
     base_link_master_sp:start_link_negotiation(#{<<"AVAILABILITY">>=>StartTime},<<"fse_fta">>,BH)
         end),

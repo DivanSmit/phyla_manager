@@ -35,9 +35,9 @@ get_candidates(Requirements, PluginState, NegH, BH) ->
   CandidateBCs = bhive:discover_bases(DR,BH),
   case CandidateBCs of
     [] ->
-      FSM_PID = base_variables:read(<<"FSE_FSM_INFO">>, <<"FSE_FSM_PID">>, BH),
+      FSM_PID = base_variables:read(<<"FSM_INFO">>, <<"FSM_PID">>, BH),
       gen_statem:cast(FSM_PID, no_operator),
-      base_variables:write(<<"FSE_FSM_INFO">>, <<"FSE_FSM_status">>, no_operator, BH),
+      base_variables:write(<<"FSM_INFO">>, <<"FSM_status">>, no_operator, BH),
       {candidates, CandidateBCs, nostate}
     ;
     _ ->
@@ -78,7 +78,6 @@ all_proposals_received(ProposalList, PluginState, NegH, BH) ->
 
       %% Convert time to normal time
       PartnerName = base_business_card:get_name(maps:get(<<"candidateBC">>,WinningMap)),
-      io:format("fse: ~p~n",[maps:get(<<"Time">>, WinningMap)]),
       {{_, _, _}, {Hour, Min, Sec}} = calendar:system_time_to_universal_time(maps:get(<<"Time">>, WinningMap), 1000),
       io:format("The best time for FSE--Operator is: ~p:~p:~p by:~p~n", [Hour+2, Min, Sec, PartnerName]),
       base_variables:write(<<"FSE_FSM_INFO">>,<<"startTime">>, maps:get(<<"Time">>, WinningMap),BH),
@@ -98,9 +97,9 @@ all_proposals_received(ProposalList, PluginState, NegH, BH) ->
 
 
 promise_received(Promise, PluginState, NegH, BH) ->
-  FSM_PID = base_variables:read(<<"FSE_FSM_INFO">>,<<"FSE_FSM_PID">>,BH),
+  FSM_PID = base_variables:read(<<"FSM_INFO">>,<<"FSM_PID">>,BH),
   gen_statem:cast(FSM_PID,found_operator),
-  base_variables:write(<<"FSE_FSM_INFO">>,<<"FSE_FSM_status">>, found_operator,BH),
+  base_variables:write(<<"FSM_INFO">>,<<"FSM_status">>, found_operator,BH),
   LinkID = list_to_binary(ref_to_list(make_ref())),
   Data1 = #{},
   {ok,LinkID,Data1}.

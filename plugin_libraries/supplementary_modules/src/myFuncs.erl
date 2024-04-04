@@ -11,13 +11,18 @@
 -include("../../../base_include_libs/base_terms.hrl").
 
 %% API
--export([get_task_id_from_BH/1, get_task_shell_element/2, get_partner_task_id/1, get_task_shell_from_id/2, get_task_type/1,
+-export([get_task_id_from_BH/1, get_task_type_from_BH/1, get_task_shell_element/2, get_partner_task_id/1, get_task_shell_from_id/2, get_task_type/1,
   get_task_sort/1, get_task_id/1, check_if_my_task/2, convert_unix_time_to_normal/1, check_availability/4, update_list_and_average/2]).
 
 get_task_id_from_BH(BH) ->
   TasksExe = base_schedule:get_all_tasks(BH),
   TaskKeys = maps:keys(TasksExe),
   lists:map(fun(Tuple) -> element(5, Tuple) end, TaskKeys).
+
+get_task_type_from_BH(BH) ->
+  TasksExe = base_schedule:get_all_tasks(BH),
+  TaskKeys = maps:keys(TasksExe),
+  lists:map(fun(Tuple) -> element(6, Tuple) end, TaskKeys).
 
 get_task_shell_element(Element, BH) ->
   TasksExe = base_schedule:get_all_tasks(BH),

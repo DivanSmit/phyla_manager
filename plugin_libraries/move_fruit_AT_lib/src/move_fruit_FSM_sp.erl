@@ -23,11 +23,11 @@ stop(BH) ->
 handle_task_request(Pars, BH) ->
 
   StartTime = maps:get(<<"startTime">>,Pars),
-  base_variables:write(<<"MF_FSM_INFO">>,<<"startTime">>, StartTime,BH),
+  base_variables:write(<<"FSM_INFO">>,<<"startTime">>, StartTime,BH),
 
   FSM_data = #{<<"BH">> => BH},
   {ok, StateMachinePID} = gen_statem:start_link({global, base_business_card:get_id(base:get_my_bc(BH))},move_fruit_FSM_sched, FSM_data, []),
 
-  base_variables:write(<<"MF_FSM_INFO">>,<<"MF_FSM_PID">>, StateMachinePID,BH),
-  base_variables:write(<<"MF_FSM_INFO">>,<<"MF_FSM_status">>, start,BH),
+  base_variables:write(<<"FSM_INFO">>,<<"FSM_PID">>, StateMachinePID,BH),
+  base_variables:write(<<"FSM_INFO">>,<<"FSM_status">>, start,BH),
   ok.

@@ -4,9 +4,9 @@
 %%% @doc
 %%%
 %%% @end
-%%% Created : 10. Oct 2023 17:10
+%%% Created : 01. Nov 2023 18:10
 %%%-------------------------------------------------------------------
--module(move_fruit_servant_link_ep).
+-module(mf_operator_servant_link_ep).
 -author("LENOVO").
 -behaviour(base_link_ep).
 %% API
@@ -20,33 +20,15 @@ stop(BH) ->
   ok.
 
 request_start_link(PluginState, ExH, BH) ->
-  io:format("The servant link has requested to start ~n "),
+  io:format("The operator servant link has requested to start ~n"),
+  {start, nostate}.
 
-  TasksExe = base_execution:get_all_tasks(BH),
-  KeyE = maps:keys(TasksExe),
-
-  io:format("Execution: ~p ~n ",[KeyE]),
-  case KeyE of
-    [] ->
-      {start, no_state};
-    _ ->
-      io:format("Operator is busy ~n"),
-      base_link_ep:signal_partner(<<"Busy">>,nothing,ExH),
-      io:format("Signal sent ~n"),
-      {wait, no_state}
-  end.
 
 request_resume_link(PluginState, ExH, BH) ->
   {cancel, no_state}.
 
 link_start(PluginState, ExH, BH) ->
-
-  %% Insert functionality here
-  %%------------------------------------------
-  io:format("Moving the fruit ~n "),
-  timer:sleep(2000),
-  io:format("The fruit has been moved ~n "),
-  %%------------------------------------------
+  io:format("~nLINK TASK IS STARING SERVANT~n"),
 
   {ok, no_state}.
 
@@ -55,7 +37,6 @@ link_resume(PluginState, ExH, BH) ->
 
 partner_call({<<"AVAILABILITY">>,nothing}, State, ExAgentHandle, BH) ->
   io:format("The servant link has recieved the partner call~n"),
-
   Reply = #{<<"AVAILABILITY">>=>false},
   {reply, Reply, nostate};
 
@@ -67,8 +48,8 @@ partner_signal(Cast, State, ExAgentHandle, BH) ->
   erlang:error(not_implemented).
 
 link_end(Reason, State, ExAgentHandle, BH) ->
-  io:format("THe link is finished~n"),
-  discard.
+  io:format("The link is finished~n"),
+  reflect.
 
 handle_call(Call, TaskState, ExAgentHandle, BH) ->
   erlang:error(not_implemented).
@@ -77,5 +58,6 @@ handle_message(Cast, TaskState, ExAgentHandle, BH) ->
   io:format("~n MESSAGE Value ~p ",[Cast]),
   {ok, nothing}.
 
-base_variable_update(_, PluginState, ExH, BH) ->
-  erlang:error(not_implemented).
+base_variable_update({<<"TaskStatus">>, Variable, Value}, PluginState, ExH, BH) ->
+  io:format("~n The variable has been updated, ~p to ~p~n",[Variable,Value]),
+  {ok, no_state}.

@@ -1,12 +1,12 @@
 %%%-------------------------------------------------------------------
 %%% @author LENOVO
-%%% @copyright (C) 2023, <COMPANY>
+%%% @copyright (C) 2024, <COMPANY>
 %%% @doc
 %%%
 %%% @end
-%%% Created : 10. Oct 2023 15:14
+%%% Created : 23. Jan 2024 10:16
 %%%-------------------------------------------------------------------
--module(mf_storage_master_link_sp).
+-module(mf_operator_master_link_sp).
 -author("LENOVO").
 -behaviour(base_link_master_sp).
 -include("../../../base_include_libs/base_terms.hrl").
@@ -19,7 +19,7 @@ init(Pars, BH) ->
   ok.
 
 stop(BH) ->
-  ok.
+  erlang:error(not_implemented).
 
 generate_requirements(Pars, NegH, BH) ->
   % the Pars parameter must be a list of maps per resource or just one map if there is only one resource requirement
@@ -31,13 +31,13 @@ generate_requirements(Pars, NegH, BH) ->
 
 get_candidates(Requirements, PluginState, NegH, BH) ->
   % search for all planets as candidates and let the planets decide.receive
-  DR = #base_discover_query{capabilities = <<"COLD_STORE_FRUIT">>},
+  DR = #base_discover_query{capabilities = <<"MoveFruit">>},
   CandidateBCs = bhive:discover_bases(DR,BH),
   case CandidateBCs of
     [] ->
       FSM_PID = base_variables:read(<<"FSM_INFO">>, <<"FSM_PID">>, BH),
-      gen_statem:cast(FSM_PID, no_storage),
-      base_variables:write(<<"FSM_INFO">>, <<"FSM_status">>, no_storage, BH),
+      gen_statem:cast(FSM_PID, no_operator),
+      base_variables:write(<<"FSM_INFO">>, <<"FSM_status">>, no_operator, BH),
       {candidates, CandidateBCs, nostate}
     ;
     _ ->
@@ -78,9 +78,8 @@ all_proposals_received(ProposalList, PluginState, NegH, BH) ->
 
       %% Convert time to normal time
       PartnerName = base_business_card:get_name(maps:get(<<"candidateBC">>,WinningMap)),
-      io:format("mf: ~p~n",[maps:get(<<"Time">>, WinningMap)]),
       {{_, _, _}, {Hour, Min, Sec}} = calendar:system_time_to_universal_time(maps:get(<<"Time">>, WinningMap), 1000),
-      io:format("The best time for MF--Storage is: ~p:~p:~p by:~p~n", [Hour+2, Min, Sec, PartnerName]),
+      io:format("The best time for MF--Operator is: ~p:~p:~p by:~p~n", [Hour+2, Min, Sec, PartnerName]),
       base_variables:write(<<"FSM_INFO">>,<<"startTime">>, maps:get(<<"Time">>, WinningMap),BH),
 
       % retrieve the winning BC
@@ -99,8 +98,8 @@ all_proposals_received(ProposalList, PluginState, NegH, BH) ->
 
 promise_received(Promise, PluginState, NegH, BH) ->
   FSM_PID = base_variables:read(<<"FSM_INFO">>,<<"FSM_PID">>,BH),
-  gen_statem:cast(FSM_PID,found_storage),
-  base_variables:write(<<"FSM_INFO">>,<<"FSM_status">>, found_storage,BH),
+  gen_statem:cast(FSM_PID,found_operator),
+  base_variables:write(<<"FSM_INFO">>,<<"FSM_status">>, found_operator,BH),
   LinkID = list_to_binary(ref_to_list(make_ref())),
   Data1 = #{},
   {ok,LinkID,Data1}.

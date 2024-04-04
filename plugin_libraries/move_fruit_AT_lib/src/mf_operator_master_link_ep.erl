@@ -1,12 +1,12 @@
 %%%-------------------------------------------------------------------
 %%% @author LENOVO
-%%% @copyright (C) 2023, <COMPANY>
+%%% @copyright (C) 2024, <COMPANY>
 %%% @doc
 %%%
 %%% @end
-%%% Created : 01. Nov 2023 18:06
+%%% Created : 23. Jan 2024 10:18
 %%%-------------------------------------------------------------------
--module(fse_operator_master_link_ep).
+-module(mf_operator_master_link_ep).
 -author("LENOVO").
 -behaviour(base_link_ep).
 -include("../../../base_include_libs/base_terms.hrl").
