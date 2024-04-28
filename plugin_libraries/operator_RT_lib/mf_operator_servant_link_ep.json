@@ -1,8 +1,0 @@
-{"name":"mf_operator_servant_link_ep",
-  "lib":"operator_RT_lib",
-  "base_link":"mf_operator",
-  "sector": "ep",
-  "bin_dir": "default",
-  "behaviour":"link",
-  "language":"beam"
-}

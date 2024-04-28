@@ -1,0 +1,8 @@
+{"name":"execute_process_info_handler_ep",
+  "lib":"execute_process_AT_lib",
+  "tags":["INFO"],
+  "bin_dir": "default",
+  "behaviour":"receptor",
+  "sector": "cm",
+  "language":"beam"
+}

@@ -1,0 +1,8 @@
+{"name":"execute_process_sched_tasks_ep",
+  "lib":"execute_process_AT_lib",
+  "base_task": "spawn_process_tasks",
+  "sector": "ep",
+  "bin_dir": "default",
+  "behaviour":"task",
+  "language":"beam"
+}

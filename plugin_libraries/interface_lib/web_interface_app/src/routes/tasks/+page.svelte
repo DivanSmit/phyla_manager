@@ -10,9 +10,9 @@
 
     let timeOptions = generateTimeOptions();
 
-    let fseSpawnTag = "SPAWN_FSE_INSTANCE";
+    let fseSpawnTag = "SPAWN_PT_INSTANCE";
     let ftaMeasureSpawnTag = "";
-    let moveFruitSpawnTag = "SPAWN_MOVE_FRUIT_INSTANCE";
+    let moveFruitSpawnTag = "SPAWN_MOVE_INSTANCE";
 
     async function spawnTaskRequest(tag1 = "", tag2 = ""){
         let response = await spawnInstance(tag1, tag2);

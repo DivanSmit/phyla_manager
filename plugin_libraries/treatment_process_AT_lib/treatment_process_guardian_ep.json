@@ -1,0 +1,7 @@
+{"name":"treatment_process_guardian_ep",
+  "lib":"treatment_process_AT_lib",
+  "sector": "ep",
+  "bin_dir": "default",
+  "behaviour":"guardian",
+  "language":"beam"
+}

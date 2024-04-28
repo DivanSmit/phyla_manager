@@ -1,8 +1,0 @@
-{"name":"fse_fta_machine_master_link_ep",
-  "lib":"fruit_sample_evaluation_AT_lib",
-  "base_link":"fse_fta",
-  "sector": "ep",
-  "bin_dir": "default",
-  "behaviour":"link",
-  "language":"beam"
-}

@@ -1,0 +1,8 @@
+{"name":"pt_info_handler_ep",
+  "lib":"process_task_AT_lib",
+  "tags":["INFO","StartTask","EndTask"],
+  "bin_dir": "default",
+  "behaviour":"receptor",
+  "sector": "cm",
+  "language":"beam"
+}

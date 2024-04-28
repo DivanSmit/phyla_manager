@@ -1,0 +1,8 @@
+{"name":"move_type_info_handler_ep",
+  "lib":"move_AT_lib",
+  "tags":["SPAWN_MOVE_INSTANCE","END"],
+  "bin_dir": "default",
+  "behaviour":"receptor",
+  "sector": "cm",
+  "language":"beam"
+}

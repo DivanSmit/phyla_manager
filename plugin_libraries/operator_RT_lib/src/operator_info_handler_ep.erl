@@ -27,7 +27,7 @@ handle_signal(Tag, Signal, BH) ->
 handle_request(<<"MOVE">>,<<"FRUIT">>, FROM, BH)->
 
   spawn(fun()->
-    move_fruit_sp:handle_task_request(FROM,BH)
+    move_sp:handle_task_request(FROM,BH)
     end),
 
   Reply = #{<<"Reply">>=>ok},

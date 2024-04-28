@@ -17,13 +17,13 @@ init(Pars, BH) ->
   ok.
 
 stop(BH) ->
-  erlang:error(not_implemented).
+  ok.
 
 handle_signal(Tag, Signal, BH) ->
   erlang:error(not_implemented).
 
 handle_request(<<"SPAWN_FACILITY_ROOM_INSTANCE">>,Payload, FROM, BH)->
-  io:format("Spawn request recieved for ROOM~n"),
+
   Jsondata = maps:get(<<"param">>,Payload),
   Params =  bason:json_to_map(Jsondata),
 
@@ -34,9 +34,7 @@ handle_request(<<"SPAWN_FACILITY_ROOM_INSTANCE">>,Payload, FROM, BH)->
 
   },
 
-  {ok, Recipe} = facility_room_guardian_sp:generate_instance_recipe(Type, Name, BH),
-  io:format("Spawn request recieved of ~p~n",[Name]),
-
+  {ok, Recipe} = facility_room_guardian_sp:generate_instance_recipe(Name, BH),
   Tsched = base:get_origo(),
   Data1 = AttributesMap,
   spawn(fun()->

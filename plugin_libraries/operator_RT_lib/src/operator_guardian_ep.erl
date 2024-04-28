@@ -29,10 +29,7 @@ request_start_instance(State, GuardianHandle, BH) ->
 
   Data = base_task_ep:get_schedule_data(GuardianHandle,BH),
 
-  Pass = maps:get(<<"password">>,Data),
-  Break = maps:get(<<"BreakTime">>,Data),
-  base_guardian_ep:write_instance_attribute(<<"Parameters">>,<<"password">>, Pass,GuardianHandle,BH),
-  base_guardian_ep:write_instance_attribute(<<"Parameters">>,<<"BreakTime">>, Break,GuardianHandle,BH),
+  base_guardian_ep:write_instance_attribute_page(<<"Parameters">>,Data,GuardianHandle,BH),
 
   {start_instance, State}.
 

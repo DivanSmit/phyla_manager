@@ -3,9 +3,9 @@
   {outdir, "operator_RT_lib/ebin"},
   debug_info
 ]}.
-{ [ 'move_fruit_AT_lib/src/*'], [
+{ [ 'move_AT_lib/src/*'], [
   {i, "include"},
-  {outdir, "move_fruit_AT_lib/ebin"},
+  {outdir, "move_AT_lib/ebin"},
   debug_info
 ]}.
 { [ 'interface_lib/src/*'], [
@@ -18,9 +18,9 @@
   {outdir, "fta_machine_RT_lib/ebin"},
   debug_info
 ]}.
-{ [ 'fruit_sample_evaluation_AT_lib/src/*'], [
+{ [ 'process_task_AT_lib/src/*'], [
   {i, "include"},
-  {outdir, "fruit_sample_evaluation_AT_lib/ebin"},
+  {outdir, "process_task_AT_lib/ebin"},
   debug_info
 ]}.
 { [ 'supplementary_modules/src/*'], [
@@ -31,5 +31,20 @@
 { [ 'facility_room_RT_lib/src/*'], [
   {i, "include"},
   {outdir, "facility_room_RT_lib/ebin"},
+  debug_info
+]}.
+{ [ 'execute_process_AT_lib/src/*'], [
+  {i, "include"},
+  {outdir, "execute_process_AT_lib/ebin"},
+  debug_info
+]}.
+{ [ 'treatment_process_AT_lib/src/*'], [
+  {i, "include"},
+  {outdir, "treatment_process_AT_lib/ebin"},
+  debug_info
+]}.
+{ [ 'configure_process_AT_lib/src/*'], [
+  {i, "include"},
+  {outdir, "configure_process_AT_lib/ebin"},
   debug_info
 ]}.

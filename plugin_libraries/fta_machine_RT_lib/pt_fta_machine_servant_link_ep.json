@@ -1,0 +1,8 @@
+{"name":"pt_fta_machine_servant_link_ep",
+  "lib":"fta_machine_RT_lib",
+  "base_link":"pt_fta",
+  "sector": "ep",
+  "bin_dir": "default",
+  "behaviour":"link",
+  "language":"beam"
+}

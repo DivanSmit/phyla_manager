@@ -1,7 +1,0 @@
-{"name":"move_fruit_guardian_sp",
-  "lib":"move_fruit_AT_lib",
-  "sector": "sp",
-  "bin_dir": "default",
-  "behaviour":"guardian",
-  "language":"beam"
-}

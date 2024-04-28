@@ -1,8 +1,0 @@
-{"name":"mf_storage_servant_link_sp",
-  "lib":"facility_room_RT_lib",
-  "base_link":"mfFindStorage",
-  "sector": "sp",
-  "bin_dir": "default",
-  "behaviour":"link",
-  "language":"beam"
-}

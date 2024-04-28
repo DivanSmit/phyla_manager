@@ -30,18 +30,18 @@ instance_spawn_request(Pars, BH) ->
 
   {ok, Recipe} = generate_instance_recipe(Name, ID, BH),
   Tsched = base:get_origo(),
-  Data1 = no_data,
+  Data1 = Pars,
   base_guardian_sp:schedule_instance_guardian(Tsched,Recipe,Data1,BH),
   ok.
 
 generate_instance_recipe(Name, ID, BH) ->
   RECIPE = #{
     <<"plugins">>=> [
-      #{<<"name">>=><<"fse_operator_servant_link_sp">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},
-      #{<<"name">>=><<"fse_operator_servant_link_ep">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},
-      #{<<"name">>=><<"fse_operator_servant_link_rp">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},
-      #{<<"name">>=><<"mf_operator_servant_link_sp">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},
-      #{<<"name">>=><<"mf_operator_servant_link_ep">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},
+      #{<<"name">>=><<"pt_operator_servant_link_sp">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},
+      #{<<"name">>=><<"pt_operator_servant_link_ep">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},
+      #{<<"name">>=><<"pt_operator_servant_link_rp">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},
+      #{<<"name">>=><<"move_operator_servant_link_sp">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},
+      #{<<"name">>=><<"move_operator_servant_link_ep">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"operator_info_handler_ep">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]}
     ],
     <<"bc">> => #{
@@ -65,5 +65,5 @@ generate_instance_recipe(Name, ID, BH) ->
   },
   {ok, RECIPE}.
 
-%%#{<<"name">>=><<"move_fruit_ep">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},
-%%#{<<"name">>=><<"move_fruit_sp">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},
+%%#{<<"name">>=><<"move_ep">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},
+%%#{<<"name">>=><<"move_sp">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},

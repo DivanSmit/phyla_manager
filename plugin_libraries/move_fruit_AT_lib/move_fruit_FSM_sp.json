@@ -1,8 +1,0 @@
-{"name":"move_fruit_FSM_sp",
-  "lib":"move_fruit_AT_lib",
-  "base_task": "move_fruit_FSM",
-  "sector": "sp",
-  "bin_dir": "default",
-  "behaviour":"task",
-  "language":"beam"
-}

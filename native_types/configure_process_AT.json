@@ -1,0 +1,24 @@
+{
+  "plugins": [
+    {"name": "configure_process_guardian_sp","lib": "configure_process_AT_lib","init_args": [
+      {"name":  "ExeP_01","id": "11"}
+    ]},
+    {"name": "configure_process_guardian_ep","lib": "configure_process_AT_lib","init_args": []},
+    {"name": "configure_process_type_info_handler_ep","lib": "configure_process_AT_lib","init_args": []}
+  ],
+  "bc":{
+    "identity":
+    {
+      "id":"CONFIG_PROCESS_TYPE",
+      "name":"CONFIG_PROCESS_TYPE",
+      "taxonomy":{"arti_class":"resource-type","base_type":"CONFIG_PROCESS_TYPE"}
+    },
+    "capabilities":["SPAWN_CONFIG_PROCESS_INSTANCE","END_CONFIG_PROCESS_INSTANCE"],
+    "responsibilities":[],
+    "addresses":{},
+    "meta":{}
+
+  },
+  "disk_base":"CONFIG_PROCESS_TYPE",
+  "cookie":"BB"
+}

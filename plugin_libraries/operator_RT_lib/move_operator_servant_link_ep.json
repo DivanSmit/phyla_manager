@@ -1,0 +1,8 @@
+{"name":"move_operator_servant_link_ep",
+  "lib":"operator_RT_lib",
+  "base_link":"move_operator",
+  "sector": "ep",
+  "bin_dir": "default",
+  "behaviour":"link",
+  "language":"beam"
+}

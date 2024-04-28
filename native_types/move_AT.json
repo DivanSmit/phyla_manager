@@ -1,0 +1,22 @@
+{
+  "plugins": [
+    {"name": "move_guardian_sp","lib": "move_AT_lib","init_args":[]},
+    {"name": "move_guardian_ep","lib": "move_AT_lib","init_args": []},
+    {"name": "move_type_info_handler_ep","lib": "move_AT_lib","init_args": []}
+  ],
+  "bc":{
+    "identity":
+    {
+      "id":"MOVE_TYPE",
+      "name":"MOVE_TYPE",
+      "taxonomy":{"arti_class":"activity-type","base_type":"MOVE_TYPE"}
+    },
+    "capabilities":["SPAWN_MOVE_INSTANCE","END_MOVE_INSTANCE"],
+    "responsibilities":[],
+    "addresses":{},
+    "meta":{}
+
+  },
+  "disk_base":"MOVE_TYPE",
+  "cookie":"BB"
+}

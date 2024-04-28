@@ -1,0 +1,8 @@
+{"name":"pt_type_info_handler_ep",
+  "lib":"process_task_AT_lib",
+  "tags":["SPAWN_PT_INSTANCE","END"],
+  "bin_dir": "default",
+  "behaviour":"receptor",
+  "sector": "cm",
+  "language":"beam"
+}
