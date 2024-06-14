@@ -41,6 +41,30 @@ handle_call({http_request,<<"INFO">>,MSG}, From, State) ->
                                             end, [],List),
                    {ok, ListResult}
                end;
+             <<"Test">>->
+               case bhive:discover_bases(#base_discover_query{capabilities = Tag},BH) of
+                 []->
+                   io:format("No INSTANCE found~n"),
+                   {ok, []};
+                 List->
+                   ListResult = lists:foldl(fun(Elem, Acc)->
+                     Reply = base_signal:emit_request(Elem,<<"INFO">>,Query,BH),
+                     [Reply|Acc]
+                                            end, [],List),
+                   {ok, ListResult}
+               end;
+             <<"Test1">>->
+               case bhive:discover_bases(#base_discover_query{capabilities = Tag},BH) of
+                 []->
+                   io:format("No INSTANCE found~n"),
+                   {ok, []};
+                 List->
+                   ListResult = lists:foldl(fun(Elem, Acc)->
+                     Reply = base_signal:emit_request(Elem,<<"INFO">>,Query,BH),
+                     [Reply|Acc]
+                                            end, [],List),
+                   {ok, ListResult}
+               end;
              _ -> {error, no_match}
            end,
   gen_server:reply(From,Reply1),

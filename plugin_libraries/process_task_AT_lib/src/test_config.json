@@ -1,0 +1,45 @@
+{
+  "trial_name": "Trial type 1",
+  "activities": [
+    {
+      "name": "Move_1",
+      "type": "move_AT",
+      "meta": {
+        "desired_role": "operator",
+        "from": "cold_storage_1",
+        "target": "evaluation_room_1",
+        "quantity": "Single batch"
+      }
+    },
+    {
+      "name": "Visual Test",
+      "type": "process_step_AT",
+      "meta": {
+        "machine": {},
+        "resources": ["visual chart"],
+        "desired_role": "researcher",
+        "description": "The fruit should be visually inspected and written down."
+      }
+    },
+    {
+      "name": "Size Test",
+      "type": "process_step_AT",
+      "meta": {
+        "machine": {},
+        "resources": ["Ruler", "Scalpel"],
+        "desired_role": "researcher",
+        "description": "The overall size of the fruit should be written down and entered into excel."
+      }
+    },
+    {
+      "name": "Move_2",
+      "type": "move_AT",
+      "meta": {
+        "desired_role": "operator",
+        "from": "evaluation_room_1",
+        "target": "waste_removal",
+        "quantity": "Single batch"
+      }
+    }
+  ]
+}

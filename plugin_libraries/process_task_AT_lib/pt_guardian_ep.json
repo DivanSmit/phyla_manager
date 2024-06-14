@@ -1,7 +1,0 @@
-{"name":"pt_guardian_ep",
-  "lib":"process_task_AT_lib",
-  "sector": "ep",
-  "bin_dir": "default",
-  "behaviour":"guardian",
-  "language":"beam"
-}

@@ -1,0 +1,8 @@
+{"name":"maintain_records_type_info_handler_ep",
+  "lib":"maintain_records_AT_lib",
+  "tags":["SPAWN_MAINTAIN_RECORDS_INSTANCE","END"],
+  "bin_dir": "default",
+  "behaviour":"receptor",
+  "sector": "cm",
+  "language":"beam"
+}

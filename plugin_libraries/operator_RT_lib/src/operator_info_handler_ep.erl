@@ -16,6 +16,24 @@
 
 
 init(Pars, BH) ->
+  timer:sleep(2500),
+  Role = base_attributes:read(<<"Parameters">>, <<"role">>, BH),
+
+  case Role of
+    <<"operator">> ->
+
+      %Testing
+      {ok,BinaryData} = file:read_file("C:/Users/LENOVO/Desktop/base-getting-started/phyla_manager_BASE/plugin_libraries/treatment_process_AT_lib/src/process_config_test.json"),
+      JsonString = bason:json_to_map(BinaryData), %%%%%%%%%%%%%%%%%%%%%%%%%%%%% Remove once testing is done!
+
+      io:format("Starting Testing from Operator Info Handler~n"),
+      handle_request(<<"INFO">>,<<"Test1">>, BH, BH),
+      TaskHolons = bhive:discover_bases(#base_discover_query{capabilities = <<"manage_facility">>}, BH);
+%%      Reply1 = base_signal:emit_request(TaskHolons, <<"newConfig">>, JsonString, BH);
+    _->
+      H=2
+  end,
+
   ok.
 
 stop(BH) ->
@@ -23,6 +41,48 @@ stop(BH) ->
 
 handle_signal(Tag, Signal, BH) ->
   erlang:error(not_implemented).
+
+handle_request(<<"INFO">>,<<"Test">>, FROM, BH)->
+  io:format("Received test~n"),
+
+  Elem = #{
+    <<"meta">>=>#{
+      <<"machine">>=>#{}
+    }
+  },
+
+  MyBC = base:get_my_bc(BH),
+  MyID = base_business_card:get_id(MyBC),
+
+  Data_map = maps:merge(#{<<"parentID">> => MyID,<<"startTime">>=>base:get_origo()}, maps:get(<<"meta">>, Elem)),
+
+  Spawn_Tag = <<"SPAWN_PS_INSTANCE">>,
+  TaskHolons = bhive:discover_bases(#base_discover_query{capabilities = Spawn_Tag}, BH),
+  base_signal:emit_request(TaskHolons, Spawn_Tag, Data_map, BH),
+  Reply = #{<<"Reply">>=>ok},
+  {reply, Reply};
+
+handle_request(<<"INFO">>,<<"Test1">>, FROM, BH)->
+  io:format("Received test1~n"),
+
+  Elem = #{<<"children">> => [#{
+    <<"type">> => <<"process_step_AT">>,
+    <<"meta">> => #{
+      <<"machine">> => #{},
+      <<"startTime">>=>base:get_origo()
+    }
+  }]},
+
+  MyBC = base:get_my_bc(BH),
+  MyID = base_business_card:get_id(MyBC),
+
+  Data_map = maps:merge(#{<<"parentID">> => MyID,<<"startTime">>=>base:get_origo()}, Elem),
+  io:format("Data map: ~p~n",[Data_map]),
+  Spawn_Tag = <<"SPAWN_PROCESS_TASK_INSTANCE">>,
+  TaskHolons = bhive:discover_bases(#base_discover_query{capabilities = Spawn_Tag}, BH),
+  base_signal:emit_request(TaskHolons, Spawn_Tag, Data_map, BH),
+  Reply = #{<<"Reply">>=>ok},
+  {reply, Reply};
 
 handle_request(<<"MOVE">>,<<"FRUIT">>, FROM, BH)->
 

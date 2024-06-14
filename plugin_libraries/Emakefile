@@ -18,9 +18,9 @@
   {outdir, "fta_machine_RT_lib/ebin"},
   debug_info
 ]}.
-{ [ 'process_task_AT_lib/src/*'], [
+{ [ 'process_step_AT_lib/src/*'], [
   {i, "include"},
-  {outdir, "process_task_AT_lib/ebin"},
+  {outdir, "process_step_AT_lib/ebin"},
   debug_info
 ]}.
 { [ 'supplementary_modules/src/*'], [
@@ -33,9 +33,9 @@
   {outdir, "facility_room_RT_lib/ebin"},
   debug_info
 ]}.
-{ [ 'execute_process_AT_lib/src/*'], [
+{ [ 'process_task_AT_lib/src/*'], [
   {i, "include"},
-  {outdir, "execute_process_AT_lib/ebin"},
+  {outdir, "process_task_AT_lib/ebin"},
   debug_info
 ]}.
 { [ 'treatment_process_AT_lib/src/*'], [
@@ -46,5 +46,15 @@
 { [ 'configure_process_AT_lib/src/*'], [
   {i, "include"},
   {outdir, "configure_process_AT_lib/ebin"},
+  debug_info
+]}.
+{ [ 'maintain_records_AT_lib/src/*'], [
+  {i, "include"},
+  {outdir, "maintain_records_AT_lib/ebin"},
+  debug_info
+]}.
+{ [ 'activity_instance_lib/src/*'], [
+  {i, "include"},
+  {outdir, "activity_instance_lib/ebin"},
   debug_info
 ]}.

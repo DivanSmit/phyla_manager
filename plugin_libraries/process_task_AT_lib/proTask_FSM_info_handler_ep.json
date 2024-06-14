@@ -1,0 +1,8 @@
+{"name":"proTask_FSM_info_handler_ep",
+  "lib":"process_task_AT_lib",
+  "tags":["StateCast","State","taskScheduled"],
+  "bin_dir": "default",
+  "behaviour":"receptor",
+  "sector": "cm",
+  "language":"beam"
+}

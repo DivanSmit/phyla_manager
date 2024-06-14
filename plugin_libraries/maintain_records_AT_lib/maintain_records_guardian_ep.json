@@ -1,0 +1,7 @@
+{"name":"maintain_records_guardian_ep",
+  "lib":"maintain_records_AT_lib",
+  "sector": "ep",
+  "bin_dir": "default",
+  "behaviour":"guardian",
+  "language":"beam"
+}

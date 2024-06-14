@@ -1,8 +1,0 @@
-{"name":"exePro_FSM_sp",
-  "lib":"execute_process_AT_lib",
-  "base_task": "exePro_FSM",
-  "sector": "sp",
-  "bin_dir": "default",
-  "behaviour":"task",
-  "language":"beam"
-}

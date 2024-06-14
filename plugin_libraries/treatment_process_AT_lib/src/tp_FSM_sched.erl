@@ -11,42 +11,70 @@
 -behaviour(gen_statem).
 -include("../../../base_include_libs/base_terms.hrl").
 %% API
--export([init/1, callback_mode/0, scheduling_tasks/3, task_not_possible/3, finish/3]).
+-export([init/1, callback_mode/0, get_planned_data/3, get_incoming_TRU/3 ,task_not_possible/3, finish/3]).
 
 
 init(Pars) ->
-  io:format("~n *[EXE PRO S STATE]*: FSM installed ~n"),
-  {ok, scheduling_tasks, Pars}.
+  io:format("~n *[TREATMENT STATE]*: FSM installed ~n"),
+  {ok, get_planned_data, Pars}.
 
 callback_mode() ->
   [state_functions, state_enter].
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-get_planned_dat(enter, OldState, State)->
-  io:format("~n *[TREATMENT STATE]*: Scheduling tasks ~n"),
+get_planned_data(enter, OldState, State)->
+  io:format("~n *[TREATMENT STATE]*: Getting process configurations ~n"),
 
   BH = maps:get(<<"BH">>,State),
 
   Tsched = base:get_origo(),
-  Type = <<"spawn_process_tasks">>,
+  Type = <<"manage_process_step">>,
   ID = make_ref(),
   Data1 =#{},
   base_task_sp:schedule_task(Tsched,Type, ID, Data1, BH),
   {keep_state, State};
 
-scheduling_tasks(cast, task_scheduled, State)->
+get_planned_data(cast, process_scheduled, State)->
   io:format("~n *[TREATMENT STATE]*: All Task scheduled ~n"),
 
-  {next_state, tasks_scheduled ,State};
+  {next_state, get_incoming_TRU ,State};
 
-scheduling_tasks(cast, not_possible, State)->
+get_planned_data(cast, not_possible, State)->
   io:format("~n *[TREATMENT STATE]*: Error while scheduling tasks ~n"),
 
   {next_state, task_not_possible ,State};
 
 
-scheduling_tasks(cast, _, State)->
+get_planned_data(cast, _, State)->
+  {keep_state, State}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+get_incoming_TRU(enter, OldState, State)->
+  io:format("~n *[TREATMENT STATE]*: Getting process configurations ~n"),
+
+%%  BH = maps:get(<<"BH">>,State),
+%%
+%%  Tsched = base:get_origo(),
+%%  Type = <<"manage_process_step">>,
+%%  ID = make_ref(),
+%%  Data1 =#{},
+%%  base_task_sp:schedule_task(Tsched,Type, ID, Data1, BH),
+  {keep_state, State};
+
+get_incoming_TRU(cast, task_scheduled, State)->
+  io:format("~n *[TREATMENT STATE]*: All Task scheduled ~n"),
+
+  {next_state, tasks_scheduled ,State};
+
+get_incoming_TRU(cast, not_possible, State)->
+  io:format("~n *[TREATMENT STATE]*: Error while scheduling tasks ~n"),
+
+  {next_state, task_not_possible ,State};
+
+
+get_incoming_TRU(cast, _, State)->
   {keep_state, State}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

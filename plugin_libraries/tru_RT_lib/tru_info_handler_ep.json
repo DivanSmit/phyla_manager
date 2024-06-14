@@ -1,0 +1,8 @@
+{"name":"tru_info_handler_ep",
+  "lib":"tru_RT_lib",
+  "tags":[],
+  "bin_dir": "default",
+  "behaviour":"receptor",
+  "sector": "cm",
+  "language":"beam"
+}

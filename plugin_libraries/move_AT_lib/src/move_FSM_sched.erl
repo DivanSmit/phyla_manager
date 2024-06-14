@@ -147,7 +147,7 @@ waiting_for_execution(enter, OldState, State)->
   StartTime = maps:get(<<"startTime">>,State),
   EndTime = base_variables:read(<<"FSM_INFO">>,<<"endTime">>,BH),
 
-  ProID = base_attributes:read(<<"meta">>,<<"executeID">>,BH),
+  ProID = base_attributes:read(<<"meta">>,<<"parentID">>,BH),
   TaskHolons = bhive:discover_bases(#base_discover_query{id = ProID}, BH),
   base_signal:emit_signal(TaskHolons, <<"taskScheduled">>, #{
     <<"endTime">>=>EndTime,
@@ -155,7 +155,7 @@ waiting_for_execution(enter, OldState, State)->
     <<"taskName">>=>MyName
   }, BH),
 
-  io:format("Attempting to end instance~n"),
+%%  io:format("Attempting to end instance~n"),
   GH = base_attributes:read(<<"guardian">>,<<"GH">>,BH),
   Target = bhive:discover_bases(#base_discover_query{capabilities = <<"END_MOVE_INSTANCE">>},BH),
   base_signal:emit_signal(Target,<<"END">>,GH,BH),
@@ -189,7 +189,7 @@ task_in_execution(enter, OldState, State)->
   io:format("~n *[MF STATE]*: Task in execution ~n"),
 
   BH = maps:get(<<"BH">>,State),
-  ProID = base_attributes:read(<<"meta">>,<<"executeID">>,BH),
+  ProID = base_attributes:read(<<"meta">>,<<"parentID">>,BH),
   TaskHolons = bhive:discover_bases(#base_discover_query{id = ProID}, BH),
   base_signal:emit_signal(TaskHolons, <<"StateCast">>, task_started, BH),
 
@@ -217,7 +217,7 @@ task_not_possible(enter, OldState, State)->
 
   %% Informing Execute Process that task is not possible
   BH = maps:get(<<"BH">>,State),
-  ProID = base_attributes:read(<<"meta">>,<<"executeID">>,BH),
+  ProID = base_attributes:read(<<"meta">>,<<"parentID">>,BH),
   TaskHolons = bhive:discover_bases(#base_discover_query{id = ProID}, BH),
   base_signal:emit_signal(TaskHolons, <<"StateCast">>, not_possible, BH),
 
@@ -234,7 +234,7 @@ task_cancelled(enter, OldState, State)->
 
   %% Informing Execute Process that task is not possible
   BH = maps:get(<<"BH">>,State),
-  ProID = base_attributes:read(<<"meta">>,<<"executeID">>,BH),
+  ProID = base_attributes:read(<<"meta">>,<<"parentID">>,BH),
   TaskHolons = bhive:discover_bases(#base_discover_query{id = ProID}, BH),
   base_signal:emit_signal(TaskHolons, <<"StateCast">>, task_cancelled, BH),
 
@@ -250,7 +250,7 @@ finish(enter, OldState, State)->
   io:format("~n *[MF STATE]*: Task Finished ~n"),
 
   BH = maps:get(<<"BH">>,State),
-  ProID = base_attributes:read(<<"meta">>,<<"executeID">>,BH),
+  ProID = base_attributes:read(<<"meta">>,<<"parentID">>,BH),
   TaskHolons = bhive:discover_bases(#base_discover_query{id = ProID}, BH),
   base_signal:emit_signal(TaskHolons, <<"StateCast">>, task_finished, BH),
 

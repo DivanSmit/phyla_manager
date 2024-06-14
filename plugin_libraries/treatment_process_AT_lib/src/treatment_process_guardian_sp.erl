@@ -37,7 +37,11 @@ instance_spawn_request(Pars, BH) ->
 generate_instance_recipe(Name, ID,BH) ->
   RECIPE = #{
     <<"plugins">>=> [
-      #{<<"name">>=><<"tp_FSM_sp">>,<<"lib">>=><<"treatment_process_AT_lib">>,<<"init_args">>=>[]}
+      #{<<"name">>=><<"tp_FSM_sp">>,<<"lib">>=><<"treatment_process_AT_lib">>,<<"init_args">>=>[]},
+      #{<<"name">>=><<"tp_info_handler_ep">>,<<"lib">>=><<"treatment_process_AT_lib">>,<<"init_args">>=>[]},
+      #{<<"name">>=><<"manage_process_configuration_sp">>,<<"lib">>=><<"treatment_process_AT_lib">>,<<"init_args">>=>[]}
+      #{<<"name">>=><<"manage_process_configuration_ep">>,<<"lib">>=><<"treatment_process_AT_lib">>,<<"init_args">>=>[]}
+
     ],
     <<"bc">> => #{
       <<"identity">>=>#{
@@ -45,7 +49,7 @@ generate_instance_recipe(Name, ID,BH) ->
         <<"name">>=>Name,
         <<"taxonomy">>=>#{<<"arti_class">>=><<"resource-instance">>,<<"base_type">>=><<"TREATMENT_PROCESS_TYPE">>}
       },
-      <<"capabilities">>=>[<<"PT_INSTANCE_INFO">>,<<"EXECUTABLE_TASK">>],
+      <<"capabilities">>=>[],
       <<"responsibilities">>=>[],
       <<"addresses">>=>#{},
       <<"meta">>=>#{}

@@ -1,0 +1,8 @@
+{"name":"maintain_records_info_handler_ep",
+  "lib":"maintain_records_AT_lib",
+  "tags":["INFO","END"],
+  "bin_dir": "default",
+  "behaviour":"receptor",
+  "sector": "cm",
+  "language":"beam"
+}

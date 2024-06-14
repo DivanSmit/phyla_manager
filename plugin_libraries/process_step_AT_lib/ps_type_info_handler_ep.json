@@ -1,0 +1,8 @@
+{"name":"ps_type_info_handler_ep",
+  "lib":"process_step_AT_lib",
+  "tags":["SPAWN_PS_INSTANCE","END"],
+  "bin_dir": "default",
+  "behaviour":"receptor",
+  "sector": "cm",
+  "language":"beam"
+}

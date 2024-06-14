@@ -19,8 +19,12 @@ init(Pars, BH) ->
 stop(BH) ->
   ok.
 
-handle_request(Tag, Signal, FROM, BH) ->
-  erlang:error(not_implemented);
+handle_signal(<<"processScheduled">>, Payload, BH) ->
+  base_variables:write(<<"process">>, <<"newStart">>, Payload,BH);
+
+handle_signal(<<"StartTask">>,ID, BH)->
+  % Remember to update .json file of any changes to the subject
+  ok.
 
 handle_request(<<"INFO">>,<<"INFO">>, FROM ,BH)->
   MyBC = base:get_my_bc(BH),
@@ -28,6 +32,3 @@ handle_request(<<"INFO">>,<<"INFO">>, FROM ,BH)->
   Reply = #{},
   {reply, Reply}.
 
-handle_signal(<<"StartTask">>,ID, BH)->
-  % Remember to update .json file of any changes to the subject
-  ok.

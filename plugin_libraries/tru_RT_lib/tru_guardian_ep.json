@@ -1,0 +1,7 @@
+{"name":"tru_guardian_ep",
+  "lib":"tru_RT_lib",
+  "sector": "ep",
+  "bin_dir": "default",
+  "behaviour":"guardian",
+  "language":"beam"
+}

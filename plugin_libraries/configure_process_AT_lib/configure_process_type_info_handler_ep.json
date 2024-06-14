@@ -1,8 +1,0 @@
-{"name":"configure_process_type_info_handler_ep",
-  "lib":"configure_process_AT_lib",
-  "tags":["SPAWN_CONFIG_PROCESS_INSTANCE","END"],
-  "bin_dir": "default",
-  "behaviour":"receptor",
-  "sector": "cm",
-  "language":"beam"
-}

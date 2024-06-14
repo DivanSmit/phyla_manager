@@ -21,7 +21,7 @@ stop(BH) ->
 
 handle_signal(<<"END">>, GH, BH) ->
 %%  TODO end instance call
-  io:format("Recieved end request, GH:~p~n",[GH]),
+%%  io:format("Recieved end request, GH:~p~n",[GH]),
   case base_guardian_ep:end_instance(GH, BH) of
     ok -> io:format("Succsessfull~n");
     _ -> io:format("Not Successfull~n")
@@ -29,7 +29,7 @@ handle_signal(<<"END">>, GH, BH) ->
   ok.
 
 handle_request(<<"SPAWN_MOVE_INSTANCE">>,Payload, FROM, BH)->
-  io:format("Recieved SPAWN_MOVE_INSTANCE~n"),
+%%  io:format("Recieved SPAWN_MOVE_INSTANCE~n"),
 
   IDInt = rand:uniform(1000),
   ID = integer_to_binary(IDInt),

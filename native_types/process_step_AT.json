@@ -1,0 +1,24 @@
+{
+  "plugins": [
+    {"name": "ps_guardian_sp","lib": "process_step_AT_lib","init_args": [
+
+    ]},
+    {"name": "ps_guardian_ep","lib": "process_step_AT_lib","init_args": []},
+    {"name": "ps_type_info_handler_ep","lib": "process_step_AT_lib","init_args": []}
+  ],
+  "bc":{
+    "identity":
+    {
+      "id":"PROCESS_STEP_TYPE",
+      "name":"PROCESS_STEP_TYPE",
+      "taxonomy":{"arti_class":"resource-type","base_type":"PROCESS_STEP_TYPE"}
+    },
+    "capabilities":["SPAWN_PS_INSTANCE","END_PS_INSTANCE"],
+    "responsibilities":[],
+    "addresses":{},
+    "meta":{}
+
+  },
+  "disk_base":"PROCESS_STEP_TYPE",
+  "cookie":"BB"
+}

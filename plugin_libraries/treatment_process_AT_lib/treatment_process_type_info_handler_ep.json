@@ -1,6 +1,6 @@
-{"name":"treatment_process_guardian_ep",
+{"name":"treatment_process_type_info_handler_ep",
   "lib":"treatment_process_AT_lib",
-  "tags":["SPAWN_TREATMENT_PROCESS_INSTANCE","END"],
+  "tags":["SPAWN_TREATMENT_PROCESS_INSTANCE","END","ProcessData","currentConfig"],
   "bin_dir": "default",
   "behaviour":"receptor",
   "sector": "cm",
