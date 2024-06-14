@@ -27,9 +27,21 @@ spawn_cancelled(Reason, State, ManagerHandle, BH) ->
 
 request_start_instance(State, GuardianHandle, BH) ->
 
+  Meta = maps:get(<<"meta">>,base_task_ep:get_schedule_data(GuardianHandle, BH)),
+
+  InstanceData = #{
+    <<"FSM_Schedule">> => move_FSM_sched,
+    <<"childContract">>=><<"contractingOp">>,
+    <<"children">>=>Meta
+  },
+
   %%  This is where we add the attributes and state variables
-  base_guardian_ep:write_instance_attribute(<<"guardian">>,<<"GH">>,GuardianHandle,GuardianHandle,BH),
-  base_guardian_ep:write_instance_attribute_page(<<"meta">>,base_task_ep:get_schedule_data(GuardianHandle,BH),GuardianHandle,BH), %% Wrting Data1 to attributes page
+  base_guardian_ep:write_instance_attribute_page(
+    <<"meta">>,
+    maps:merge(InstanceData,base_task_ep:get_schedule_data(GuardianHandle, BH)),
+    GuardianHandle,
+    BH
+  ), %% Wrting Data1 to attributes page
   {start_instance, State}.
 
 instance_started(State, GuardianHandle, BH) ->

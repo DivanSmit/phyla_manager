@@ -17,7 +17,7 @@
 
 init(Pars) ->
   io:format("~n *[MF STATE]*: FSM installed ~n"),
-  {ok, searching_for_target_storage, Pars}.
+  {ok, searching_for_operator, Pars}.
 
 callback_mode() ->
   [state_functions, state_enter].
@@ -66,17 +66,22 @@ searching_for_operator(enter, OldState, State)->
   io:format("~n *[MF STATE]*: Searching for an operator ~n"),
 
   BH = maps:get(<<"BH">>,State),
-  StartTime = maps:get(<<"startTime">>,State),
+  Child = maps:get(<<"children">>,State),
+  StartTime = maps:get(<<"startTime">>,Child),
   spawn(fun()->
     % Change the link tag
-    base_link_master_sp:start_link_negotiation(#{<<"AVAILABILITY">>=>StartTime},<<"move_operator">>,BH)
+    base_link_master_sp:start_link_negotiation(#{<<"AVAILABILITY">>=>any,<<"type">>=>resource},<<"contractingOp">>,BH)
         end),
   {keep_state, State};
 
-searching_for_operator(cast, found_operator, State)->
+searching_for_operator(cast, contracted, State)->
   io:format("~n *[MF STATE]*: Found an operator ~n"),
+  BH = maps:get(<<"BH">>,State),
 
-  {next_state, current_storage_confirmation, State};
+  StartTime = base_variables:read(<<"FSM_INFO">>,<<"startTime">>,BH),
+  NewState = maps:merge(State,#{<<"startTime">>=>StartTime}),
+
+  {next_state, waiting_for_execution, NewState};
 
 searching_for_operator(cast, no_operator_available, State)->
   io:format("~n *[MF STATE]*: Did not find an available operator ~n"),
@@ -155,10 +160,6 @@ waiting_for_execution(enter, OldState, State)->
     <<"taskName">>=>MyName
   }, BH),
 
-%%  io:format("Attempting to end instance~n"),
-  GH = base_attributes:read(<<"guardian">>,<<"GH">>,BH),
-  Target = bhive:discover_bases(#base_discover_query{capabilities = <<"END_MOVE_INSTANCE">>},BH),
-  base_signal:emit_signal(Target,<<"END">>,GH,BH),
   {keep_state, State};
 
 waiting_for_execution(cast, task_started, State)->

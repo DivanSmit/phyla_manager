@@ -39,8 +39,10 @@ generate_instance_recipe(Name, ID, BH) ->
     <<"plugins">>=> [
       #{<<"name">>=><<"move_storage_master_link_ep">>,<<"lib">>=><<"move_AT_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"move_storage_master_link_sp">>,<<"lib">>=><<"move_AT_lib">>,<<"init_args">>=>[]},
-      #{<<"name">>=><<"move_operator_master_link_ep">>,<<"lib">>=><<"move_AT_lib">>,<<"init_args">>=>[]},
-      #{<<"name">>=><<"move_operator_master_link_sp">>,<<"lib">>=><<"move_AT_lib">>,<<"init_args">>=>[]},
+      #{<<"name">>=><<"contracting_operator_master_link_sp">>,<<"lib">>=><<"activity_instance_lib">>,<<"init_args">>=>[]},
+      #{<<"name">>=><<"contracting_operator_master_link_ep">>,<<"lib">>=><<"activity_instance_lib">>,<<"init_args">>=>[]},
+      #{<<"name">>=><<"contracting_servant_link_sp">>,<<"lib">>=><<"activity_instance_lib">>,<<"init_args">>=>[]},
+      #{<<"name">>=><<"contracting_servant_link_ep">>,<<"lib">>=><<"activity_instance_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"move_FSM_sp">>,<<"lib">>=><<"move_AT_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"move_info_handler_ep">>,<<"lib">>=><<"move_AT_lib">>,<<"init_args">>=>[]}
     ],

@@ -12,7 +12,6 @@
 %% API
 -export([init/2, stop/1, request_start_negotiation/3, generate_proposal/4, proposal_accepted/3]).
 
-
 init(Pars, BH) ->
   base_attributes:write(<<"TaskDurations">>,<<"ps_operator">>,1800000,BH),
   base_attributes:write(<<"TaskDurationList">>,<<"ps_operator">>,[1800000],BH),
@@ -48,7 +47,6 @@ generate_proposal(Requirements, PluginState, NegH, BH) ->
 proposal_accepted(PluginState, NegH, BH) ->
   io:format("Proposal Accepted~n"),
   Tsched = PluginState,
-%%  Tsched = base:get_origo(),
   LinkID = list_to_binary(ref_to_list(make_ref())),
   Data1 = #{<<"LinkID">>=>LinkID},
   {promise, Tsched, LinkID,Data1, no_state}.

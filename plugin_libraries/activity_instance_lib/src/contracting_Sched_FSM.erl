@@ -33,12 +33,11 @@ spawn_and_wait_for_child(enter, OldState, State)->
   case map_size(Current) of
     0 -> {next_state, task_not_possible, State};
     _ ->
-      Spawn_Tag = <<"SPAWN_PS_INSTANCE">>,
+      Spawn_Tag = maps:get(<<"type">>,Current),
       MyBC = base:get_my_bc(BH),
       MyID = base_business_card:get_id(MyBC),
       TaskHolons = bhive:discover_bases(#base_discover_query{capabilities = Spawn_Tag}, BH),
       [ChildName] = base_signal:emit_request(TaskHolons, Spawn_Tag, maps:merge(Current,#{<<"parentID">>=>MyID}), BH),
-      io:format("CHild Name: ~p~n",[ChildName]),
       {keep_state, maps:merge(State,#{<<"child">>=>ChildName})}
   end;
 

@@ -42,7 +42,6 @@ generate_instance_recipe(Name, ID, BH) ->
       #{<<"name">>=><<"contracting_operator_master_link_sp">>,<<"lib">>=><<"activity_instance_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"contracting_operator_master_link_ep">>,<<"lib">>=><<"activity_instance_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"ps_info_handler_ep">>,<<"lib">>=><<"process_step_AT_lib">>,<<"init_args">>=>[]},
-      #{<<"name">>=><<"ps_FSM_ep">>,<<"lib">>=><<"process_step_AT_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"ps_FSM_sp">>,<<"lib">>=><<"process_step_AT_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"contracting_servant_link_sp">>,<<"lib">>=><<"activity_instance_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"contracting_servant_link_ep">>,<<"lib">>=><<"activity_instance_lib">>,<<"init_args">>=>[]}

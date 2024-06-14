@@ -66,12 +66,19 @@ handle_request(<<"INFO">>,<<"Test1">>, FROM, BH)->
   io:format("Received test1~n"),
 
   Elem = #{<<"children">> => [#{
-    <<"type">> => <<"process_step_AT">>,
+    <<"type">> => <<"SPAWN_PS_INSTANCE">>,
     <<"meta">> => #{
       <<"machine">> => #{},
       <<"startTime">>=>base:get_origo()
     }
-  }]},
+  },#{
+    <<"type">> => <<"SPAWN_MOVE_INSTANCE">>,
+    <<"meta">> => #{
+      <<"machine">> => #{},
+      <<"startTime">>=>base:get_origo()
+    }
+  }
+    ]},
 
   MyBC = base:get_my_bc(BH),
   MyID = base_business_card:get_id(MyBC),
@@ -84,14 +91,6 @@ handle_request(<<"INFO">>,<<"Test1">>, FROM, BH)->
   Reply = #{<<"Reply">>=>ok},
   {reply, Reply};
 
-handle_request(<<"MOVE">>,<<"FRUIT">>, FROM, BH)->
-
-  spawn(fun()->
-    move_sp:handle_task_request(FROM,BH)
-    end),
-
-  Reply = #{<<"Reply">>=>ok},
-  {reply, Reply};
 
 handle_request(<<"INFO">>,<<"INFO">>, FROM, BH)->
   MyBC = base:get_my_bc(BH),

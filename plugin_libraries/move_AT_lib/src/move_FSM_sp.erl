@@ -14,7 +14,7 @@
 
 
 init(Pars, BH) ->
-  handle_task_request(Pars,BH),
+%%  handle_task_request(Pars,BH),
   ok.
 
 stop(BH) ->

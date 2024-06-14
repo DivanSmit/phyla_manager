@@ -41,5 +41,5 @@ handle_request(<<"SPAWN_MOVE_INSTANCE">>,Payload, FROM, BH)->
   spawn(fun()->
     base_guardian_sp:schedule_instance_guardian(Tsched,Recipe,Data1,BH)
         end),
-  Reply = #{<<"name">>=>Name},
+  Reply = Name,
   {reply, Reply}.

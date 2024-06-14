@@ -50,13 +50,6 @@ link_end(Reason, State, ExAgentHandle, BH) ->
   io:format("The link is finished~n"),
   reflect.
 
-handle_call(Call, TaskState, ExAgentHandle, BH) ->
-  erlang:error(not_implemented).
-
-handle_message(Cast, TaskState, ExAgentHandle, BH) ->
-  io:format("~n MESSAGE Value ~p ",[Cast]),
-  {ok, nothing}.
-
 base_variable_update({<<"TaskStatus">>, Variable, Value}, PluginState, ExH, BH) ->
   io:format("~n The variable has been updated, ~p to ~p~n",[Variable,Value]),
   {ok, no_state}.
