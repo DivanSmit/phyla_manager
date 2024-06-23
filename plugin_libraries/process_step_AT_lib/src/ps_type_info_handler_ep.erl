@@ -26,10 +26,16 @@ handle_signal(<<"END">>, ID, BH) ->
   ok.
 
 handle_request(<<"SPAWN_PS_INSTANCE">>,Payload, FROM, BH)->
-  io:format("received~n"),
+
   IDInt = rand:uniform(10000),
   ID = integer_to_binary(IDInt),
-  Name = list_to_binary("PS_" ++ integer_to_list(IDInt)),
+
+  case maps:get(<<"name">>, Payload) of
+    no_entry ->
+      Name = list_to_binary("PS_" ++ integer_to_list(IDInt));
+    _ ->
+      Name = maps:get(<<"name">>, Payload)
+  end,
 
   {ok, Recipe} = ps_guardian_sp:generate_instance_recipe(Name, ID, BH),
   Tsched = base:get_origo(),

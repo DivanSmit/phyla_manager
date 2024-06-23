@@ -2,7 +2,7 @@
   "plugins": [
     {"name": "operator_guardian_sp","lib": "operator_RT_lib","init_args": [
       {
-        "name": "Facility Manager",
+        "name": "FM1",
         "id": "1",
         "role": "facility_manager",
         "password": "hello",

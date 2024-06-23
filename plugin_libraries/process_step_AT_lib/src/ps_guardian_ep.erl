@@ -31,6 +31,8 @@ request_start_instance(State, GuardianHandle, BH) ->
 
   InstanceData = #{
     <<"FSM_Schedule">> => ps_sched_FSM,
+    <<"FSM_Execute">> => contracting_exe_FSM,
+    <<"FSM_WAIT_FOR_PARENTS_DELAY">> => 60000, %One minute
     <<"childContract">>=><<"contractingOp">>,
     <<"children">>=>Meta
   },

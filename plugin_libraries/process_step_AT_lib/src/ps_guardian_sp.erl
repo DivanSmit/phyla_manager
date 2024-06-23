@@ -37,12 +37,12 @@ instance_spawn_request(Pars, BH) ->
 generate_instance_recipe(Name, ID, BH) ->
   RECIPE = #{
     <<"plugins">>=> [
-      #{<<"name">>=><<"ps_fta_machine_master_link_sp">>,<<"lib">>=><<"process_step_AT_lib">>,<<"init_args">>=>[]},
-      #{<<"name">>=><<"ps_fta_machine_master_link_ep">>,<<"lib">>=><<"process_step_AT_lib">>,<<"init_args">>=>[]},
+%%      #{<<"name">>=><<"ps_fta_machine_master_link_sp">>,<<"lib">>=><<"process_step_AT_lib">>,<<"init_args">>=>[]},
+%%      #{<<"name">>=><<"ps_fta_machine_master_link_ep">>,<<"lib">>=><<"process_step_AT_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"contracting_operator_master_link_sp">>,<<"lib">>=><<"activity_instance_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"contracting_operator_master_link_ep">>,<<"lib">>=><<"activity_instance_lib">>,<<"init_args">>=>[]},
-      #{<<"name">>=><<"ps_info_handler_ep">>,<<"lib">>=><<"process_step_AT_lib">>,<<"init_args">>=>[]},
-      #{<<"name">>=><<"ps_FSM_sp">>,<<"lib">>=><<"process_step_AT_lib">>,<<"init_args">>=>[]},
+      #{<<"name">>=><<"activity_info_handler_ep">>,<<"lib">>=><<"activity_instance_lib">>,<<"init_args">>=>[]},
+%%      #{<<"name">>=><<"ps_FSM_sp">>,<<"lib">>=><<"process_step_AT_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"contracting_servant_link_sp">>,<<"lib">>=><<"activity_instance_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"contracting_servant_link_ep">>,<<"lib">>=><<"activity_instance_lib">>,<<"init_args">>=>[]}
 

@@ -39,8 +39,8 @@ generate_instance_recipe(Name, ID,BH) ->
     <<"plugins">>=> [
       #{<<"name">>=><<"process_task_info_handler_ep">>,<<"lib">>=><<"process_task_AT_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"proTask_FSM_info_handler_ep">>,<<"lib">>=><<"process_task_AT_lib">>,<<"init_args">>=>[]},
-      #{<<"name">>=><<"process_task_sched_tasks_sp">>,<<"lib">>=><<"process_task_AT_lib">>,<<"init_args">>=>[]},
-      #{<<"name">>=><<"process_task_sched_tasks_ep">>,<<"lib">>=><<"process_task_AT_lib">>,<<"init_args">>=>[]},
+%%      #{<<"name">>=><<"process_task_sched_tasks_sp">>,<<"lib">>=><<"process_task_AT_lib">>,<<"init_args">>=>[]},
+%%      #{<<"name">>=><<"process_task_sched_tasks_ep">>,<<"lib">>=><<"process_task_AT_lib">>,<<"init_args">>=>[]},
 %%      #{<<"name">>=><<"proTask_FSM_sp">>,<<"lib">>=><<"process_task_AT_lib">>,<<"init_args">>=>[]}
       #{<<"name">>=><<"contracting_master_link_sp">>,<<"lib">>=><<"activity_instance_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"contracting_master_link_ep">>,<<"lib">>=><<"activity_instance_lib">>,<<"init_args">>=>[]}

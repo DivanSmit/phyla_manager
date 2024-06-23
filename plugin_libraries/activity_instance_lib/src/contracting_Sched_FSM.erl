@@ -11,7 +11,7 @@
 -behaviour(gen_statem).
 -include("../../../base_include_libs/base_terms.hrl").
 %% API
--export([init/1, callback_mode/0, spawn_and_wait_for_child/3, contract_child/3, rescheduling/3, finish/3]).
+-export([init/1, callback_mode/0, spawn_and_wait_for_child/3, contract_child/3, rescheduling/3, finish/3, terminate/3]).
 
 
 init(Pars) ->
@@ -38,6 +38,7 @@ spawn_and_wait_for_child(enter, OldState, State)->
       MyID = base_business_card:get_id(MyBC),
       TaskHolons = bhive:discover_bases(#base_discover_query{capabilities = Spawn_Tag}, BH),
       [ChildName] = base_signal:emit_request(TaskHolons, Spawn_Tag, maps:merge(Current,#{<<"parentID">>=>MyID}), BH),
+      base_variables:write(<<"predecessors">>,ChildName,maps:get(<<"pred">>,Current),BH),
       {keep_state, maps:merge(State,#{<<"child">>=>ChildName})}
   end;
 
@@ -74,12 +75,12 @@ contract_child(cast, contracted, State)->
   [Child|Rest] = maps:get(<<"children">>,State),
   BH = maps:get(<<"BH">>,State),
   case Rest of
-     [] ->
-       {next_state, finish ,State};
-    _->
-      {next_state, spawn_and_wait_for_child ,#{<<"BH">>=>BH,<<"children">>=>Rest}}
+    [] ->
+      {next_state, finish, State};
+    _ ->
+      {next_state, spawn_and_wait_for_child, #{<<"BH">> => BH, <<"children">> => Rest}}
 
-end;
+  end;
 
 contract_child(cast, _, State)->
   {keep_state, State}.
@@ -99,9 +100,13 @@ rescheduling(cast, _, State)->
 finish(enter, OldState, State)->
   io:format("~n *[CONTRACT S STATE]*: All children contracted ~n"),
 
-  {keep_state, State};
+  {stop, normal, State};
 
 finish(cast, _, State)->
   {keep_state, State}.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+terminate(Reason, _StateName, State) ->
+  ok.
 

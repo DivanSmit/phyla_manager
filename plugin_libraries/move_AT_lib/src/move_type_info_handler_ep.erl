@@ -33,7 +33,13 @@ handle_request(<<"SPAWN_MOVE_INSTANCE">>,Payload, FROM, BH)->
 
   IDInt = rand:uniform(1000),
   ID = integer_to_binary(IDInt),
-  Name = list_to_binary("move_" ++ integer_to_list(IDInt)),
+
+  case maps:get(<<"name">>, Payload) of
+    no_entry ->
+      Name = list_to_binary("PS_" ++ integer_to_list(IDInt));
+    _ ->
+      Name = maps:get(<<"name">>, Payload)
+  end,
 
   {ok, Recipe} = move_guardian_sp:generate_instance_recipe(Name, ID, BH), %% TODO add the time into the equation, or add it in the attributes
   Tsched = base:get_origo(),

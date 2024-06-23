@@ -53,7 +53,7 @@ generate_instance_recipe(Name, ID, Role, BH) ->
     <<"plugins">>=> [
       #{<<"name">>=><<"contracting_operator_servant_link_sp">>,<<"lib">>=><<"activity_instance_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"contracting_operator_servant_link_ep">>,<<"lib">>=><<"activity_instance_lib">>,<<"init_args">>=>[]},
-      #{<<"name">>=><<"ps_operator_servant_link_rp">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},
+%%      #{<<"name">>=><<"ps_operator_servant_link_rp">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"move_operator_servant_link_sp">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"move_operator_servant_link_ep">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"operator_info_handler_ep">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},

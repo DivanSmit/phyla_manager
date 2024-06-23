@@ -12,7 +12,7 @@
 -include("../../../base_include_libs/base_terms.hrl").
 %% API
 -export([init/1, callback_mode/0, searching_for_operator/3, searching_for_target_storage/3, current_storage_confirmation/3,
-  task_in_execution/3, waiting_for_execution/3, task_not_possible/3, task_cancelled/3, finish/3]).
+          waiting_for_execution/3, task_not_possible/3, task_cancelled/3, finish/3, terminate/3]).
 
 
 init(Pars) ->
@@ -160,19 +160,7 @@ waiting_for_execution(enter, OldState, State)->
     <<"taskName">>=>MyName
   }, BH),
 
-  {keep_state, State};
-
-waiting_for_execution(cast, task_started, State)->
-  io:format("~n *[MF STATE]*: The task started ~n"),
-
-  {next_state, task_in_execution, State};
-
-waiting_for_execution(cast, reschedule_required, State)->
-  io:format("~n *[MF STATE]*: The task needs to reschedule ~n"),
-
-%% TODO add time out functionality
-
-  {next_state, searching_for_target_storage, State};
+  {stop, normal, State};
 
 waiting_for_execution(cast, task_cancelled, State)->
   io:format("~n *[MF STATE]*: The task cancelled before execution ~n"),
@@ -182,33 +170,6 @@ waiting_for_execution(cast, task_cancelled, State)->
   {next_state, task_cancelled, State};
 
 waiting_for_execution(cast, _, State)->
-  {keep_state, State}.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-task_in_execution(enter, OldState, State)->
-  io:format("~n *[MF STATE]*: Task in execution ~n"),
-
-  BH = maps:get(<<"BH">>,State),
-  ProID = base_attributes:read(<<"meta">>,<<"parentID">>,BH),
-  TaskHolons = bhive:discover_bases(#base_discover_query{id = ProID}, BH),
-  base_signal:emit_signal(TaskHolons, <<"StateCast">>, task_started, BH),
-
-  {keep_state, State};
-
-task_in_execution(cast, task_executed, State)->
-  io:format("~n *[MF STATE]*: The task executed successfully ~n"),
-
-%% TODO add cancellation functionality
-
-  {next_state, finish, State};
-
-task_in_execution(cast, task_cancelled, State)->
-  io:format("~n *[MF STATE]*: Task cancelled during execution~n"),
-
-  {next_state, task_not_possible, State};
-
-task_in_execution(cast, _, State)->
   {keep_state, State}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -248,15 +209,14 @@ task_cancelled(cast, _, State)->
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 finish(enter, OldState, State)->
-  io:format("~n *[MF STATE]*: Task Finished ~n"),
+  io:format("~n *[PS STATE]*: All children contracted ~n"),
 
-  BH = maps:get(<<"BH">>,State),
-  ProID = base_attributes:read(<<"meta">>,<<"parentID">>,BH),
-  TaskHolons = bhive:discover_bases(#base_discover_query{id = ProID}, BH),
-  base_signal:emit_signal(TaskHolons, <<"StateCast">>, task_finished, BH),
-
-  %% TODO add function to end the instance or new FSM
   {stop, normal, State};
 
 finish(cast, _, State)->
   {keep_state, State}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+terminate(_Reason, _StateName, _State) ->
+  ok.

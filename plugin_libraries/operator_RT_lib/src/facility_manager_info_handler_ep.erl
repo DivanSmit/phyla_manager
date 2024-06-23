@@ -69,23 +69,24 @@ handle_request(<<"INFO">>,<<"TASKSID">>, FROM, BH)->
   TaskTimes = myFuncs:get_task_shell_element(2,BH),
   TaskTimesC = lists:map(fun(Time) -> myFuncs:convert_unix_time_to_normal(Time) end, TaskTimes),
   Reply = #{<<"id">>=>TaskIDs,<<"time">>=>TaskTimesC, <<"type">>=>TaskTypes},
-  {reply, Reply};
-
-%Potentially Delete
-handle_request(<<"TASKS">>,Request, FROM, BH)->
-  ID = maps:get(<<"taskID">>,Request),
-  Param = maps:get(<<"param">>,Request),
-
-  Shell = myFuncs:get_task_shell_from_id(ID,BH),
-  case myFuncs:get_task_sort(Shell) of
-    link ->
-      PartnerID = myFuncs:get_partner_task_id(Shell),
-      TaskHolons = bhive:discover_bases(#base_discover_query{capabilities = <<"EXECUTABLE_TASK">>}, BH),
-      Reply1 = base_signal:emit_signal(TaskHolons, Param, PartnerID, BH)
-  end,
-
-  MyBC = base:get_my_bc(BH),
-  MyName = base_business_card:get_name(MyBC),
-  Reply = #{<<"name">>=>MyName},
   {reply, Reply}.
+
+%%%Potentially Delete
+%%handle_request(<<"TASKS">>,Request, FROM, BH)->
+%%
+%%  ID = maps:get(<<"taskID">>,Request),
+%%  Param = maps:get(<<"param">>,Request),
+%%
+%%  Shell = myFuncs:get_task_shell_from_id(ID,BH),
+%%  case myFuncs:get_task_sort(Shell) of
+%%    link ->
+%%      PartnerID = myFuncs:get_partner_task_id(Shell),
+%%      TaskHolons = bhive:discover_bases(#base_discover_query{capabilities = <<"EXECUTABLE_TASK">>}, BH),
+%%      Reply1 = base_signal:emit_signal(TaskHolons, Param, PartnerID, BH)
+%%  end,
+%%
+%%  MyBC = base:get_my_bc(BH),
+%%  MyName = base_business_card:get_name(MyBC),
+%%  Reply = #{<<"name">>=>MyName},
+%%  {reply, Reply}.
 

@@ -43,11 +43,6 @@
   {outdir, "treatment_process_AT_lib/ebin"},
   debug_info
 ]}.
-{ [ 'configure_process_AT_lib/src/*'], [
-  {i, "include"},
-  {outdir, "configure_process_AT_lib/ebin"},
-  debug_info
-]}.
 { [ 'maintain_records_AT_lib/src/*'], [
   {i, "include"},
   {outdir, "maintain_records_AT_lib/ebin"},

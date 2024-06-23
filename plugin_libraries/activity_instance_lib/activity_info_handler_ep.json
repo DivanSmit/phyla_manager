@@ -1,5 +1,5 @@
-{"name":"ps_info_handler_ep",
-  "lib":"process_step_AT_lib",
+{"name":"activity_info_handler_ep",
+  "lib":"activity_instance_lib",
   "tags":["INFO","StartTask","EndTask","Update"],
   "bin_dir": "default",
   "behaviour":"receptor",

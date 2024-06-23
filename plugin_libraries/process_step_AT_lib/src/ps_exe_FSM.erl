@@ -11,57 +11,36 @@
 -behaviour(gen_statem).
 -include("../../../base_include_libs/base_terms.hrl").
 %% API
--export([init/1, callback_mode/0, finish_state/3,
-  waiting_for_operator_to_end_task/3]).
+-export([init/1, callback_mode/0, check_with_contracted_child/3, finish/3, terminate/3]).
 
 
 init(Pars) ->
   io:format("~n *[STATE]*: FSM installed ~n"),
-  {ok, waiting_for_operator_to_end_task, Pars}.
+  {ok, check_with_contracted_child, Pars}.
 
 callback_mode() ->
   [state_functions, state_enter].
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% TODO add a timeout function eg 10 min of no response then research for operator
-waiting_for_operator_to_end_task(enter, OldState, State)->
-  io:format("~n *[STATE]*: Waiting for task to end ~n"),
-  BH = maps:get(<<"BH">>,State),
-  FTA_link_ExH = base_variables:read(<<"INFO">>,<<"FTA_LINK">>,BH),
-  OP_link_ExH = base_variables:read(<<"INFO">>,<<"OPERATOR_LINK">>,BH),
-  base_link_ep:start_link(FTA_link_ExH),
-  base_link_ep:start_link(OP_link_ExH),
-
+check_with_contracted_child(enter, OldState, State)->
+  io:format("~n *[CONTRACT E STATE]*: Checking with Contracted Child ~n"),
   {keep_state, State};
 
-waiting_for_operator_to_end_task(cast, task_finished, State)->
-  io:format("~n *[STATE]*: The task has finished ~n"),
-
-  {next_state, finish_state, State};
-
-waiting_for_operator_to_end_task(cast, _, State)->
+check_with_contracted_child(cast, _, State)->
   {keep_state, State}.
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-finish_state(enter, OldState, State)->
-  io:format("~n *[STATE]*: Finished state ~n"),
-  BH = maps:get(<<"BH">>,State),
-  FTA_link_ExH = base_variables:read(<<"INFO">>,<<"FTA_LINK">>,BH),
-  OP_link_ExH = base_variables:read(<<"INFO">>,<<"OPERATOR_LINK">>,BH),
-  base_link_ep:end_link(FTA_link_ExH,done),
-  base_link_ep:end_link(OP_link_ExH,done),
-
-%% TODO end instance
-  MyBC = base:get_my_bc(BH),
-  MyID = base_business_card:get_id(MyBC),
-
-  TaskHolons = bhive:discover_bases(#base_discover_query{capabilities = <<"END_PS_INSTANCE">>}, BH),
-  base_signal:emit_signal(TaskHolons, <<"END">>, MyID, BH),
+finish(enter, OldState, State)->
+  io:format("~n *[CONTRACT S STATE]*: All children contracted ~n"),
 
   {stop, normal, State};
 
-finish_state(cast, _, State)->
+finish(cast, _, State)->
   {keep_state, State}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+terminate(Reason, _StateName, State) ->
+  ok.

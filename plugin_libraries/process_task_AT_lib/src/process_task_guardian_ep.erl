@@ -27,10 +27,9 @@ spawn_cancelled(Reason, State, ManagerHandle, BH) ->
 
 request_start_instance(State, GuardianHandle, BH) ->
 
-  io:format("Sched data: ~p~n",[base_task_ep:get_schedule_data(GuardianHandle, BH)]),
-
   InstanceData = #{
     <<"FSM_Schedule">> => contracting_Sched_FSM,
+    <<"FSM_Execute">> => contracting_exe_FSM,
     <<"childContract">>=><<"contracting">>
   },
 

@@ -12,7 +12,7 @@
 -include("../../../base_include_libs/base_terms.hrl").
 %% API
 -export([init/1, callback_mode/0, searching_for_operator/3, searching_for_fta_machine/3,
-        task_in_execution/3, task_scheduled/3, task_not_possible/3]).
+  task_scheduled/3, task_not_possible/3, finish/3, terminate/3]).
 
 
 init(Pars) ->
@@ -112,12 +112,7 @@ task_scheduled(enter, OldState, State)->
     <<"taskName">>=>MyName
   }, BH),
 
-  {keep_state, State};
-
-task_scheduled(cast, task_started, State)->
-  io:format("~n *[PS STATE]*: The task started ~n"),
-
-  {next_state, task_in_execution, State};
+  {stop, normal, State};
 
 task_scheduled(cast, timeout_reached, State)->
   io:format("~n *[PS STATE]*: The task timed-out ~n"),
@@ -139,19 +134,15 @@ task_not_possible(cast, _, State)->
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-task_in_execution(enter, OldState, State)->
-  io:format("~n *[PS STATE]*: Task in execution ~n"),
+finish(enter, OldState, State)->
+  io:format("~n *[PS STATE]*: All children contracted ~n"),
 
-  BH = maps:get(<<"BH">>,State),
-  Tsched = base:get_origo(),
-  Type = <<"ps_FSM">>,
-  ID = make_ref(),
-  Data1 =State,
-  base_task_sp:schedule_task(Tsched,Type, ID, Data1, BH),
+  {stop, normal, State};
 
-  {keep_state, State};
-
-task_in_execution(cast, _, State)->
+finish(cast, _, State)->
   {keep_state, State}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+terminate(_Reason, _StateName, _State) ->
+  ok.

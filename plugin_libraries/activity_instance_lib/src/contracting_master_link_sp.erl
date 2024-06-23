@@ -18,22 +18,22 @@ init(Pars, BH) ->
 
   io:format("Contract Master installed~n"),
   FSM = base_attributes:read(<<"meta">>,<<"FSM_Schedule">>,BH),
-  io:format("FSM: ~p~n",[FSM]),
   FSM_Data = #{
     <<"BH">>=>BH,
     <<"children">>=>base_attributes:read(<<"meta">>,<<"children">>,BH)
   },
-  io:format("FSM DATA: ~p~n",[FSM_Data]),
   {ok, StateMachinePID} = gen_statem:start_link({global, base_business_card:get_id(base:get_my_bc(BH))}, FSM, FSM_Data, []),
 
   base_variables:write(<<"FSM_INFO">>, <<"FSM_PID">>, StateMachinePID, BH),
+  base_variables:write(<<"FSM_INFO">>,<<"FSM_Count">>, 0,BH),
+  base_variables:write(<<"FSM_INFO">>,<<"FSM_Ready">>, 0,BH),
+
   ok.
 
 stop(BH) ->
   ok.
 
 generate_requirements(Pars, NegH, BH) ->
-  io:format("Generating Requirements~n"),
   % the Pars parameter must be a list of maps per resource or just one map if there is only one resource requirement
   if
     is_list(Pars)->{requirements, Pars, base:get_origo() + 600000, nostate};
@@ -48,7 +48,6 @@ get_candidates(Requirements, PluginState, NegH, BH) ->
         Name = maps:get(<<"name">>,Requirements),
         DR = #base_discover_query{name = Name},
         CandidateBCs = bhive:discover_bases(DR,BH),
-        io:format("Candidate: ~p~n",[CandidateBCs]),
         {candidates,CandidateBCs, activity};
     resource->
       DR = #base_discover_query{capabilities = <<"TAKE_MEASUREMENT">>},
@@ -74,7 +73,6 @@ all_proposals_received(ProposalList, PluginState, NegH, BH) ->
   case PluginState of
     activity ->
       CandidateBC = maps:keys(ProposalList),
-      io:format("CandidateBC: ~p~n", [CandidateBC]),
       {ok, CandidateBC, nostate};
     resource ->
       case ProposalList of
@@ -117,10 +115,11 @@ all_proposals_received(ProposalList, PluginState, NegH, BH) ->
 
 
 promise_received(Promise, PluginState, NegH, BH) ->
-  io:format("Contract Promice received~n"),
   FSM_PID = base_variables:read(<<"FSM_INFO">>,<<"FSM_PID">>,BH),
   gen_statem:cast(FSM_PID,contracted),
-  base_variables:write(<<"FSM_INFO">>,<<"FSM_status">>, contracted,BH),
+  Count = base_variables:read(<<"FSM_INFO">>,<<"FSM_Count">>,BH),
+  base_variables:write(<<"FSM_INFO">>,<<"FSM_Count">>, Count+1,BH),
+
   LinkID = list_to_binary(ref_to_list(make_ref())),
   Data1 = #{},
   {ok,LinkID,Data1}.

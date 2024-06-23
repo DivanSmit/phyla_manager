@@ -24,7 +24,6 @@ request_start_negotiation(MasterBC, NegH, BH) ->
   {start,no_state}.
 
 generate_proposal(Requirements, PluginState, NegH, BH) ->
-  io:format("Operator received requirements~n"),
   TaskDuration = base_attributes:read(<<"TaskDurations">>, <<"ps_operator">>, BH),
   StartTime = maps:get(<<"AVAILABILITY">>,lists:nth(1, Requirements)),
   {Result,AvailabilityTime} = case StartTime of
@@ -45,7 +44,6 @@ generate_proposal(Requirements, PluginState, NegH, BH) ->
   end.
 
 proposal_accepted(PluginState, NegH, BH) ->
-  io:format("Proposal Accepted~n"),
   Tsched = PluginState,
   LinkID = list_to_binary(ref_to_list(make_ref())),
   Data1 = #{<<"LinkID">>=>LinkID},

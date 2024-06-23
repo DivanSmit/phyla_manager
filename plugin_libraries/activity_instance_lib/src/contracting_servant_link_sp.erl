@@ -14,7 +14,6 @@
 
 
 init(Pars, BH) ->
-  io:format("INSTALLED~n"),
   ok.
 
 stop(BH) ->
@@ -24,7 +23,6 @@ request_start_negotiation(MasterBC, NegH, BH) ->
   {start,no_state}.
 
 generate_proposal(Requirements, PluginState, NegH, BH) ->
-  io:format("Received requirements~n"),
   Name = maps:get(<<"name">>,lists:nth(1,Requirements)),
   MyBC = base:get_my_bc(BH),
   MyName = base_business_card:get_name(MyBC),
@@ -37,7 +35,6 @@ generate_proposal(Requirements, PluginState, NegH, BH) ->
   end.
 
 proposal_accepted(PluginState, NegH, BH) ->
-  io:format("Proposal accepted~n"),
   Tsched = base:get_origo(),
   LinkID = list_to_binary(ref_to_list(make_ref())),
   Data1 = #{<<"LinkID">>=>LinkID},

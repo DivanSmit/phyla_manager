@@ -65,13 +65,19 @@ handle_request(<<"INFO">>,<<"Test">>, FROM, BH)->
 handle_request(<<"INFO">>,<<"Test1">>, FROM, BH)->
   io:format("Received test1~n"),
 
-  Elem = #{<<"children">> => [#{
+  Elem = #{<<"children">> => [
+    #{
+    <<"name">> => <<"Step_1">>,
+    <<"pred">> => [<<"Move_1">>],
     <<"type">> => <<"SPAWN_PS_INSTANCE">>,
     <<"meta">> => #{
       <<"machine">> => #{},
       <<"startTime">>=>base:get_origo()
     }
-  },#{
+  }
+    ,#{
+    <<"name">> => <<"Move_1">>,
+    <<"pred">> => [],
     <<"type">> => <<"SPAWN_MOVE_INSTANCE">>,
     <<"meta">> => #{
       <<"machine">> => #{},
@@ -99,6 +105,9 @@ handle_request(<<"INFO">>,<<"INFO">>, FROM, BH)->
   {reply, Reply};
 
 handle_request(<<"INFO">>,<<"TASKSID">>, FROM, BH)->
+%%  io:format("Names: ~p~n",[myFuncs:get_partner_names(BH)]),
+  MyBC = base:get_my_bc(BH),
+  io:format("~p Received message~n",[base_business_card:get_name(MyBC)]),
   TaskIDs = myFuncs:get_task_id_from_BH(BH),
   TaskTypes  = myFuncs:get_task_type_from_BH(BH),
   TaskTimes = myFuncs:get_task_shell_element(2,BH),
@@ -107,6 +116,8 @@ handle_request(<<"INFO">>,<<"TASKSID">>, FROM, BH)->
   {reply, Reply};
 
 handle_request(<<"TASKS">>,Request, FROM, BH)->
+  MyBC = base:get_my_bc(BH),
+
   ID = maps:get(<<"taskID">>,Request),
   Param = maps:get(<<"param">>,Request),
 
@@ -115,7 +126,7 @@ handle_request(<<"TASKS">>,Request, FROM, BH)->
     link ->
       PartnerID = myFuncs:get_partner_task_id(Shell),
       TaskHolons = bhive:discover_bases(#base_discover_query{capabilities = <<"EXECUTABLE_TASK">>}, BH),
-      Reply1 = base_signal:emit_signal(TaskHolons, Param, PartnerID, BH)
+      base_signal:emit_signal(TaskHolons, Param, PartnerID, BH)
   end,
 
   MyBC = base:get_my_bc(BH),

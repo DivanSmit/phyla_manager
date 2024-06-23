@@ -9,6 +9,7 @@
 -module(contracting_operator_servant_link_ep).
 -author("LENOVO").
 -behaviour(base_link_ep).
+-include("../../../base_include_libs/base_terms.hrl").
 %% API
 -export([init/2, stop/1, request_start_link/3, request_resume_link/3, link_start/3, link_resume/3, partner_call/4, partner_signal/4, link_end/4, base_variable_update/4]).
 
@@ -20,8 +21,20 @@ stop(BH) ->
   ok.
 
 request_start_link(PluginState, ExH, BH) ->
-  io:format("The contracted operator servant link has requested to start ~n"),
-  {wait, nostate}.
+
+  MyBC = base:get_my_bc(BH),
+  MyName = base_business_card:get_name(MyBC),
+  PartnerBC = base_link_ep:get_partner_bc(ExH),
+  PartnerName = base_business_card:get_name(PartnerBC),
+  CurrentTime = binary_to_list(myFuncs:convert_unix_time_to_normal(base:get_origo())),
+  io:format("Servant contract: ~p with parent ~p ready to start at ~p~n",[MyName,PartnerName,CurrentTime]),
+
+  spawn(fun()->
+    timer:sleep(1000),
+    TaskHolons = bhive:discover_bases(#base_discover_query{name = PartnerName}, BH),
+    base_signal:emit_signal(TaskHolons, <<"Update">>,MyName, BH)
+        end),
+  {start, nostate}.
 
 request_resume_link(PluginState, ExH, BH) ->
   {cancel, no_state}.
