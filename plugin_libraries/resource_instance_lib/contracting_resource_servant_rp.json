@@ -1,0 +1,8 @@
+{"name":"contracting_resource_servant_rp",
+  "lib":"resource_instance_lib",
+  "base_link":"contractingOp",
+  "sector": "rp",
+  "bin_dir": "default",
+  "behaviour":"link",
+  "language":"beam"
+}

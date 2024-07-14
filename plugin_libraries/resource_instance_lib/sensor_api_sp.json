@@ -1,0 +1,8 @@
+{"name":"sensor_api_sp",
+  "lib":"resource_instance_lib",
+  "base_task": "sensor_api",
+  "sector": "sp",
+  "bin_dir": "default",
+  "behaviour":"task",
+  "language":"beam"
+}

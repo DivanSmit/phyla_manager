@@ -50,8 +50,6 @@ start_task(TaskState, ExecutorHandle, BH) ->
 %%      base_guardian_sp:schedule_instance_guardian(Tsched, Recipe, Data1, BH)
 %%          end)
 %%              end, [], TRUList),
-
-  %% TODO refelct on the plugin for analysis
   {end_task, discard, TaskState}.
 
 end_task(TaskState, ExecutorHandle, BH) ->

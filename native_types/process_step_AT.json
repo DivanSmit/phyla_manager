@@ -13,7 +13,7 @@
       "name":"PROCESS_STEP_TYPE",
       "taxonomy":{"arti_class":"resource-type","base_type":"PROCESS_STEP_TYPE"}
     },
-    "capabilities":["SPAWN_PS_INSTANCE","END_PS_INSTANCE"],
+    "capabilities":["SPAWN_PS_INSTANCE","END_PS_INSTANCE","ACTIVITY_INFO"],
     "responsibilities":[],
     "addresses":{},
     "meta":{}

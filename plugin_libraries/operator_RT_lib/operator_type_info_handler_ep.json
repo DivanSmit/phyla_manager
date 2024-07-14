@@ -1,6 +1,6 @@
 {"name":"operator_type_info_handler_ep",
   "lib":"operator_RT_lib",
-  "tags":["SPAWN_OPERATOR_INSTANCE"],
+  "tags":["SPAWN_OPERATOR_INSTANCE","INFO","RESOURCE_USAGE","requestForData"],
   "bin_dir": "default",
   "behaviour":"receptor",
   "sector": "cm",

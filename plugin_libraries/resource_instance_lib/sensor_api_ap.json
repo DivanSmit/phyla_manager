@@ -1,0 +1,8 @@
+{"name":"sensor_api_ap",
+  "lib":"resource_instance_lib",
+  "base_task": "sensor_api",
+  "sector": "ap",
+  "bin_dir": "default",
+  "behaviour":"task",
+  "language":"beam"
+}

@@ -1,7 +1,7 @@
 {
   "plugins": [
-    {"name": "tru_guardian_sp","lib": "tru_RT_lib","init_args": []},
-    {"name": "tru_guardian_ep","lib": "tru_RT_lib","init_args": []},
+    {"name": "tru_guardian_sp","lib":"tru_RT_lib","init_args": []},
+    {"name": "tru_guardian_ep","lib":"tru_RT_lib","init_args": []},
     {"name": "tru_type_info_handler_ep","lib": "tru_RT_lib","init_args": []}
   ],
   "bc":{

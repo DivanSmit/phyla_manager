@@ -11,40 +11,110 @@
 -behaviour(gen_statem).
 -include("../../../base_include_libs/base_terms.hrl").
 %% API
--export([init/1, callback_mode/0, check_with_contracted_child/3, check_with_parent/3, parent_not_yet_ready/3,
-  wait_for_operator_start/3, finish/3, terminate/3]).
+-export([init/1, callback_mode/0, wait_for_schedule/3, wait_for_scheduled_time/3, check_with_contracted_child/3, check_with_parent/3, parent_not_yet_ready/3,
+  wait_for_operator_start/3, wait_for_operator_end/3, rescheduling/3,finish/3, terminate/3]).
 
 
 init(Pars) ->
   io:format("~n *[CONTRACT E STATE]*: FSM installed ~n"),
 
-  {ok, check_with_contracted_child, Pars}.
+  {ok, wait_for_schedule, Pars}.
+
 
 callback_mode() ->
   [state_functions, state_enter].
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-check_with_contracted_child(enter, OldState, State)->
-  io:format("~n *[CONTRACT E STATE]*: Checking with Contracted Child ~n"),
+wait_for_schedule(enter, OldState, State)->
+  io:format("~n *[ACTIVITY E STATE]*: Waiting for schedule ~n"),
 
   {keep_state, State};
 
-check_with_contracted_child(cast, ready, State)->
-  io:format("~n *[CONTRACT E STATE]*: Child ready ~n"),
+wait_for_schedule(cast, scheduled, State)->
+  {next_state, wait_for_scheduled_time, State};
 
+
+wait_for_schedule(cast, _, State)->
+  {keep_state, State}.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+wait_for_scheduled_time(enter, _OldState, State) ->
+  gen_statem:cast(self(), internal_check),
+  {keep_state, State};
+
+wait_for_scheduled_time(cast, internal_check, State)->
   BH = maps:get(<<"BH">>,State),
-  Numchild = base_variables:read(<<"FSM_INFO">>,<<"FSM_Count">>,BH),
-  Count = base_variables:read(<<"FSM_INFO">>,<<"FSM_Ready">>,BH),
-%%  io:format("Count: ~p Child: ~p~n",[Count,Numchild]),
+  Delay = base_variables:read(<<"FSM_INFO">>,<<"startTime">>,BH) - base:get_origo(),
+
   if
-    Numchild == Count ->
-      io:format("~n *[CONTRACT E STATE]*: All children ready, checking with parent ~n"),
-      {next_state, check_with_parent, State};
+    Delay<0 -> {next_state, check_with_contracted_child, State};
     true ->
-      {keep_state, State}
+      {keep_state, {State,base:get_origo()}, Delay}
 
   end;
+
+wait_for_scheduled_time(timeout, _EventContent, {State,_}) ->
+  {next_state, check_with_contracted_child, State};
+
+wait_for_scheduled_time(cast, _, {State,OldTIme}) ->
+  io:format("~n *[CONTRACT E STATE]*: Unsupported cast ~n"),
+  BH = maps:get(<<"BH">>,State),
+  Delay = base_variables:read(<<"FSM_INFO">>,<<"startTime">>,BH) - base:get_origo(),
+  {keep_state, {State,OldTIme}, Delay}.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+check_with_contracted_child(enter, _OldState, State) ->
+  gen_statem:cast(self(), internal_check),
+  {keep_state, State};
+
+check_with_contracted_child(cast, internal_check, State)->
+  io:format("~n *[CONTRACT E STATE]*: Checking with Contracted Child ~n"),
+
+  BH = maps:get(<<"BH">>,State),
+  ChildrenTasks = base_schedule:get_all_tasks(BH),
+  Children = myFuncs:extract_partner_names(ChildrenTasks,servant),
+  MyName = myFuncs:myName(BH),
+
+  Check = lists:foldl(fun(X, Acc) ->
+    if
+      X == MyName -> Acc; % Some of the tasks we are the servant for our parents. SKip those tasks
+      true ->
+        TaskHolons = bhive:discover_bases(#base_discover_query{name = X}, BH),
+        [Reply] = base_signal:emit_request(TaskHolons, <<"CheckIn">>, MyName, BH),
+        io:format("Reply from child ~p for ~p is ~p~n",[X,MyName, Reply]),
+        case Reply of
+          ready -> Acc;
+          not_ready -> false
+        end
+    end
+
+                      end, true, Children),
+
+  case Check of
+    true -> {next_state, check_with_parent, State};
+    false -> {next_state, rescheduling, State}
+  end;
+
+% Remember to remove the FSM count stuff
+
+%%check_with_contracted_child(cast, ready, State)->
+%%  io:format("~n *[CONTRACT E STATE]*: Child ready ~n"),
+%%
+%%  BH = maps:get(<<"BH">>,State),
+%%  Numchild = base_variables:read(<<"FSM_INFO">>,<<"FSM_Count">>,BH),
+%%  Count = base_variables:read(<<"FSM_INFO">>,<<"FSM_Ready">>,BH),
+%%  if
+%%    Numchild == Count ->
+%%      io:format("~n *[CONTRACT E STATE]*: All children ready, checking with parent ~n"),
+%%      {next_state, check_with_parent, State};
+%%    true ->
+%%      {keep_state, State}
+%%  end;
 
 check_with_contracted_child(cast, _, State)->
   {keep_state, State}.
@@ -52,8 +122,6 @@ check_with_contracted_child(cast, _, State)->
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 check_with_parent(enter, _OldState, State) ->
-
-  %% Send an internal cast to trigger the state check
   gen_statem:cast(self(), internal_check),
   {keep_state, State};
 
@@ -64,10 +132,7 @@ check_with_parent(cast, internal_check, State) ->
   MyName = base_business_card:get_name(MyBC),
   ProID = base_attributes:read(<<"meta">>, <<"parentID">>, BH),
   TaskHolons = bhive:discover_bases(#base_discover_query{id = ProID}, BH),
-
-  %% Sending a request, because an answer is required if can continue or not
-  [Reply] = base_signal:emit_request(TaskHolons, <<"Update">>, MyName, BH),
-  io:format("Reply from parent: ~p~n", [Reply]),
+  [Reply] = base_signal:emit_request(TaskHolons, <<"Update">>, {MyName,query}, BH),
   case Reply of
     ready ->
       {next_state, wait_for_operator_start, State};
@@ -84,17 +149,22 @@ parent_not_yet_ready(enter, _OldState, State) ->
   BH = maps:get(<<"BH">>,State),
   Delay = base_attributes:read(<<"meta">>,<<"FSM_WAIT_FOR_PARENTS_DELAY">>,BH),
   io:format("~n *[CONTRACT E STATE]*: Parent not yet ready, going to wait for ~ps ~n",[Delay/1000]),
+  {keep_state, {State,base:get_origo()}, Delay};
 
-  {keep_state, State, Delay};
-
-parent_not_yet_ready(timeout, _EventContent, State) ->
+parent_not_yet_ready(timeout, _EventContent, {State,_}) ->
   io:format("~n *[CONTRACT E STATE]*: Timer expired, checking with parent again~n"),
   {next_state, check_with_parent, State};
 
-parent_not_yet_ready(cast, _, State) ->
-  io:format("~n *[CONTRACT E STATE]*: Unsupported cast ~n"),
-  {keep_state, State}.
+parent_not_yet_ready(cast, parent_ready, {State,_}) ->
+  io:format("~n *[CONTRACT E STATE]*: Parent said you can start~n"),
+  {next_state, wait_for_operator_start, State};
 
+parent_not_yet_ready(cast, _, {State,OldTIme}) ->
+  io:format("~n *[CONTRACT E STATE]*: Unsupported cast ~n"),
+  BH = maps:get(<<"BH">>,State),
+  Delay = base_attributes:read(<<"meta">>,<<"FSM_WAIT_FOR_PARENTS_DELAY">>,BH),
+  RemainingTIme = Delay-base:get_origo()+OldTIme,
+  {keep_state, {State,OldTIme}, RemainingTIme}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -105,12 +175,17 @@ wait_for_operator_start(enter, OldState, State)->
 wait_for_operator_start(cast, start, State)->
   io:format("~n *[CONTRACT E STATE]*: Operator wants to start ~n"),
   BH = maps:get(<<"BH">>,State),
-  Handels = base_variables:read(<<"FSM_EXE">>, <<"ExecutionHandels">>,BH),
+  Handles = base_variables:read(<<"FSM_EXE">>, <<"ExecutionHandels">>,BH),
   lists:foldl(fun(Elem,Acc)->
     base_link_ep:start_link(Elem)
-  end, [], Handels),
+  end, [], Handles),
+
+  %Start link with parent
+  Handle = base_variables:read(<<"FSM_EXE">>, <<"parentExecutionHandel">>,BH),
+  base_link_ep:start_link(Handle),
   %Start timer task
-  {keep_state, State};
+
+  {next_state, wait_for_operator_end, State};
 
 wait_for_operator_start(cast, _, State)->
   io:format("~n *[CONTRACT E STATE]*: Unsupported cast ~n"),
@@ -118,9 +193,67 @@ wait_for_operator_start(cast, _, State)->
   {keep_state, State}.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+wait_for_operator_end(enter, OldState, State)->
+  io:format("~n *[CONTRACT E STATE]*: Waiting for operator to complete the task~n"),
+  {keep_state, State};
+
+wait_for_operator_end(cast, end_task, State)->
+  io:format("~n *[CONTRACT E STATE]*: Operator completed the task ~n"),
+  BH = maps:get(<<"BH">>,State),
+  Handles = base_variables:read(<<"FSM_EXE">>, <<"ExecutionHandels">>,BH),
+  lists:foldl(fun(Elem,Acc)->
+    base_link_ep:end_link(Elem,completed)
+              end, [], Handles),
+  %Start timer task
+  {next_state, finish, State};
+
+wait_for_operator_end(cast, _, State)->
+  io:format("~n *[CONTRACT E STATE]*: Unsupported cast ~n"),
+
+  {keep_state, State}.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+rescheduling(enter, OldState, State)->
+  BH = maps:get(<<"BH">>, State),
+  MyBC = base:get_my_bc(BH),
+  MyName = base_business_card:get_name(MyBC),
+  io:format("~n *[CONTRACT E STATE]*: ~p needs rescheduling ~n",[MyName]),
+
+  ProID = base_attributes:read(<<"meta">>, <<"parentID">>, BH),
+  TaskHolons = bhive:discover_bases(#base_discover_query{id = ProID}, BH),
+  [Reply] = base_signal:emit_request(TaskHolons, <<"Update">>, {MyName,query}, BH),
+  case Reply of
+    ready ->
+      io:format("~p needs serious rescheduling ~n", [MyName]),
+      {keep_state, State};
+    not_ready ->
+      {keep_state, State, 30000}
+  end;
+
+
+rescheduling(timeout, _EventContent, State) ->
+  {next_state, check_with_contracted_child, State};
+
+rescheduling(cast, _, State)->
+
+  {next_state, check_with_contracted_child, State}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 finish(enter, OldState, State)->
+  io:format("~n *[CONTRACT E STATE]*: FSM completed ~n"),
+  BH = maps:get(<<"BH">>,State),
 
+  % Ending link with parent, if it has one
+  case base_variables:read(<<"FSM_EXE">>, <<"parentExecutionHandel">>, BH) of
+    no_entry -> true;
+    Handle ->
+      base_link_ep:end_link(Handle,completed)
+  end,
+
+
+  io:format("~n### ~p IS COMPLETE WITH ITS TASKS ###~n~n",[myFuncs:myName(BH)]),
   {stop, normal, State};
 
 finish(cast, _, State)->

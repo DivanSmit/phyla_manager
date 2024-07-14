@@ -1,0 +1,27 @@
+{
+  "plugins": [
+    {"name": "report_generator_guardian_sp","lib": "report_generator_RT_lib","init_args": [
+      {
+        "name": "Report Generator",
+        "id": "9999"
+      }
+    ]},
+    {"name": "report_generator_guardian_ep","lib": "report_generator_RT_lib","init_args": []},
+    {"name": "report_generator_type_info_handler_ep","lib": "report_generator_RT_lib","init_args": []}
+  ],
+  "bc":{
+    "identity":
+    {
+      "id":"REPORT_GENERATOR_TYPE",
+      "name":"REPORT_GENERATOR_TYPE",
+      "taxonomy":{"arti_class":"resource-type","base_type":"REPORT_GENERATOR_TYPE"}
+    },
+    "capabilities":["SPAWN_REPORT_GENERATOR_INSTANCE","END_REPORT_GENERATOR_INSTANCE"],
+    "responsibilities":[],
+    "addresses":{},
+    "meta":{}
+
+  },
+  "disk_base":"REPORT_GENERATOR_TYPE",
+  "cookie":"BB"
+}

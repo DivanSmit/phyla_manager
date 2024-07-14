@@ -11,8 +11,71 @@
 -include("../../../base_include_libs/base_terms.hrl").
 
 %% API
--export([get_task_id_from_BH/1, get_task_type_from_BH/1, get_task_shell_element/2, get_partner_task_id/1, get_partner_names/1, get_task_shell_from_id/2, get_task_type/1,
-  get_task_sort/1, get_task_id/1, check_if_my_task/2, convert_unix_time_to_normal/1, check_availability/4, update_list_and_average/2]).
+-export([extract_partner_names/2, myName/1, extract_partner_and_task_id/3, get_task_id_from_BH/1, get_task_type_from_BH/1,
+  get_task_shell_element/2, get_partner_task_id/1, get_partner_names/2, get_task_shell_from_id/2, get_task_type/1,
+  get_task_sort/1, get_task_id/1, check_if_my_task/2, convert_unix_time_to_normal/1, convert_unix_time_to_normal/2, check_availability/4,
+  update_list_and_average/2, add_map_to_json_file/2, read_json_file/1, write_json_file/2]).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Functions for extracting data
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+myName(BH)->
+  base_business_card:get_name(base:get_my_bc(BH)).
+
+extract_partner_names(Tasks, Type) ->
+  Values = maps:values(Tasks),
+  ListTasks = lists:foldl(fun(X, Acc) ->
+
+    Meta = X#base_task.meta,
+    BC = case Type of
+           master ->
+             Meta#base_contract.master_bc;
+           servant ->
+             Meta#base_contract.servant_bc
+         end,
+    Name = base_business_card:get_name(BC),
+    [Name | Acc]
+              end, [], Values),
+  lists:reverse(ListTasks).
+
+extract_partner_and_task_id(ID, Type, BH) ->
+  QueryS = base_schedule:query_task_shells(#task_shell_query{field = id, range = ID}, BH),
+  Shell = case QueryS of
+            [] ->
+              QueryE = base_execution:query_task_shells(#task_shell_query{field = id, range = ID}, BH),
+
+              case QueryE of
+                [] ->
+                  error;
+                _ ->
+                  base_execution:get_task(lists:nth(1,QueryE), BH)
+
+              end;
+            _ ->
+              base_schedule:get_task(lists:nth(1,QueryS), BH)
+          end,
+
+  % Now we can extract the Shell
+  case Shell of
+    error ->
+      {error,task_completed};
+    _ ->
+
+      Meta = Shell#base_task.meta,
+      Promise = case Type of
+                  master ->
+                    Meta#base_contract.master_promise;
+                  servant ->
+                    Meta#base_contract.servant_promise
+                end,
+
+      PartnerBC = Promise#link_promise.bc,
+      PartnerShell = Promise#link_promise.shell,
+
+      {PartnerShell#task_shell.id, base_business_card:get_name(PartnerBC)}
+  end.
 
 get_task_id_from_BH(BH) ->
   TasksExe = base_schedule:get_all_tasks(BH),
@@ -27,13 +90,9 @@ get_task_type_from_BH(BH) ->
   TaskKeys = maps:keys(TasksExe),
   lists:map(fun(Tuple) -> element(6, Tuple) end, TaskKeys).
 
-get_partner_names(BH)->
+get_partner_names(BH,Type)->
   Data = base_schedule:get_all_tasks(BH),
-%%  io:format("Data = ~p~n",[Data]),
-  maps:fold(fun(X, Acc)->
-    io:format("Exe: ~p~n",[base_execution:get_executor_handle(X,BH)])
-  end, [],Data).
-%%  extract_values(Data). %GPT generated function
+  extract_partner_names(Data,Type).
 
 
 get_task_shell_element(Element, BH) ->
@@ -50,7 +109,6 @@ get_partner_task_id(TaskShell)->
   element(5,Shell).
 
 get_task_shell_from_id(ID,BH)->
-
   try
     Tasklist = base_schedule:get_all_tasks(BH), %% This is a map
     TaskKeys = maps:keys(Tasklist), %% This is a list
@@ -112,33 +170,72 @@ get_task_sort(Shell)->
   element(7,TaskKeys).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Functions for writing to files
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+read_json_file(FilePath) ->
+  {ok, BinaryData} = file:read_file(FilePath),
+  case jsx:decode(BinaryData) of
+    JsonData -> {ok, JsonData};
+    {error, Reason} -> {error, Reason}
+  end.
+
+write_json_file(FilePath, Data) ->
+  JsonData = jsx:encode(Data),
+  PrettyJsonData = jsx:prettify(JsonData),
+  file:write_file(FilePath, PrettyJsonData).
+
+add_map_to_json_file(FilePath, NewMap) ->
+  case read_json_file(FilePath) of
+    {ok, CurrentData} ->
+      List = maps:get(<<"list">>, CurrentData, []),
+      UpdatedList = [NewMap | List],
+      UpdatedData = maps:put(<<"list">>, UpdatedList, CurrentData),
+      write_json_file(FilePath, UpdatedData);
+    {error, Reason} ->
+      {error, Reason}
+  end.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Functions for conversions
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%%  TODO fix the calendar time issue where higher more than 12 o'clock it should be the next day
 convert_unix_time_to_normal(Time) ->
 
-%%  TODO fix the calendar time issue
-
-  {{Y, D, M}, {Hour, Min, Sec}} = calendar:system_time_to_universal_time(Time, 1000),
-  String = lists:concat([Y, "-", D, "-", M, " ", Hour + 2, ":", Min, ":", Sec]),
+  {{Y, M, D}, {Hour, Min, Sec}} = calendar:system_time_to_universal_time(Time, 1000),
+  LocalTime = calendar:universal_time_to_local_time({{Y, M, D}, {Hour, Min, Sec}}),
+  {{LocalY, LocalM, LocalD}, {LocalHour, LocalMin, LocalSec}} = LocalTime,
+  String = io_lib:format("~4..0B-~2..0B-~2..0B ~2..0B:~2..0B:~2..0B", [LocalY, LocalM, LocalD, LocalHour, LocalMin, LocalSec]),
   list_to_binary(String).
 
-update_list_and_average(List,Value)->
+convert_unix_time_to_normal(Time, Return) ->
+
+  BIN = convert_unix_time_to_normal(Time),
+  case Return of
+    binary -> BIN;
+    string -> binary_to_list(BIN)
+  end.
+
+update_list_and_average(List, Value) ->
+
   UpdatedList =
-    case length(List) > 10 of
-      true ->
-        tl(List);
-      false ->
-        List
+    case length(List) >= 10 of
+      true -> tl(List);
+      false -> List
     end,
 
   NewList = [Value | UpdatedList],
+  Sum = lists:sum(NewList),
 
-  Average = case lists:sum(NewList) of
-              0 -> 0;
-              Sum -> round(math:ceil((Sum / length(NewList))/60000))*60000
-            end,
-  {Average,NewList}.
+  Average =
+    case length(NewList) of
+      0 -> 0; % Avoid division by zero
+      Length ->
+        RoundedAverage = math:ceil(Sum / Length / 60000) * 60000,
+        round(RoundedAverage)
+    end,
+  {Average, NewList}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Functions for calculating the availability of a resource at a time
@@ -198,8 +295,6 @@ extract_exe_time(BH) ->
     #{<<"startTime">> => element(3, Tuple), <<"taskType">> => element(6, Tuple)}
             end, Keys).
 
-
-
 extract_values(Data) ->
   Values = extract_values_recursive(Data),
   lists:flatten(Values).
@@ -216,3 +311,5 @@ extract_values_recursive([{_, _, {base_contract, _,
   [Value | extract_values_recursive(T)];
 extract_values_recursive([_ | T]) ->
   extract_values_recursive(T).
+
+

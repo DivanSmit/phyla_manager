@@ -15,18 +15,21 @@
 
 
 init(Pars, BH) ->
+  base:wait_for_base_ready(BH),
 
-  io:format("Contract Master installed~n"),
-  FSM = base_attributes:read(<<"meta">>,<<"FSM_Schedule">>,BH),
-  FSM_Data = #{
-    <<"BH">>=>BH,
-    <<"children">>=>base_attributes:read(<<"meta">>,<<"children">>,BH)
-  },
-  {ok, StateMachinePID} = gen_statem:start_link({global, base_business_card:get_id(base:get_my_bc(BH))}, FSM, FSM_Data, []),
-
-  base_variables:write(<<"FSM_INFO">>, <<"FSM_PID">>, StateMachinePID, BH),
   base_variables:write(<<"FSM_INFO">>,<<"FSM_Count">>, 0,BH),
   base_variables:write(<<"FSM_INFO">>,<<"FSM_Ready">>, 0,BH),
+  base_variables:write(<<"FSM_INFO">>,<<"startTime">>, base_attributes:read(<<"meta">>,<<"startTime">>, BH),BH),
+  base_variables:write(<<"FSM_INFO">>,<<"endTime">>, base:get_origo(),BH),
+  io:format("Master SP INSTALLED FOR ~p with Contract: ~p~n",[myFuncs:myName(BH), base_attributes:read(<<"meta">>,<<"childContract">>,BH)]),
+
+
+  FSM = base_attributes:read(<<"meta">>,<<"FSM_Schedule">>,BH),
+  FSM_Data = #{
+    <<"BH">>=>BH
+  },
+  {ok, StateMachinePID} = gen_statem:start_link({global, base_business_card:get_id(base:get_my_bc(BH))}, FSM, FSM_Data, []),
+  base_variables:write(<<"FSM_INFO">>, <<"FSM_PID">>, StateMachinePID, BH),
 
   ok.
 
@@ -50,7 +53,8 @@ get_candidates(Requirements, PluginState, NegH, BH) ->
         CandidateBCs = bhive:discover_bases(DR,BH),
         {candidates,CandidateBCs, activity};
     resource->
-      DR = #base_discover_query{capabilities = <<"TAKE_MEASUREMENT">>},
+      Cape = maps:get(<<"capabilities">>,Requirements),
+      DR = #base_discover_query{capabilities = Cape},
       CandidateBCs = bhive:discover_bases(DR,BH),
       case CandidateBCs of
         [] ->
@@ -72,27 +76,37 @@ all_proposals_received(ProposalList, PluginState, NegH, BH) ->
 
   case PluginState of
     activity ->
-      CandidateBC = maps:keys(ProposalList),
-      {ok, CandidateBC, nostate};
+      [CandidateBC] = maps:keys(ProposalList),
+      [Proposal] = maps:values(ProposalList),
+      Name = base_business_card:get_name(CandidateBC),
+      case Proposal of
+        {accept, {Start, End}} ->
+          base_variables:write(Name, <<"startTime">>, Start, BH),
+          base_variables:write(Name, <<"endTime">>, End, BH),
+          {ok, [CandidateBC], nostate};
+        _ -> io:format("~n### Incorrect Proposal from ~p ###~n", [Name]),
+          {ok, [], nostate}
+      end;
+
     resource ->
       case ProposalList of
         [] ->
           {ok, [], nostate};
         _ ->
           WinningMap = maps:fold(fun(CandidateBC, Proposal, Acc) ->
-            #{<<"TIME">> := CandidateTime} = Proposal,
+            #{<<"startTime">> := CandidateTime} = Proposal,
 
             if
               Acc == null ->
                 % it is the first proposal being evaluated
-                #{<<"Time">> => CandidateTime, <<"proposal">> => Proposal, <<"candidateBC">> => CandidateBC};
+                #{<<"startTime">> => CandidateTime, <<"proposal">> => Proposal, <<"candidateBC">> => CandidateBC};
               true ->
                 % it is not the first proposal being evaluated
-                PreviousTime = maps:get(<<"Time">>, Acc), % get the current best proposal
+                PreviousTime = maps:get(<<"startTime">>, Acc), % get the current best proposal
                 if
                   CandidateTime < PreviousTime ->
                     % the latest proposal is better, update the current best proposal
-                    #{<<"Time">> => CandidateTime, <<"proposal">> => Proposal, <<"candidateBC">> => CandidateBC};
+                    #{<<"startTime">> => CandidateTime, <<"proposal">> => Proposal, <<"candidateBC">> => CandidateBC};
                   true ->
                     % the latest proposal is not better, keep the old proposal
                     Acc
@@ -100,6 +114,10 @@ all_proposals_received(ProposalList, PluginState, NegH, BH) ->
             end
                                  end, null, ProposalList),
           % retrieve the winning BC
+          CanidateProposal = maps:get(<<"proposal">>,WinningMap),
+          base_variables:write(<<"FSM_INFO">>,<<"startTime">>, maps:get(<<"startTime">>, CanidateProposal),BH),
+          base_variables:write(<<"FSM_INFO">>,<<"endTime">>, maps:get(<<"endTime">>, CanidateProposal),BH),
+
           CandidateBC = if
                           is_map(WinningMap) ->
                             % if the winning proposal is a map, then get the winning candidateBC

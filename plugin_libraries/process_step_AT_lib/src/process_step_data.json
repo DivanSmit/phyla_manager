@@ -1,0 +1,46 @@
+{
+  "list": [
+    {
+      "FSM": "contracting_exe_FSM",
+      "resources": [
+        {
+          "capabilities": "OPERATOR_INSTANCE_INFO",
+          "change": 0,
+          "name": "",
+          "port": 0
+        },
+        {
+          "capabilities": "FACILITY_ROOM_INSTANCE_INFO",
+          "change": 9,
+          "name": "Evaluation_Room",
+          "port": 0
+        }
+      ],
+      "description": "Collect the fruit that is done.",
+      "duration": 300000,
+      "processType": "Collect_Fruit",
+      "type": "SPAWN_PS_INSTANCE"
+    },
+    {
+      "FSM": "contracting_exe_FSM",
+      "resources": [
+        {
+          "capabilities": "MOVE_FRUIT",
+          "change": 0,
+          "name": "Test2",
+          "port": 0
+        },
+        {
+          "capabilities": "COLD_STORE_FRUIT",
+          "change": 10,
+          "name": "",
+          "port": 0
+        }
+      ],
+      "description": "They need to move the fruit.",
+      "duration": 10000,
+      "processType": "measure_temp",
+      "type": "SPAWN_PS_INSTANCE"
+    }
+  ]
+}

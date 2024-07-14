@@ -1,6 +1,6 @@
 {"name":"tp_info_handler_ep",
   "lib":"treatment_process_AT_lib",
-  "tags":["INFO","processScheduled"],
+  "tags":["INFO","processScheduled","Update"],
   "bin_dir": "default",
   "behaviour":"receptor",
   "sector": "cm",

@@ -1,6 +1,6 @@
 {"name":"tru_type_info_handler_ep",
   "lib":"tru_RT_lib",
-  "tags":[],
+  "tags":["INFO"],
   "bin_dir": "default",
   "behaviour":"receptor",
   "sector": "cm",

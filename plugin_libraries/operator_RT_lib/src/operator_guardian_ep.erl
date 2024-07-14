@@ -29,7 +29,7 @@ request_start_instance(State, GuardianHandle, BH) ->
 
   Data = base_task_ep:get_schedule_data(GuardianHandle,BH),
 
-  base_guardian_ep:write_instance_attribute_page(<<"Parameters">>,Data,GuardianHandle,BH),
+  base_guardian_ep:write_instance_attribute_page(<<"attributes">>,Data,GuardianHandle,BH),
 
   {start_instance, State}.
 

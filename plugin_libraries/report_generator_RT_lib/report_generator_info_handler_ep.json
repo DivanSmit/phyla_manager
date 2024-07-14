@@ -1,0 +1,8 @@
+{"name":"report_generator_info_handler_ep",
+  "lib":"report_generator_RT_lib",
+  "tags":["RequestForList","generateReport"],
+  "bin_dir": "default",
+  "behaviour":"receptor",
+  "sector": "cm",
+  "language":"beam"
+}

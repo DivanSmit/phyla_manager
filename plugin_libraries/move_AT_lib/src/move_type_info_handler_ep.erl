@@ -41,7 +41,7 @@ handle_request(<<"SPAWN_MOVE_INSTANCE">>,Payload, FROM, BH)->
       Name = maps:get(<<"name">>, Payload)
   end,
 
-  {ok, Recipe} = move_guardian_sp:generate_instance_recipe(Name, ID, BH), %% TODO add the time into the equation, or add it in the attributes
+  {ok, Recipe} = move_guardian_sp:generate_instance_recipe(Name, ID, BH),
   Tsched = base:get_origo(),
   Data1 = Payload, %% Meta data with Process ID
   spawn(fun()->

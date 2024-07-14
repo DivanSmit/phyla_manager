@@ -36,4 +36,8 @@ handle_request(<<"SPAWN_FTA_MACHINE_INSTANCE">>,Payload, FROM, BH)->
     base_guardian_sp:schedule_instance_guardian(Tsched,Recipe,Data1,BH)
         end),
   Reply = #{<<"name">>=>Name},
-  {reply, Reply}.
+  {reply, Reply};
+
+handle_request(<<"INFO">>, <<"InstanceCapabilities">>, From, BH)->
+  Capabilities = base_attributes:read(<<"INSTANCE">>,<<"CAPABILITIES">>,BH),
+  {reply,Capabilities}.

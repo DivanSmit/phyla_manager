@@ -1,6 +1,6 @@
 {"name":"facility_manager_info_handler_ep",
   "lib":"operator_RT_lib",
-  "tags":["SPAWN","ConfigID","TASKS","newConfig"],
+  "tags":["SPAWN","ConfigID","TASKS","newConfig", "ALERT", "Maintenance"],
   "bin_dir": "default",
   "behaviour":"receptor",
   "sector": "cm",

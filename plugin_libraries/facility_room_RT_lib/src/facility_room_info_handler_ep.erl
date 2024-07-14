@@ -14,6 +14,7 @@
 
 
 init(Pars, BH) ->
+  base_variables:write(<<"current_Capacity">>,<<"value">>,0, BH),
   ok.
 
 stop(BH) ->
@@ -26,4 +27,19 @@ handle_request(<<"INFO">>,<<"INFO">>, FROM, BH)->
   MyBC = base:get_my_bc(BH),
   MyName = base_business_card:get_name(MyBC),
   Reply = #{<<"name">>=>MyName},
-  {reply, Reply}.
+  {reply, Reply};
+
+handle_request(<<"CheckIn">>, From, _, BH) ->
+  case base_execution:get_all_tasks(BH) of
+    #{} ->
+      Tasks = base_schedule:get_all_tasks(BH),
+      Masters = myFuncs:extract_partner_names(Tasks, master),
+      case lists:nth(1, Masters) of % If there is nothing on the execution and the next task on sched is with parent
+        From ->
+          {reply, ready};
+        _ ->
+          {reply, not_ready}
+      end;
+    _ ->
+      {reply, not_ready}
+  end.

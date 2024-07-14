@@ -27,14 +27,13 @@ spawn_cancelled(Reason, State, ManagerHandle, BH) ->
 
 request_start_instance(State, GuardianHandle, BH) ->
 
-  Meta = maps:get(<<"meta">>,base_task_ep:get_schedule_data(GuardianHandle, BH)),
+%%  Meta = maps:get(<<"meta">>,base_task_ep:get_schedule_data(GuardianHandle, BH)),
 
   InstanceData = #{
     <<"FSM_Schedule">> => ps_sched_FSM,
-    <<"FSM_Execute">> => contracting_exe_FSM,
+    <<"FSM_Execute">> => binary_to_existing_atom(maps:get(<<"FSM">>,base_task_ep:get_schedule_data(GuardianHandle, BH)), utf8),
     <<"FSM_WAIT_FOR_PARENTS_DELAY">> => 60000, %One minute
-    <<"childContract">>=><<"contractingOp">>,
-    <<"children">>=>Meta
+    <<"childContract">>=><<"contractingOp">>
   },
 
   %%  This is where we add the attributes and state variables

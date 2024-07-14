@@ -14,6 +14,7 @@
 
 
 init(Pars, BH) ->
+
   ok.
 
 stop(BH) ->
@@ -29,13 +30,15 @@ generate_proposal(Requirements, PluginState, NegH, BH) ->
 
   case Name of
     MyName ->
-      {proposal, accept, nostate};
+      StartTime = base_variables:read(<<"FSM_INFO">>,<<"startTime">>,BH),
+      EndTime = base_variables:read(<<"FSM_INFO">>,<<"endTime">>,BH),
+      {proposal, {accept,{StartTime,EndTime}}, StartTime};
     _ ->
       {refuse, not_qualified}
   end.
 
 proposal_accepted(PluginState, NegH, BH) ->
-  Tsched = base:get_origo(),
+  Tsched = PluginState,
   LinkID = list_to_binary(ref_to_list(make_ref())),
   Data1 = #{<<"LinkID">>=>LinkID},
   {promise, Tsched, LinkID,Data1, no_state}.

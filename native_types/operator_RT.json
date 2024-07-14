@@ -5,14 +5,14 @@
         "name": "FM1",
         "id": "1",
         "role": "facility_manager",
-        "password": "hello",
+        "password": "",
         "BreakTime": "12:00"
       },
       {
         "name": "Test2",
         "id": "2",
         "role": "operator",
-        "password": "hello",
+        "password": "",
         "BreakTime": "12:00"
       }
     ]},
@@ -26,7 +26,7 @@
       "name":"OPERATOR_TYPE",
       "taxonomy":{"arti_class":"resource-type","base_type":"OPERATOR_TYPE"}
     },
-    "capabilities":["SPAWN_OPERATOR_INSTANCE"],
+    "capabilities":["SPAWN_OPERATOR_INSTANCE","RESOURCE_INFO"],
     "responsibilities":[],
     "addresses":{},
     "meta":{}

@@ -26,11 +26,11 @@ spawn_cancelled(Reason, State, ManagerHandle, BH) ->
   ok.
 
 request_start_instance(State, GuardianHandle, BH) ->
-
+%% TODO add something here for the end instance case. Perhaps a variable update when instance sends message
   InstanceData = #{
     <<"FSM_Schedule">> => contracting_Sched_FSM,
-    <<"FSM_Execute">> => contracting_exe_FSM,
-    <<"childContract">>=><<"contracting">>
+    <<"FSM_Execute">> => activity_exe_FSM,
+    <<"FSM_WAIT_FOR_PARENTS_DELAY">> => 60000 %One minute
   },
 
   %%  This is where we add the attributes and state variables

@@ -13,7 +13,7 @@
       "name":"PROCESS_TASK_TYPE",
       "taxonomy":{"arti_class":"resource-type","base_type":"PROCESS_TASK_TYPE"}
     },
-    "capabilities":["SPAWN_PROCESS_TASK_INSTANCE","END_PROCESS_TASK_INSTANCE"],
+    "capabilities":["SPAWN_PROCESS_TASK_INSTANCE","END_PROCESS_TASK_INSTANCE","ACTIVITY_INFO"],
     "responsibilities":[],
     "addresses":{},
     "meta":{}

@@ -2,6 +2,10 @@ import socket
 import tkinter as tk
 import random
 
+print("######################")
+print("RUNNING SIMULATION APP")
+print("######################")
+
 # Function to send a random number through the TCP socket
 def send_random_number():
     try:

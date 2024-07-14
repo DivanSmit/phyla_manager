@@ -28,31 +28,54 @@ searching_for_operator(enter, OldState, State)->
   io:format("~n *[PS STATE]*: Searching for an operator ~n"),
   BH = maps:get(<<"BH">>,State),
 
-  Child = maps:get(<<"children">>,State),
   Base_Link = base_attributes:read(<<"meta">>,<<"childContract">>,BH),
 
-  StartTime = maps:get(<<"startTime">>,Child),
+  StartTime = base_attributes:read(<<"meta">>,<<"startTime">>,BH),
+%%  spawn(fun()->
+%%    base_link_master_sp:start_link_negotiation(#{
+%%      <<"AVAILABILITY">>=>StartTime,
+%%      <<"type">>=>resource,
+%%      <<"capabilities">>=><<"TAKE_MEASUREMENT">>
+%%    },Base_Link,BH)
+%%      end),
+
+%%  MetaData = base_attributes:read(<<"meta">>, <<"resources">>,BH),
+
+
+
+
+  Change = 10,
+
+  Requirements =#{
+    <<"AVAILABILITY">>=>StartTime,
+    <<"action">>=>Change,
+    <<"type">>=>resource,
+    <<"capabilities">>=><<"OPERATOR_INSTANCE_INFO">>,
+    <<"processType">>=> base_attributes:read(<<"meta">>, <<"processType">>,BH),
+    <<"description">>=> base_attributes:read(<<"meta">>, <<"description">>,BH),
+    <<"duration">>=> base_attributes:read(<<"meta">>, <<"duration">>,BH)
+  } ,
+
+%% TODO Implement the correct requirements in a robust manner
   spawn(fun()->
-    base_link_master_sp:start_link_negotiation(#{<<"AVAILABILITY">>=>StartTime, <<"type">>=>resource},Base_Link,BH)
-      end),
+    base_link_master_sp:start_link_negotiation(Requirements,Base_Link,BH)
+        end),
   {keep_state, State};
 
 searching_for_operator(cast, contracted, State)->
   io:format("~n *[PS STATE]*: Found an operator ~n"),
-  BH = maps:get(<<"BH">>,State),
 
-  StartTime = base_variables:read(<<"FSM_INFO">>,<<"startTime">>,BH),
-  NewState = maps:merge(State,#{<<"startTime">>=>StartTime}),
-  Child = maps:get(<<"children">>,State),
-  Machine = maps:get(<<"machine">>,Child),
-
-  case map_size(Machine) of
-    0 ->
-      io:format("Operator only task~n"),
-      {next_state, task_scheduled, NewState};
-    _ ->
-      {next_state, searching_for_fta_machine, NewState}
-  end;
+%%  Child = maps:get(<<"children">>,State),
+%%  Machine = maps:get(<<"machine">>,Child),
+%%
+%%  case map_size(Machine) of
+%%    0 ->
+%%      io:format("Operator only task~n"),
+%%
+%%    _ ->
+%%      {next_state, searching_for_fta_machine, State}
+%%  end;
+  {next_state, task_scheduled, State};
 
 searching_for_operator(cast, no_operator, State)->
   io:format("~n *[PS STATE]*: Did not find an operator ~n"),
@@ -81,8 +104,6 @@ searching_for_fta_machine(cast, found_fta_machine, State)->
 searching_for_fta_machine(cast, no_fta_available, State)->
   io:format("~n *[PS STATE]*: Found an fta machine ~n"),
 
-%%  TODO add functionality for no fta machine found
-
   {next_state, searching_for_operator, State};
 
 searching_for_fta_machine(cast, no_fta_machine, State)->
@@ -97,20 +118,19 @@ searching_for_fta_machine(cast, _, State)->
 
 task_scheduled(enter, OldState, State)->
   io:format("~n *[PS STATE]*: Task scheduled ~n"),
-
   BH = maps:get(<<"BH">>,State),
+
   MyBC = base:get_my_bc(BH),
   MyName = base_business_card:get_name(MyBC),
-  StartTime = maps:get(<<"startTime">>,State),
+  StartTime = base_variables:read(<<"FSM_INFO">>,<<"startTime">>,BH),
   EndTime = base_variables:read(<<"FSM_INFO">>,<<"endTime">>,BH),
+
 
   ProID = base_attributes:read(<<"meta">>,<<"parentID">>,BH),
   TaskHolons = bhive:discover_bases(#base_discover_query{id = ProID}, BH),
-  base_signal:emit_signal(TaskHolons, <<"taskScheduled">>, #{
-    <<"endTime">>=>EndTime,
-    <<"startTime">>=>StartTime,
-    <<"taskName">>=>MyName
-  }, BH),
+  base_signal:emit_signal(TaskHolons, <<"taskScheduled">>,
+    {MyName,StartTime,EndTime}
+    , BH),
 
   {stop, normal, State};
 
@@ -135,7 +155,7 @@ task_not_possible(cast, _, State)->
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 finish(enter, OldState, State)->
-  io:format("~n *[PS STATE]*: All children contracted ~n"),
+
 
   {stop, normal, State};
 
@@ -144,5 +164,11 @@ finish(cast, _, State)->
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-terminate(_Reason, _StateName, _State) ->
+terminate(_Reason, _StateName, State) ->
+  io:format("~n *[PS STATE]*: All children contracted ~n"),
+  BH = maps:get(<<"BH">>,State),
+
+  % Start FSM
+  PID = base_variables:read(<<"FSM_EXE">>, <<"FSM_PID">>,BH),
+  gen_statem:cast(PID, scheduled),
   ok.

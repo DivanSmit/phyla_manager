@@ -14,7 +14,7 @@
 -export([init/2, stop/1, request_start/2, task_cancel/4, request_resume/2, start_task/3, resume_task/3, base_variable_update/4, end_task/3]).
 
 
-%% TODO the case where a task cannot spawn and state needs to go to not_possible
+
 init(Pars, BH) ->
   ok.
 

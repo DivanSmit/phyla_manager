@@ -1,0 +1,55 @@
+{
+  "list": [
+    {
+      "children": [
+        {
+          "processType": "Process_11"
+        }
+      ],
+      "processType": "Process_101",
+      "type": "SPAWN_PROCESS_TASK_INSTANCE"
+    },
+    {
+      "children": [
+        {
+          "processType": "Process_21"
+        }
+      ],
+      "processType": "Process_31",
+      "type": "SPAWN_PROCESS_TASK_INSTANCE"
+    },
+    {
+      "children": [
+        {
+          "processType": "Process_11"
+        },
+        {
+          "processType": "Process_12"
+        }
+      ],
+      "processType": "Process_21",
+      "type": "SPAWN_PROCESS_TASK_INSTANCE"
+    },
+    {
+      "children": [
+        {
+          "processType": "measure_temp"
+        },
+        {
+          "processType": "Collect_Fruit"
+        }
+      ],
+      "processType": "Process_12",
+      "type": "SPAWN_PROCESS_TASK_INSTANCE"
+    },
+    {
+      "children": [
+        {
+          "processType": "measure_temp"
+        }
+      ],
+      "processType": "Process_11",
+      "type": "SPAWN_PROCESS_TASK_INSTANCE"
+    }
+  ]
+}

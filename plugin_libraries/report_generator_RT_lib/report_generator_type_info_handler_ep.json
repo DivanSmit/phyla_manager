@@ -1,0 +1,8 @@
+{"name":"report_generator_type_info_handler_ep",
+  "lib":"report_generator_RT_lib",
+  "tags":["SPAWN_REPORT_GENERATOR_INSTANCE","END"],
+  "bin_dir": "default",
+  "behaviour":"receptor",
+  "sector": "cm",
+  "language":"beam"
+}

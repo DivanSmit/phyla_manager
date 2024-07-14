@@ -29,9 +29,9 @@ request_start_link(PluginState, ExH, BH) ->
   CurrentTime = binary_to_list(myFuncs:convert_unix_time_to_normal(base:get_origo())),
   io:format("Servant contract: ~p with parent ~p ready to start at ~p~n",[MyName,PartnerName,CurrentTime]),
 
-%%  Reply = base_link_ep:call_partner(<<"SIGNAL">>,ready,ExH),
+  base_variables:write(<<"FSM_EXE">>, <<"parentExecutionHandel">>,ExH,BH),
 
-  {start, no_state}.
+  {wait, no_state}.
 
 request_resume_link(PluginState, ExH, BH) ->
   {cancel, no_state}.
@@ -49,7 +49,12 @@ partner_signal(_, PluginState, ExH, BH) ->
   erlang:error(not_implemented).
 
 link_end(Reason, PluginState, ExH, BH) ->
-  erlang:error(not_implemented).
+  MyBC = base:get_my_bc(BH),
+  MyName = base_business_card:get_name(MyBC),
+  ProID = base_attributes:read(<<"meta">>, <<"parentID">>, BH),
+  TaskHolons = bhive:discover_bases(#base_discover_query{id = ProID}, BH),
+  base_signal:emit_signal(TaskHolons, <<"Update">>, {MyName,completed}, BH),
+  reflect.
 
 base_variable_update(_, PluginState, ExH, BH) ->
   erlang:error(not_implemented).

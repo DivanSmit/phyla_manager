@@ -28,6 +28,16 @@
   {outdir, "supplementary_modules/ebin"},
   debug_info
 ]}.
+{ [ 'supplementary_modules/jsx-main/src/*'], [
+  {i, "include"},
+  {outdir, "supplementary_modules/ebin"},
+  debug_info
+]}.
+{ [ 'supplementary_modules/epgsql-devel/src/*'], [
+  {i, "include"},
+  {outdir, "supplementary_modules/ebin"},
+  debug_info
+]}.
 { [ 'facility_room_RT_lib/src/*'], [
   {i, "include"},
   {outdir, "facility_room_RT_lib/ebin"},
@@ -43,13 +53,23 @@
   {outdir, "treatment_process_AT_lib/ebin"},
   debug_info
 ]}.
-{ [ 'maintain_records_AT_lib/src/*'], [
+{ [ 'report_generator_RT_lib/src/*'], [
   {i, "include"},
-  {outdir, "maintain_records_AT_lib/ebin"},
+  {outdir, "report_generator_RT_lib/ebin"},
+  debug_info
+]}.
+{ [ 'tru_RT_lib/src/*'], [
+  {i, "include"},
+  {outdir, "tru_RT_lib/ebin"},
   debug_info
 ]}.
 { [ 'activity_instance_lib/src/*'], [
   {i, "include"},
   {outdir, "activity_instance_lib/ebin"},
+  debug_info
+]}.
+{ [ 'resource_instance_lib/src/*'], [
+  {i, "include"},
+  {outdir, "resource_instance_lib/ebin"},
   debug_info
 ]}.

@@ -13,7 +13,7 @@
       "name":"FTA_MACHINE_TYPE",
       "taxonomy":{"arti_class":"resource-type","base_type":"FTA_MACHINE_TYPE"}
     },
-    "capabilities":["SPAWN_FTA_MACHINE_INSTANCE"],
+    "capabilities":["SPAWN_FTA_MACHINE_INSTANCE","RESOURCE_INFO"],
     "responsibilities":[],
     "addresses":{},
     "meta":{}

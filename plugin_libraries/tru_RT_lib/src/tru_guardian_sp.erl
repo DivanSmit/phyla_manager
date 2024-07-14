@@ -46,7 +46,7 @@ generate_instance_recipe(ID, Type, BH) ->
 
   RECIPE = #{
     <<"plugins">>=> [
-      {"name": "tru_info_handler_ep","lib": "tru_RT_lib","init_args": []}
+      #{<<"name">>=><<"tru_info_handler_ep">>,<<"lib">>=><<"tru_RT_lib">>,<<"init_args">>=>[]}
 
     ],
     <<"bc">> => #{

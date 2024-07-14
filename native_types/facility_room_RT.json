@@ -4,17 +4,26 @@
       {
         "name": "cold_storage_1",
         "id": "1252",
-        "capacity": 1000
+        "capacity": 100,
+        "sensors": [
+
+        ]
       },
       {
         "name": "evaluation_room_1",
         "id": "414",
-        "capacity": 1000000
+        "capacity": 1000000,
+        "sensors": [
+
+        ]
       },
       {
         "name": "waste_removal",
         "id": "135",
-        "capacity": 1000000
+        "capacity": 1000000,
+        "sensors": [
+
+        ]
       }
     ]},
     {"name": "facility_room_guardian_ep","lib": "facility_room_RT_lib","init_args": []},
@@ -27,7 +36,7 @@
       "name":"FACILITY_ROOM_TYPE",
       "taxonomy":{"arti_class":"resource-type","base_type":"FACILITY_ROOM_TYPE"}
     },
-    "capabilities":["SPAWN_FACILITY_ROOM_INSTANCE"],
+    "capabilities":["SPAWN_FACILITY_ROOM_INSTANCE","RESOURCE_INFO"],
     "responsibilities":[],
     "addresses":{},
     "meta":{}

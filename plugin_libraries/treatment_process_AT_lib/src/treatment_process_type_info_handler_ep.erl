@@ -20,13 +20,12 @@ stop(BH) ->
   ok.
 
 handle_signal(<<"END">>, ID, BH) ->
-%%  TODO end instance call
   GH = base_guardian_ep:get_guardian_of_id(ID,BH),
   base_guardian_ep:end_instance(GH,BH),
   ok;
 
 handle_signal(<<"ProcessData">>, Data, BH) ->
-%% TODO add checks to see if the data is legit and correct
+
   base_attributes:write_page(<<"processData">>,Data,BH),
   ok.
 

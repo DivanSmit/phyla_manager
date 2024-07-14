@@ -19,6 +19,11 @@ init(Pars, BH) ->
   lists:foldl(fun(Elem,Acc)->
     instance_spawn_request(Elem,BH)
               end, [], Pars),
+
+  base_attributes:write(<<"INSTANCE">>,<<"CAPABILITIES">>, [
+    <<"FACILITY_ROOM_INSTANCE_INFO">>,
+    <<"COLD_STORE_FRUIT">>
+    ], BH),
   ok.
 
 stop(BH) ->
@@ -30,19 +35,24 @@ instance_spawn_request(Pars, BH) ->
 
   {ok, Recipe} = generate_instance_recipe(Name, BH),
   Tsched = base:get_origo(),
-  Data1 = #{
-    <<"capacity">>=>Cap
-  },
-  base_guardian_sp:schedule_instance_guardian(Tsched,Recipe,Data1,BH),
+
+  base_guardian_sp:schedule_instance_guardian(Tsched,Recipe,Pars,BH),
   ok.
 
 generate_instance_recipe(Name, BH) ->
 
     RECIPE = #{
       <<"plugins">> => [
-        #{<<"name">>=><<"move_storage_servant_link_ep">>,<<"lib">>=><<"facility_room_RT_lib">>,<<"init_args">>=>[]},
-        #{<<"name">>=><<"move_storage_servant_link_sp">>,<<"lib">>=><<"facility_room_RT_lib">>,<<"init_args">>=>[]},
-        #{<<"name">>=><<"facility_room_info_handler_ep">>,<<"lib">>=><<"facility_room_RT_lib">>,<<"init_args">>=>[]}
+        #{<<"name">>=><<"contracting_operator_servant_link_ep">>,<<"lib">>=><<"resource_instance_lib">>,<<"init_args">>=>[]},
+        #{<<"name">>=><<"contracting_room_servant_link_sp">>,<<"lib">>=><<"resource_instance_lib">>,<<"init_args">>=>[]},
+        #{<<"name">>=><<"contracting_resource_servant_ap">>,<<"lib">>=><<"resource_instance_lib">>,<<"init_args">>=>[]},
+        #{<<"name">>=><<"contracting_resource_servant_rp">>,<<"lib">>=><<"resource_instance_lib">>,<<"init_args">>=>[]},
+        #{<<"name">>=><<"facility_room_info_handler_ep">>,<<"lib">>=><<"facility_room_RT_lib">>,<<"init_args">>=>[]},
+        #{<<"name">>=><<"sensor_api_sp">>,<<"lib">>=><<"resource_instance_lib">>,<<"init_args">>=>[]},
+        #{<<"name">>=><<"sensor_api_ep">>,<<"lib">>=><<"resource_instance_lib">>,<<"init_args">>=>[]},
+        #{<<"name">>=><<"sensor_api_ap">>,<<"lib">>=><<"resource_instance_lib">>,<<"init_args">>=>[]},
+        #{<<"name">>=><<"sensor_api_rp">>,<<"lib">>=><<"resource_instance_lib">>,<<"init_args">>=>[]}
+
       ],
       <<"bc">> => #{
         <<"identity">> => #{
@@ -50,6 +60,7 @@ generate_instance_recipe(Name, BH) ->
           <<"name">> => Name,
           <<"taxonomy">> => #{<<"arti_class">> => <<"resource-instance">>, <<"base_type">> => <<"FACILITY_ROOM_TYPE">>}
         },
+        % Remember to update Type attributes as new capabilities are added.
         <<"capabilities">> => [
           <<"FACILITY_ROOM_INSTANCE_INFO">>,
           <<"COLD_STORE_FRUIT">>

@@ -14,7 +14,7 @@
 
 
 init(Pars, BH) ->
-  erlang:error(not_implemented).
+  ok.
 
 stop(BH) ->
   erlang:error(not_implemented).

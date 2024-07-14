@@ -20,6 +20,10 @@ init(Pars, BH) ->
   lists:foldl(fun(Elem,Acc)->
     instance_spawn_request(Elem,BH)
               end, [], Pars),
+  base_attributes:write(<<"INSTANCE">>,<<"CAPABILITIES">>, [
+    <<"MEASURE_FTA_VALUES">>,
+    <<"FTA_INSTANCE_INFO">>
+  ], BH),
   ok.
 
 stop(BH) ->
@@ -50,7 +54,11 @@ generate_instance_recipe(Name,ID, BH) ->
         <<"name">>=>Name,
         <<"taxonomy">>=>#{<<"arti_class">>=><<"resource-instance">>,<<"base_type">>=><<"FTA_MACHINE_TYPE">>}
       },
-      <<"capabilities">>=>[<<"MEASURE_FTA_VALUES">>,<<"FTA_INSTANCE_INFO">>],
+      % Remember to update Type attributes as new capabilities are added.
+      <<"capabilities">>=>[
+        <<"MEASURE_FTA_VALUES">>,
+        <<"FTA_INSTANCE_INFO">>
+      ],
       <<"responsibilities">>=>[],
       <<"addresses">>=>#{},
       <<"meta">>=>#{}

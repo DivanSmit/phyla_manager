@@ -1,0 +1,7 @@
+{"name":"report_generator_guardian_ep",
+  "lib":"report_generator_RT_lib",
+  "sector": "ep",
+  "bin_dir": "default",
+  "behaviour":"guardian",
+  "language":"beam"
+}

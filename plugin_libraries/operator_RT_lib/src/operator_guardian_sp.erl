@@ -19,6 +19,13 @@ init(Pars, BH) ->
   lists:foldl(fun(Elem,Acc)->
     instance_spawn_request(Elem,BH)
               end, [], Pars),
+
+  base_attributes:write(<<"INSTANCE">>,<<"CAPABILITIES">>, [
+    <<"manage_facility">>,
+    <<"MoveFruit">>,
+    <<"OPERATOR_INSTANCE_INFO">>,
+    <<"TAKE_MEASUREMENT">>
+  ], BH),
   ok.
 
 stop(BH) ->
@@ -36,6 +43,8 @@ instance_spawn_request(Pars, BH) ->
   ok.
 
 generate_instance_recipe(Name, ID, Role, BH) ->
+
+  % Remember to update Type attributes as new capabilities are added.
   Capabilities = case Role of
                    <<"facility_manager">> -> [
                      <<"manage_facility">>,
@@ -51,11 +60,10 @@ generate_instance_recipe(Name, ID, Role, BH) ->
                  end,
   RECIPE = #{
     <<"plugins">>=> [
-      #{<<"name">>=><<"contracting_operator_servant_link_sp">>,<<"lib">>=><<"activity_instance_lib">>,<<"init_args">>=>[]},
-      #{<<"name">>=><<"contracting_operator_servant_link_ep">>,<<"lib">>=><<"activity_instance_lib">>,<<"init_args">>=>[]},
-%%      #{<<"name">>=><<"ps_operator_servant_link_rp">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},
-      #{<<"name">>=><<"move_operator_servant_link_sp">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},
-      #{<<"name">>=><<"move_operator_servant_link_ep">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},
+      #{<<"name">>=><<"contracting_operator_servant_link_sp">>,<<"lib">>=><<"resource_instance_lib">>,<<"init_args">>=>[]},
+      #{<<"name">>=><<"contracting_operator_servant_link_ep">>,<<"lib">>=><<"resource_instance_lib">>,<<"init_args">>=>[]},
+      #{<<"name">>=><<"contracting_resource_servant_ap">>,<<"lib">>=><<"resource_instance_lib">>,<<"init_args">>=>[]},
+      #{<<"name">>=><<"contracting_resource_servant_rp">>,<<"lib">>=><<"resource_instance_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"operator_info_handler_ep">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]},
       #{<<"name">>=><<"facility_manager_info_handler_ep">>,<<"lib">>=><<"operator_RT_lib">>,<<"init_args">>=>[]}
 

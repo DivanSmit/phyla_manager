@@ -53,14 +53,14 @@ handle_call({http_request,<<"INFO">>,MSG}, From, State) ->
                                             end, [],List),
                    {ok, ListResult}
                end;
-             <<"Test1">>->
+             Something->
                case bhive:discover_bases(#base_discover_query{capabilities = Tag},BH) of
                  []->
                    io:format("No INSTANCE found~n"),
                    {ok, []};
                  List->
                    ListResult = lists:foldl(fun(Elem, Acc)->
-                     Reply = base_signal:emit_request(Elem,<<"INFO">>,Query,BH),
+                     Reply = base_signal:emit_request(Elem,<<"INFO">>,Something,BH),
                      [Reply|Acc]
                                             end, [],List),
                    {ok, ListResult}
@@ -79,13 +79,12 @@ handle_call({http_request,<<"SPAWN">>,MSG}, From, State) ->
   Reply1 = case Query of
              <<"SPAWN">> ->
                Param = maps:get(<<"param">>, MSG),
-               Init = #{<<"param">>=>Param},
                TargetBC = bhive:discover_bases(#base_discover_query{capabilities = Tag}, BH),
                case TargetBC of
                  [] ->
                    {error, no_instances};
                  _ ->
-                   ReplyOfSpawn = base_signal:emit_request(TargetBC, Tag, Init, BH),
+                   ReplyOfSpawn = base_signal:emit_request(TargetBC, Tag, Param, BH),
                    {ok, ReplyOfSpawn}
                end;
              _ -> {error, no_match}
@@ -115,6 +114,25 @@ handle_call({http_request,<<"USERInteract">>,MSG}, From, State) ->
   io:format("Reply: ~p~n",[Reply1]),
   {noreply,State};
 
+handle_call({http_request,<<"newComponent">>,MSG}, From, State) ->
+  io:format("HTTP request recieved from: ~p~n",[MSG]),
+  BH = State#http_state_management.base_handle,
+  User = maps:get(<<"user">>,MSG),
+  Param = maps:get(<<"param">>, MSG),
+
+  TargetBC = bhive:discover_bases(#base_discover_query{capabilities = User}, BH),
+  Reply1 = case TargetBC of
+             [] ->
+               {error, no_instances};
+             _ ->
+               ReplyOfSpawn = base_signal:emit_request(TargetBC, <<"newComponent">>, Param, BH),
+               {ok, ReplyOfSpawn}
+           end,
+%%  io:format("~n The target BC is: ~p~n ",[TargetBC]),
+  gen_server:reply(From,Reply1),
+  io:format("Reply: ~p~n",[Reply1]),
+  {noreply,State};
+
 handle_call({http_request,<<"UserData">>,MSG}, From, State) ->
   io:format("HTTP request recieved from: ~p~n",[MSG]),
   BH = State#http_state_management.base_handle,
@@ -127,6 +145,24 @@ handle_call({http_request,<<"UserData">>,MSG}, From, State) ->
                {error, no_instances};
              _ ->
                ReplyOfSpawn = base_signal:emit_request(TargetBC, Tag, Param, BH),
+               {ok, ReplyOfSpawn}
+           end,
+  gen_server:reply(From,Reply1),
+  io:format("Reply: ~p~n",[Reply1]),
+  {noreply,State};
+
+handle_call({http_request,<<"data_exchange_capabilities">>,MSG}, From, State) ->
+  io:format("HTTP request recieved from: ~p~n",[MSG]),
+  BH = State#http_state_management.base_handle,
+  Cap = maps:get(<<"cap">>,MSG),
+  Tag1 = maps:get(<<"tag1">>,MSG),
+  Tag2 = maps:get(<<"tag2">>, MSG),
+  TargetBC = bhive:discover_bases(#base_discover_query{capabilities = Cap}, BH),
+  Reply1 = case TargetBC of
+             [] ->
+               {error, no_instances};
+             _ ->
+               ReplyOfSpawn = base_signal:emit_request(TargetBC, Tag1, Tag2, BH),
                {ok, ReplyOfSpawn}
            end,
   gen_server:reply(From,Reply1),

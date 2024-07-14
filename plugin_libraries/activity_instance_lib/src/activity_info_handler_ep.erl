@@ -29,6 +29,7 @@ handle_request(<<"INFO">>,<<"INFO">>, FROM ,BH)->
   {reply, Reply}.
 
 handle_signal(<<"StartTask">>,ID, BH)->
+
   case myFuncs:check_if_my_task(ID, BH) of
     my_task ->
       FSM_PID = base_variables:read(<<"FSM_EXE">>, <<"FSM_PID">>, BH),
@@ -46,6 +47,29 @@ handle_signal(<<"EndTask">>,ID, BH)->
     _ ->
       true
   end,
+  ok;
+
+handle_signal(<<"CancelTask">>,ID, BH)-> %Not yet implemented but does work. Only works if task is on schedule
+  case myFuncs:check_if_my_task(ID, BH) of
+    my_task ->
+%%      io:format("All tasks: ~p~n",[base_schedule:get_all_tasks(BH)]),
+      [Shell] = maps:keys(myFuncs:get_task_shell_from_id(ID,BH)),
+%%      io:format("Shell: ~p~n",[Shell]),
+      base_schedule:take_task(Shell,BH), % Remember to send message to other resources to also remove the task
+%%      base_execution:take_task(Shell,BH) This will also work for in execution, but most likely need to cancel or end the link with another reason
+      FSM_PID = base_variables:read(<<"FSM_EXE">>, <<"FSM_PID">>, BH),
+      gen_statem:cast(FSM_PID, start); % Remember to also end the FSM correctly!!
+%%      io:format("All tasks: ~p~n",[base_schedule:get_all_tasks(BH)]);
+    _ ->
+      true
+  end,
+  ok;
+
+handle_signal(<<"Update">>, {parent,Update}, BH)->
+%%  io:format("Received message from: ~p~n",[Value]),
+
+  FSM_PID = base_variables:read(<<"FSM_EXE">>, <<"FSM_PID">>, BH),
+  gen_statem:cast(FSM_PID, Update),
   ok;
 
 handle_signal(<<"Update">>,Value, BH)->

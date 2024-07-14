@@ -14,15 +14,18 @@
 
 
 init(Pars, BH) ->
+  base:wait_for_base_ready(BH),
+  % Starting the Exe FSM
   FSM = base_attributes:read(<<"meta">>,<<"FSM_Execute">>,BH),
   FSM_Data = #{
     <<"BH">>=>BH,
     <<"children">>=>base_attributes:read(<<"meta">>,<<"children">>,BH)
   },
   {ok, StateMachinePID} = gen_statem:start_link({global, make_ref()}, FSM, FSM_Data, []),
-  io:format("Execution FSM Started~n"),
+
   base_variables:write(<<"FSM_EXE">>, <<"FSM_PID">>, StateMachinePID, BH),
   base_variables:write(<<"FSM_EXE">>, <<"ExecutionHandels">>,[],BH),
+  io:format("Master EP INSTALLED FOR ~p with FSM: ~p~n",[myFuncs:myName(BH), FSM]),
   ok.
 
 stop(BH) ->
@@ -36,9 +39,13 @@ request_start_link(PluginState, ExH, BH) ->
   CurrentTime = binary_to_list(myFuncs:convert_unix_time_to_normal(base:get_origo())),
   io:format("Master contract: ~p with child ~p ready to start at ~p~n",[MyName,PartnerName,CurrentTime]),
 
-  Handels = base_variables:read(<<"FSM_EXE">>, <<"ExecutionHandels">>,BH),
-  base_variables:write(<<"FSM_EXE">>, <<"ExecutionHandels">>,[ExH|Handels],BH),
-  %Start timer for checking up on child
+  % Add handles to execute later
+  Handles = base_variables:read(<<"FSM_EXE">>, <<"ExecutionHandels">>,BH),
+  base_variables:write(<<"FSM_EXE">>, <<"ExecutionHandels">>,[ExH|Handles],BH),
+
+  % Start the FSM, if it is required. Otherwise FSM will just ignore
+  FSM_PID = base_variables:read(<<"FSM_EXE">>, <<"FSM_PID">>, BH),
+  gen_statem:cast(FSM_PID, scheduled_time_arrived),
 
   {wait, no_state}.
 
@@ -65,7 +72,8 @@ partner_signal({<<"SIGNAL">>,Payload}, PluginState, ExH, BH) ->
   {ok,PluginState}.
 
 link_end(Reason, PluginState, ExH, BH) ->
-  erlang:error(not_implemented).
+  io:format("The link is finished~n"),
+  archive.
 
 base_variable_update(_, PluginState, ExH, BH) ->
   {ok,PluginState}.

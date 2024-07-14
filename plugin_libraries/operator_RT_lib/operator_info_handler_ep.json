@@ -1,6 +1,6 @@
 {"name":"operator_info_handler_ep",
   "lib":"operator_RT_lib",
-  "tags":["MOVE","INFO","TASKS"],
+  "tags":["MOVE","INFO","TASKS","Update", "CheckIn"],
   "bin_dir": "default",
   "behaviour":"receptor",
   "sector": "cm",
