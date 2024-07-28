@@ -18,6 +18,33 @@
 init(Pars, BH) ->
   FilePath = "C:/Users/LENOVO/Desktop/base-getting-started/phyla_manager_BASE/plugin_libraries/process_task_AT_lib/src/process_task_data.json",
   base_variables:write(<<"TypesOfPS">>, <<"FilePath">>, FilePath, BH),
+
+  base:wait_for_base_ready(BH),
+  TableName = "process_tasks",
+  Columns = [
+    {"name", "text"},
+    {"type", "text"},
+    {"parent", "text"},
+    {"startunix", "bigint"},
+    {"endunix", "bigint"},
+    {"duration","numeric"},
+    {"resource", "text"}, %% Remember to update functions at the bottom if indexes are changed
+    {"trus","text"} %% Remember to update functions at the bottom if indexes are changed
+  ],
+  try
+    timer:sleep(100),
+    postgresql_functions:create_new_table(TableName, Columns)
+  catch
+    _:_ ->
+      try
+        io:format("Trying to create ~p again~n", [TableName])
+      catch
+        _:_ -> io:format("################POSTGRES ERROR###################~n~p cannot be opended~n~n",[TableName])
+      end
+  end,
+
+
+
   ok.
 
 stop(BH) ->
@@ -27,7 +54,18 @@ handle_signal(<<"END">>, ID, BH) ->
 %%  TODO end instance call
   GH = base_guardian_ep:get_guardian_of_id(ID,BH),
   base_guardian_ep:end_instance(GH,BH),
+  ok;
+
+handle_signal(<<"STORE_DATA">>, Data, BH) ->
+
+%%  io:format("Data in PS Type: ~p~n",[Data]),
+  Result = postgresql_functions:write_data_to_postgresql_database(Data, "process_tasks"),
+  case Result of
+    ok -> ok;
+    error -> io:format("Error when trying to write to DB~nwith data -> Data: ~p~n", [Data])
+  end,
   ok.
+
 
 handle_request(<<"INFO">>, Tag, From, BH) ->
   case Tag of
@@ -70,8 +108,8 @@ handle_request(<<"INFO">>, Tag, From, BH) ->
   end;
 
 handle_request(<<"SPAWN_PROCESS_TASK_INSTANCE">>, Payload, FROM, BH) ->
-  IDInt = rand:uniform(1000), %% TODO Change the ID to the processID
-  ID = integer_to_binary(IDInt),
+  IDInt = rand:uniform(1000),
+  ID =   ID = maps:get(<<"processID">>, Payload,integer_to_binary(IDInt)),
 
   Name = case maps:get(<<"name">>, Payload, <<"no_entry">>) of
            <<"no_entry">> -> list_to_binary("PT_" ++ integer_to_list(IDInt));
@@ -108,7 +146,7 @@ handle_request(<<"SPAWN_PROCESS_TASK_INSTANCE">>, Payload, FROM, BH) ->
 
 handle_request(<<"Update">>, From, _, BH) ->
   % This because for the top activity holon their parent is the operator!
-  {reply, ready};
+  {reply, {ready,#{}}};
 
 
 handle_request(<<"newComponent">>,Payload, FROM, BH)->
@@ -117,7 +155,25 @@ handle_request(<<"newComponent">>,Payload, FROM, BH)->
   Data = maps:merge(Payload, #{<<"type">>=><<"SPAWN_PROCESS_TASK_INSTANCE">>}),
   FilePath = base_variables:read(<<"TypesOfPS">>, <<"FilePath">>, BH),
   myFuncs:add_map_to_json_file(FilePath, Data),
-  {reply, ok}.
+  {reply, ok};
+
+handle_request(<<"requestForData">>,Layout, FROM, BH)->
+
+  io:format("P Task received a request for data with layout: ~p~n",[Layout]),
+  Actions = maps:get(<<"actions">>, Layout),
+  Name = maps:get(<<"process">>,Layout),
+  {ok, Entry} = postgresql_functions:execute_combined_queries("process_tasks", [{equal, "name", binary_to_list(Name)}]),
+
+  case Entry of
+    [] -> {reply, no_entry};
+    [Trial] ->
+      TRUs = element(9, Trial),
+      {Incoming, _} = tru:in_and_out(jsx:decode(TRUs)),
+      Structure = get_root_structure(Name, Actions, Incoming, BH),
+      FinalList = flatten_lists(Structure),
+      {reply, FinalList}
+
+  end.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% External functions
@@ -162,4 +218,52 @@ update_with(Key, Fun, Default, Map) ->
     none -> maps:put(Key, Default, Map);
     _ -> maps:update(Key, Fun, Map)
   end.
+
+get_root_structure(Name, Actions, TRUs, BH) ->
+
+  {ok, [Entry]} = postgresql_functions:execute_combined_queries("process_tasks", [{equal, "name", binary_to_list(Name)}]),
+
+  Resources = jsx:decode(element(8, Entry)),
+  lists:foldl(fun(Child, Acc) ->
+    {ok, ChildData} = postgresql_functions:execute_combined_queries("process_tasks", [{equal, "name", binary_to_list(Child)}]),
+    case ChildData of
+      [] -> io:format("The child: ~p is a PS~n", [Child]),
+        TargetBC = bhive:discover_bases(#base_discover_query{capabilities = <<"SPAWN_PS_INSTANCE">>}, BH),
+        [Reply] = base_signal:emit_request(TargetBC, <<"requestForData">>, {Child, Actions}, BH),
+        case Reply of
+          none -> Acc;
+          _ -> Acc ++ [Reply]
+        end;
+      % Need to contact the
+      [List] ->
+        {MyTRUs, _} = tru:in_and_out(jsx:decode(element(9, List))),
+        Common_TRUs = [X || X <- MyTRUs, lists:member(X, TRUs)],
+        case Common_TRUs of
+          [] -> no_trus;
+          _ ->
+            Response = get_root_structure(Child, Actions, Common_TRUs, BH),
+            io:format("Response from child ~p of ~p: ~p~n", [Child, Name, Response]),
+            case is_map(Response) of
+              true -> Acc ++ [Response];
+              false -> Acc
+            end
+        end
+
+    end
+                         end, [], Resources).
+
+flatten_lists(ListOfLists) -> % First time calling this
+  flatten_lists(ListOfLists, []).
+flatten_lists([], Acc) ->
+  lists:reverse(Acc); % Reverse the accumulator at the end to maintain order
+flatten_lists([H | T], Acc) when is_list(H) ->
+  flatten_lists(T, flatten_lists(H, Acc)); % Recursively flatten the head and continue with the tail
+flatten_lists([H | T], Acc) ->
+  flatten_lists(T, [H | Acc]). % Add the head to the accumulator and continue with the tail
+
+
+
+
+
+
 

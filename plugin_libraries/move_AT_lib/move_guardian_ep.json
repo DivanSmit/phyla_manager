@@ -1,7 +1,0 @@
-{"name":"move_guardian_ep",
-  "lib":"move_AT_lib",
-  "sector": "ep",
-  "bin_dir": "default",
-  "behaviour":"guardian",
-  "language":"beam"
-}

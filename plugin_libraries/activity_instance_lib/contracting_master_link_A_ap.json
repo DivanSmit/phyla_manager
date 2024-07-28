@@ -1,0 +1,8 @@
+{"name":"contracting_master_link_ap",
+  "lib":"activity_instance_lib",
+  "base_link":"contracting_A",
+  "sector": "ap",
+  "bin_dir": "default",
+  "behaviour":"link",
+  "language":"beam"
+}

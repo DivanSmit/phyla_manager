@@ -1,8 +1,0 @@
-{"name":"manage_process_configuration_ep",
-  "lib":"treatment_process_AT_lib",
-  "base_task": "manage_process_step",
-  "sector": "ep",
-  "bin_dir": "default",
-  "behaviour":"task",
-  "language":"beam"
-}

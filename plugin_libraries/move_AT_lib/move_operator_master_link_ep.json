@@ -1,8 +1,0 @@
-{"name":"move_operator_master_link_ep",
-  "lib":"move_AT_lib",
-  "base_link":"move_operator",
-  "sector": "ep",
-  "bin_dir": "default",
-  "behaviour":"link",
-  "language":"beam"
-}

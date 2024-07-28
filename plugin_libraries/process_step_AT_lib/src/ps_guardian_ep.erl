@@ -31,7 +31,7 @@ request_start_instance(State, GuardianHandle, BH) ->
 
   InstanceData = #{
     <<"FSM_Schedule">> => ps_sched_FSM,
-    <<"FSM_Execute">> => binary_to_existing_atom(maps:get(<<"FSM">>,base_task_ep:get_schedule_data(GuardianHandle, BH)), utf8),
+    <<"FSM_Execute">> => binary_to_atom(maps:get(<<"FSM">>,base_task_ep:get_schedule_data(GuardianHandle, BH)), utf8),
     <<"FSM_WAIT_FOR_PARENTS_DELAY">> => 60000, %One minute
     <<"childContract">>=><<"contractingOp">>
   },

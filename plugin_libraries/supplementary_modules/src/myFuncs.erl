@@ -14,7 +14,8 @@
 -export([extract_partner_names/2, myName/1, extract_partner_and_task_id/3, get_task_id_from_BH/1, get_task_type_from_BH/1,
   get_task_shell_element/2, get_partner_task_id/1, get_partner_names/2, get_task_shell_from_id/2, get_task_type/1,
   get_task_sort/1, get_task_id/1, check_if_my_task/2, convert_unix_time_to_normal/1, convert_unix_time_to_normal/2, check_availability/4,
-  update_list_and_average/2, add_map_to_json_file/2, read_json_file/1, write_json_file/2]).
+  update_list_and_average/2, add_map_to_json_file/2, read_json_file/1, write_json_file/2, extract_partner_ids/2,
+  csv_to_maps/1]).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -38,6 +39,22 @@ extract_partner_names(Tasks, Type) ->
     Name = base_business_card:get_name(BC),
     [Name | Acc]
               end, [], Values),
+  lists:reverse(ListTasks).
+
+extract_partner_ids(Tasks, Type) ->
+  Values = maps:values(Tasks),
+  ListTasks = lists:foldl(fun(X, Acc) ->
+
+    Meta = X#base_task.meta,
+    BC = case Type of
+           master ->
+             Meta#base_contract.master_bc;
+           servant ->
+             Meta#base_contract.servant_bc
+         end,
+    ID = base_business_card:get_id(BC),
+    [ID | Acc]
+                          end, [], Values),
   lists:reverse(ListTasks).
 
 extract_partner_and_task_id(ID, Type, BH) ->
@@ -195,6 +212,28 @@ add_map_to_json_file(FilePath, NewMap) ->
     {error, Reason} ->
       {error, Reason}
   end.
+
+% Reads the CSV file and converts each row into a map
+csv_to_maps(File) ->
+  {ok, Binary} = file:read_file(File),
+  Lines = binary:split(remove_bom(Binary), <<"\n">>, [global]),
+  [Header | Rows] = Lines,
+  HeaderList = binary:split(trim(Header), <<",">>, [global]),
+  lists:map(fun(Row) ->
+    Values = binary:split(trim(Row), <<",">>, [global]),
+    RowMap = lists:zip(HeaderList, Values),
+    maps:from_list(RowMap)
+            end, lists:filter(fun(Row) -> Row =/= <<>> end, Rows)).
+
+% Removes BOM if present
+remove_bom(<<239, 187, 191, Rest/binary>>) -> Rest; % UTF-8 BOM
+remove_bom(Binary) -> Binary.
+
+% Trims leading and trailing whitespace/newline characters
+trim(Bin) when is_binary(Bin) ->
+  re:replace(re:replace(Bin,
+    <<"^[\\s\\n\\r\\t]+">>, <<>>, [global, {return, binary}]),
+    <<"[\\s\\n\\r\\t]+$">>, <<>>, [global, {return, binary}]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Functions for conversions

@@ -1,6 +1,6 @@
 {"name":"ps_type_info_handler_ep",
   "lib":"process_step_AT_lib",
-  "tags":["SPAWN_PS_INSTANCE","END", "newComponent", "INFO", "STORE_DATA"],
+  "tags":["SPAWN_PS_INSTANCE","END", "newComponent", "INFO", "STORE_DATA", "requestForData"],
   "bin_dir": "default",
   "behaviour":"receptor",
   "sector": "cm",

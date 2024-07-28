@@ -1,0 +1,8 @@
+{"name":"contracting_master_link_rp",
+  "lib":"activity_instance_lib",
+  "base_link":"contractingOp",
+  "sector": "rp",
+  "bin_dir": "default",
+  "behaviour":"link",
+  "language":"beam"
+}

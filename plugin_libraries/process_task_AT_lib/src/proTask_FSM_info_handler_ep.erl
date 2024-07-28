@@ -34,7 +34,7 @@ handle_signal(<<"Update">>, {From, Value}, BH)->
 
   FSM_PID = base_variables:read(<<"FSM_EXE">>, <<"FSM_PID">>, BH),
   case Value of
-    ready ->
+    parent_ready ->
       Count = base_variables:read(<<"FSM_INFO">>, <<"FSM_Ready">>, BH),
       base_variables:write(<<"FSM_INFO">>, <<"FSM_Ready">>, Count + 1, BH),
       gen_statem:cast(FSM_PID, ready);
@@ -67,17 +67,19 @@ handle_request(<<"Update">>, {From, Value}, _, BH) ->
       io:format("Predecessor for ~p: ~p~n", [From, Pred]),
       case Pred of
         <<>> ->
-          {reply, ready};
+          TRU = base_variables:read(<<"TRU">>,<<"List">>,BH),
+          {reply, {ready,TRU}};
         _ ->
           CompletedTasksShells = base_biography:get_all_tasks(BH),
           CompletedTasks = case is_map(CompletedTasksShells) of
                              true -> % Will always be a map
                                %TODO Change this to search for child ID
-                               myFuncs:extract_partner_names(CompletedTasksShells,servant)
+                               myFuncs:extract_partner_ids(CompletedTasksShells,servant)
                            end,
           case lists:member(Pred, CompletedTasks) of
             true ->
-              {reply, ready};
+              TRU = base_variables:read(<<"TRU">>,<<"List">>,BH),
+              {reply, {ready,TRU}};
             false ->
               {reply, not_ready}
           end

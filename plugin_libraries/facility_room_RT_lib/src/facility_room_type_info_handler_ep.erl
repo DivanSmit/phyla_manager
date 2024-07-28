@@ -16,7 +16,6 @@
 
 init(Pars, BH) ->
   base:wait_for_base_ready(BH),
-  timer:sleep(100),
   TableName = "room_sensor_data",
   Columns = [
     {"unix", "bigint"},
@@ -26,7 +25,17 @@ init(Pars, BH) ->
     {"type", "text"},
     {"value", "numeric"}
   ],
-  postgresql_functions:create_new_table(TableName, Columns),
+  try
+    timer:sleep(100),
+    postgresql_functions:create_new_table(TableName, Columns)
+  catch
+    _:_ ->
+      try
+        io:format("Trying to create ~p again~n", [TableName])
+      catch
+        _:_ -> io:format("################POSTGRES ERROR###################~n~p cannot be opended~n~n",[TableName])
+      end
+  end,
   ok.
 
 stop(BH) ->

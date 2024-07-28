@@ -1,8 +1,0 @@
-{"name":"proTask_FSM_sp",
-  "lib":"process_task_AT_lib",
-  "base_task": "proTask_FSM",
-  "sector": "sp",
-  "bin_dir": "default",
-  "behaviour":"task",
-  "language":"beam"
-}

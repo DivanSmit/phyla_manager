@@ -51,8 +51,15 @@ handle_signal(<<"EndTask">>,ID, BH)->
 % Update signal is sent by child INFORMING of a an update
 handle_signal(<<"Update">>,Value, BH)->
 
-  Count = base_variables:read(<<"FSM_INFO">>,<<"FSM_Ready">>,BH),
-  base_variables:write(<<"FSM_INFO">>,<<"FSM_Ready">>,Count+1,BH),
-  FSM_PID = base_variables:read(<<"FSM_EXE">>, <<"FSM_PID">>, BH),
-  gen_statem:cast(FSM_PID, ready),
+  case Value of
+    {parent, parent_ready} ->
+      FSM_PID = base_variables:read(<<"FSM_EXE">>, <<"FSM_PID">>, BH),
+      gen_statem:cast(FSM_PID, ready);
+    _ ->
+      Count = base_variables:read(<<"FSM_INFO">>, <<"FSM_Ready">>, BH),
+      base_variables:write(<<"FSM_INFO">>, <<"FSM_Ready">>, Count + 1, BH),
+      FSM_PID = base_variables:read(<<"FSM_EXE">>, <<"FSM_PID">>, BH),
+      gen_statem:cast(FSM_PID, ready)
+  end,
+
   ok.

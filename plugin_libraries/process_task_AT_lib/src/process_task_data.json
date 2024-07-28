@@ -3,6 +3,18 @@
     {
       "children": [
         {
+          "processType": "Collect_Initial_Fruit"
+        },
+        {
+          "processType": "Measure_Fruit_Quality"
+        }
+      ],
+      "processType": "Sub_Trial_1",
+      "type": "SPAWN_PROCESS_TASK_INSTANCE"
+    },
+    {
+      "children": [
+        {
           "processType": "Process_11"
         }
       ],

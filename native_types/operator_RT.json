@@ -26,7 +26,7 @@
       "name":"OPERATOR_TYPE",
       "taxonomy":{"arti_class":"resource-type","base_type":"OPERATOR_TYPE"}
     },
-    "capabilities":["SPAWN_OPERATOR_INSTANCE","RESOURCE_INFO"],
+    "capabilities":["SPAWN_OPERATOR_INSTANCE","RESOURCE_INFO","TRU_MEASURED_VALUES"],
     "responsibilities":[],
     "addresses":{},
     "meta":{}

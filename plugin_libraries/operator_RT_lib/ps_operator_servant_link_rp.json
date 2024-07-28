@@ -1,8 +1,0 @@
-{"name":"ps_operator_servant_link_rp",
-  "lib":"operator_RT_lib",
-  "base_link":"ps_operator",
-  "sector": "rp",
-  "bin_dir": "default",
-  "behaviour":"link",
-  "language":"beam"
-}

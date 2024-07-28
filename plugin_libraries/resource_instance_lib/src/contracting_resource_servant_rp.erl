@@ -25,7 +25,7 @@ request_reflection(ReflectorHandle, BH) ->
   {start_reflection, state}.
 
 start_reflection(PluginState, ReflectorHandle, BH) ->
-  io:format("Starting a reflection~n"),
+  io:format("Starting a reflection for ~p~n",[myFuncs:myName(BH)]),
 
   Shell = base_task_rp:get_shell(ReflectorHandle),
   StartTime = Shell#task_shell.tstart,
@@ -33,11 +33,37 @@ start_reflection(PluginState, ReflectorHandle, BH) ->
   Duration = EndTime - StartTime,
 
   {ok,Requirements} = base_task_rp:get_schedule_data(ReflectorHandle,BH),
+  {ok, Execution} = base_task_rp:get_execution_data(ReflectorHandle,BH),
+%%  io:format("Execution: ~p~n",[Execution]),
 
-  io:format("Requirements in RP: ~p~n",[Requirements]),
+  % Send data to TYPE
+  MyBC = base:get_my_bc(BH),
+  MyID = MyBC#business_card.identity,
+  Tax = MyID#identity.taxonomy,
+  ParentType = Tax#base_taxonomy.base_type_code,
+  TaskHolons = bhive:discover_bases(#base_discover_query{name = ParentType}, BH),
+
+  Task = base_biography:get_task(Shell, BH),
+  Meta = Task#base_task.meta,
+  MasterBC = Meta#base_contract.master_bc,
+  PartnerName = base_business_card:get_name(MasterBC),
+
+  case maps:get(<<"TRU_Data">>, Execution, not_applicable) of
+    not_applicable -> ok;
+    TRU_Data when is_list(TRU_Data)->
+%%      io:format("The TRU data is valid~n"),
+      lists:foreach(fun(Elem) when is_map(Elem)->
+        Map = maps:merge(#{
+          <<"resource">>=>myFuncs:myName(BH),
+          <<"process">>=>PartnerName,
+          <<"unix">>=> integer_to_binary(base:get_origo())
+        }, Elem),
+        base_signal:emit_signal(TaskHolons, <<"TRU_Data">>, Map, BH)
+      end, TRU_Data)
+end,
+
+%%  io:format("Requirements in RP: ~p~n",[Requirements]),
   Type = maps:get(<<"processType">>, Requirements),
-
-
 
   case base_variables:read(<<"TaskDurationList">>, Type, BH) of
     no_entry->

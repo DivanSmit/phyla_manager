@@ -16,7 +16,6 @@
 
 init(Pars, BH) ->
   base:wait_for_base_ready(BH),
-  timer:sleep(100), % Buffer to allow functions to be compiled or something like that
   TableName = "operator_work_schedule", %% TODO add the table value as a base_variable
   Columns = [
     {"unix", "bigint"},
@@ -27,7 +26,53 @@ init(Pars, BH) ->
     {"duration", "numeric"},
     {"efficiency", "numeric"}
   ],
-  postgresql_functions:create_new_table(TableName, Columns),
+  base_variables:write(list_to_binary(TableName), <<"columns">>, Columns, BH),
+  try
+    timer:sleep(100),
+    postgresql_functions:create_new_table(TableName, Columns)
+  catch
+    _:_ ->
+      try
+        io:format("Trying to create ~p again~n", [TableName])
+      catch
+        _:_ -> io:format("################POSTGRES ERROR###################~n~p cannot be opended~n~n",[TableName])
+      end
+  end,
+
+  TableName1 = "tru_measurements", %% TODO add the table value as a base_variable
+  Columns1 = [
+    {"unix", "bigint"},
+    {"process", "text"},
+    {"resource", "text"},
+    {"name", "text"},
+    {"fruittype", "text"},
+    {"weight", "numeric"},
+    {"amount", "numeric"},
+    {"harvestdate", "text"}
+  ],
+  base_variables:write(list_to_binary(TableName1), <<"columns">>, Columns1, BH),
+  try
+    timer:sleep(100),
+    postgresql_functions:create_new_table(TableName1, Columns1)
+  catch
+    _:_ ->
+      try
+        io:format("Trying to create ~p again~n", [TableName1])
+      catch
+        _:_ -> io:format("################POSTGRES ERROR###################~n~p cannot be opended~n~n", [TableName1])
+      end
+  end,
+
+  spawn(fun()->
+    timer:sleep(2000),
+%%    TaskHolons = bhive:discover_bases(#base_discover_query{capabilities = <<"manage_facility">>}, BH),
+%%    base_signal:emit_request(TaskHolons, <<"INFO">>, <<"Test2">>, BH)
+    TargetBC = bhive:discover_bases(#base_discover_query{name = <<"Report Generator">>}, BH),
+    [Data] = base_signal:emit_request(TargetBC, <<"generateTrialReport">>, #{<<"name">>=> <<"Trial 1">>}, BH)
+
+        end),
+
+
   ok.
 
 stop(BH) ->
@@ -57,6 +102,16 @@ handle_signal(<<"RESOURCE_USAGE">>, Data, BH) ->
     ok -> ok;
     error -> io:format("Error when trying to write to DB:~nData: ~p~n", [Data_map])
   end,
+  ok;
+
+handle_signal(<<"TRU_Data">>, Data, BH) ->
+
+  Result = postgresql_functions:write_data_to_postgresql_database(Data, "tru_measurements"),
+  case Result of
+    ok -> ok;
+    error -> io:format("Error when trying to write to DB:~nData: ~p~n", [Data])
+  end,
+
   ok.
 
 handle_request(<<"SPAWN_OPERATOR_INSTANCE">>,Payload, FROM, BH)->
@@ -96,41 +151,91 @@ handle_request(<<"requestForData">>,Request, FROM, BH)->
 %%  {equal, "name", "John"},
 %%  {range, "age", "20", "30"}
 
+  Data = case maps:get(<<"action">>, Request, <<"operator_schedule">>) of
+           <<"operator_schedule">> -> TableName = "operator_work_schedule",
+             AlLdata = maps:get(<<"allData">>, Request),
 
-  TableName = "operator_work_schedule",
-  AlLdata = maps:get(<<"allData">>, Request),
+             if
+               AlLdata == false ->
+                 Start = integer_to_list(maps:get(<<"startTime">>, Request)),
+                 End = integer_to_list(maps:get(<<"endTime">>, Request)),
+                 case maps:get(<<"selected">>, Request) of
+                   <<"All">> ->
+                     TargetBC = bhive:discover_bases(#base_discover_query{capabilities = <<"OPERATOR_INSTANCE_INFO">>}, BH),
+                     lists:foldl(fun(Elem, Acc) ->
+                       Name = base_business_card:get_name(Elem),
+                       {ok, Rows} = postgresql_functions:execute_combined_queries(TableName, [{equal, "name", binary_to_list(Name)}, {range, "unix", Start, End}]),
+                       maps:merge(Acc, #{Name => Rows})
+                                 end, #{}, TargetBC);
+                   Other ->
+                     {ok, Rows} = postgresql_functions:execute_combined_queries(TableName, [{equal, "name", binary_to_list(Other)},
+                       {range, "unix", Start, End}]),
+                     #{Other => Rows}
+                 end;
 
-  Data = if
-           AlLdata == false ->
-             Start = integer_to_list(maps:get(<<"startTime">>, Request)),
-             End = integer_to_list(maps:get(<<"endTime">>, Request)),
-             case maps:get(<<"selected">>, Request) of
-               <<"All">> ->
-                 TargetBC = bhive:discover_bases(#base_discover_query{capabilities = <<"OPERATOR_INSTANCE_INFO">>}, BH),
-                 lists:foldl(fun(Elem, Acc) ->
-                   Name = base_business_card:get_name(Elem),
-                   {ok, Rows} = postgresql_functions:execute_combined_queries(TableName, [{equal, "name", binary_to_list(Name)}, {range, "unix", Start, End}]),
-                   maps:merge(Acc, #{Name => Rows})
-                             end, #{}, TargetBC);
-               Other ->
-                 {ok, Rows} = postgresql_functions:execute_combined_queries(TableName, [{equal, "name", binary_to_list(Other)},
-                   {range, "unix", Start, End}]),
-                 #{Other => Rows}
+               true ->
+                 case maps:get(<<"selected">>, Request) of
+                   <<"All">> ->
+                     TargetBC = bhive:discover_bases(#base_discover_query{capabilities = <<"OPERATOR_INSTANCE_INFO">>}, BH),
+                     lists:foldl(fun(Elem, Acc) ->
+                       Name = base_business_card:get_name(Elem),
+                       {ok, Rows} = postgresql_functions:execute_combined_queries(TableName, [{equal, "name", binary_to_list(Name)}]),
+                       maps:merge(Acc, #{Name => Rows})
+                                 end, #{}, TargetBC);
+                   Other ->
+                     {ok, Rows} = postgresql_functions:execute_combined_queries(TableName, [{equal, "name", binary_to_list(Other)}]),
+                     #{Other => Rows}
+                 end
              end;
+           <<"Measure">> ->
+             TableName1 = "tru_measurements",
+             TRUs = maps:get(<<"TRUs">>, Request, []),
+             Process = maps:get(<<"process">>, Request),
 
-           true ->
-             case maps:get(<<"selected">>, Request) of
-               <<"All">> ->
-                 TargetBC = bhive:discover_bases(#base_discover_query{capabilities = <<"OPERATOR_INSTANCE_INFO">>}, BH),
-                 lists:foldl(fun(Elem, Acc) ->
-                   Name = base_business_card:get_name(Elem),
-                   {ok, Rows} = postgresql_functions:execute_combined_queries(TableName, [{equal, "name", binary_to_list(Name)}]),
-                   maps:merge(Acc, #{Name => Rows})
-                             end, #{}, TargetBC);
-               Other ->
-                 {ok, Rows} = postgresql_functions:execute_combined_queries(TableName, [{equal, "name", binary_to_list(Other)}]),
-                 #{Other => Rows}
-             end
+             Map = lists:foldl(fun(Elem, Acc) ->
+               {ok, [Rows|_]} = postgresql_functions:execute_combined_queries(TableName1, [{equal, "name", binary_to_list(Elem)}, {equal, "process", binary_to_list(Process)}]),
+               maps:put(Elem,Rows, Acc)
+                               end, #{}, TRUs),
+
+
+             lists:foldl(fun(Val, Acc)->
+                maps:merge(Acc, get_values(Val, Map, BH))
+             end, #{},maps:get(<<"values">>, Request, []));
+           _->
+             #{}
+
          end,
 
+
   {reply, Data}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% External functions
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+get_values(Value, Data,BH)->
+
+  Columns = base_variables:read(<<"tru_measurements">>, <<"columns">>, BH),
+  Val = binary_to_list(Value),
+
+  {Index, _} = lists:foldl(
+    fun({Elem,_}, {I, Acc}) ->
+      if
+        Val == Elem -> {I, I};
+        true -> {I + 1, Acc}
+      end
+    end, {1, 0}, Columns),
+
+  {Sum, Count} = maps:fold(fun(_Key, Tuple, {AccSum, AccCount}) ->
+    Elem = element(Index, Tuple),
+    {AccSum + binary_to_integer(Elem), AccCount + 1}
+                           end, {0, 0}, Data),
+
+  % Calculate the average
+   Return = case Count of
+            0 -> 0; % If there are no elements, return 0 to avoid division by zero
+            _ -> Sum / Count
+          end,
+
+  #{Value => Return}.

@@ -1,6 +1,6 @@
 {"name":"process_task_type_info_handler_ep",
   "lib":"process_task_AT_lib",
-  "tags":["SPAWN_PROCESS_TASK_INSTANCE","END","INFO", "newComponent","Update"],
+  "tags":["SPAWN_PROCESS_TASK_INSTANCE","END","INFO", "newComponent","Update", "STORE_DATA", "requestForData"],
   "bin_dir": "default",
   "behaviour":"receptor",
   "sector": "cm",

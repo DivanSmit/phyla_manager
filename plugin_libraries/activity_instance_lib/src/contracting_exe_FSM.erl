@@ -27,7 +27,7 @@ callback_mode() ->
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 wait_for_schedule(enter, OldState, State)->
-  io:format("~n *[ACTIVITY E STATE]*: Waiting for schedule ~n"),
+  io:format("~n *[CONTRACT E STATE]*: Waiting for schedule ~n"),
 
   {keep_state, State};
 
@@ -134,10 +134,12 @@ check_with_parent(cast, internal_check, State) ->
   TaskHolons = bhive:discover_bases(#base_discover_query{id = ProID}, BH),
   [Reply] = base_signal:emit_request(TaskHolons, <<"Update">>, {MyName,query}, BH),
   case Reply of
-    ready ->
-      {next_state, wait_for_operator_start, State};
     not_ready ->
-      {next_state, parent_not_yet_ready, State}
+      {next_state, parent_not_yet_ready, State};
+    {ready, TRU} ->
+      io:format("~p received TRU list from parent: ~p~n",[myFuncs:myName(BH),TRU]),
+      base_variables:write(<<"TRU">>, <<"List">>, TRU, BH),
+      {next_state, wait_for_operator_start, State}
   end;
 
 check_with_parent(cast, _, State) ->
@@ -157,7 +159,7 @@ parent_not_yet_ready(timeout, _EventContent, {State,_}) ->
 
 parent_not_yet_ready(cast, parent_ready, {State,_}) ->
   io:format("~n *[CONTRACT E STATE]*: Parent said you can start~n"),
-  {next_state, wait_for_operator_start, State};
+  {next_state, check_with_parent, State};
 
 parent_not_yet_ready(cast, _, {State,OldTIme}) ->
   io:format("~n *[CONTRACT E STATE]*: Unsupported cast ~n"),
@@ -252,6 +254,12 @@ finish(enter, OldState, State)->
       base_link_ep:end_link(Handle,completed)
   end,
 
+  % TODO needs to reflect on the data that it generated from TRUs and write it to a DB,
+  % if it is required if. Most likely only store and measure.
+  % If stored, then it needs to ask the room for information on what the values were for the period
+  % All values need to got to the TYPE
+
+  contracting_master_link_ap:analysis(BH),
 
   io:format("~n### ~p IS COMPLETE WITH ITS TASKS ###~n~n",[myFuncs:myName(BH)]),
   {stop, normal, State};

@@ -2,6 +2,43 @@
   "list": [
     {
       "FSM": "contracting_exe_FSM",
+      "action": "Collect",
+      "description": "Collect the fruit from storage.",
+      "duration": 1000,
+      "processType": "Collect_Initial_Fruit",
+      "resources": [
+        {
+          "capabilities": "OPERATOR_INSTANCE_INFO",
+          "change": 0,
+          "name": "",
+          "port": 0
+        }
+      ],
+      "truAction": "Collect",
+      "type": "SPAWN_PS_INSTANCE"
+    },
+    {
+      "FSM": "contracting_exe_FSM",
+      "action": "Measure",
+      "description": "Measure the meta data from the TRU's.",
+      "duration": 1000,
+      "processType": "Measure_Fruit_Quality",
+      "resources": [
+        {
+          "capabilities": "OPERATOR_INSTANCE_INFO",
+          "change": 0,
+          "name": "",
+          "port": 0
+        }
+      ],
+      "truAction": "Measure",
+      "type": "SPAWN_PS_INSTANCE"
+    },
+    {
+      "FSM": "contracting_exe_FSM",
+      "description": "Collect the fruit that is done.",
+      "duration": 300000,
+      "processType": "Collect_Fruit",
       "resources": [
         {
           "capabilities": "OPERATOR_INSTANCE_INFO",
@@ -16,13 +53,14 @@
           "port": 0
         }
       ],
-      "description": "Collect the fruit that is done.",
-      "duration": 300000,
-      "processType": "Collect_Fruit",
+      "truAction": "None",
       "type": "SPAWN_PS_INSTANCE"
     },
     {
       "FSM": "contracting_exe_FSM",
+      "description": "They need to move the fruit.",
+      "duration": 10000,
+      "processType": "measure_temp",
       "resources": [
         {
           "capabilities": "MOVE_FRUIT",
@@ -37,9 +75,7 @@
           "port": 0
         }
       ],
-      "description": "They need to move the fruit.",
-      "duration": 10000,
-      "processType": "measure_temp",
+      "truAction": "Collect",
       "type": "SPAWN_PS_INSTANCE"
     }
   ]

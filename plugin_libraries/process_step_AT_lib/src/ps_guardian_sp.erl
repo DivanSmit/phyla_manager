@@ -41,9 +41,10 @@ generate_instance_recipe(Name, ID, Contract, BH) ->
 
                  #{<<"name">> => <<"contracting_operator_master_link_sp">>, <<"lib">> => <<"activity_instance_lib">>, <<"init_args">> => []},
                  #{<<"name">> => <<"contracting_operator_master_link_ep">>, <<"lib">> => <<"activity_instance_lib">>, <<"init_args">> => []},
+                 #{<<"name">> => <<"contracting_operator_master_link_rp">>, <<"lib">> => <<"activity_instance_lib">>, <<"init_args">> => []},
+                 #{<<"name">> => <<"contracting_operator_master_link_ap">>, <<"lib">> => <<"activity_instance_lib">>, <<"init_args">> => []},
                  #{<<"name">> => <<"activity_info_handler_ep">>, <<"lib">> => <<"activity_instance_lib">>, <<"init_args">> => []},
                  #{<<"name">> => <<"contracting_servant_link_A_sp">>, <<"lib">> => <<"activity_instance_lib">>, <<"init_args">> => []},
-                 #{<<"name">> => <<"contracting_servant_link_A_rp">>, <<"lib">> => <<"activity_instance_lib">>, <<"init_args">> => []},
                  #{<<"name">> => <<"contracting_servant_link_A_ep">>, <<"lib">> => <<"activity_instance_lib">>, <<"init_args">> => []}
 
                ],
@@ -68,9 +69,10 @@ generate_instance_recipe(Name, ID, Contract, BH) ->
 
                  #{<<"name">> => <<"contracting_operator_master_link_sp">>, <<"lib">> => <<"activity_instance_lib">>, <<"init_args">> => []},
                  #{<<"name">> => <<"contracting_operator_master_link_ep">>, <<"lib">> => <<"activity_instance_lib">>, <<"init_args">> => []},
+                 #{<<"name">> => <<"contracting_operator_master_link_rp">>, <<"lib">> => <<"activity_instance_lib">>, <<"init_args">> => []},
+                 #{<<"name">> => <<"contracting_operator_master_link_ap">>, <<"lib">> => <<"activity_instance_lib">>, <<"init_args">> => []},
                  #{<<"name">> => <<"activity_info_handler_ep">>, <<"lib">> => <<"activity_instance_lib">>, <<"init_args">> => []},
                  #{<<"name">> => <<"contracting_servant_link_B_sp">>, <<"lib">> => <<"activity_instance_lib">>, <<"init_args">> => []},
-                 #{<<"name">> => <<"contracting_servant_link_B_rp">>, <<"lib">> => <<"activity_instance_lib">>, <<"init_args">> => []},
                  #{<<"name">> => <<"contracting_servant_link_B_ep">>, <<"lib">> => <<"activity_instance_lib">>, <<"init_args">> => []}
 
                ],

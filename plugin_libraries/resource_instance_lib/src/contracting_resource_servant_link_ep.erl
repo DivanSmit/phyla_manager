@@ -6,7 +6,7 @@
 %%% @end
 %%% Created : 12. Jun 2024 14:39
 %%%-------------------------------------------------------------------
--module(contracting_operator_servant_link_ep).
+-module(contracting_resource_servant_link_ep).
 -author("LENOVO").
 -behaviour(base_link_ep).
 -include("../../../base_include_libs/base_terms.hrl").
@@ -38,8 +38,8 @@ link_start(PluginState, ExH, BH) ->
   io:format("~nLINK TASK IS STARING SERVANT~n"),
 
   Name = myFuncs:myName(BH),
-
   {ok, Data1} = base_task_ep:get_schedule_data(ExH, BH),
+
   Action = maps:get(<<"truAction">>, Data1, none),
   case Action of
     % Based on the instructed action, something needs to happen and then send data to the partner if needed
@@ -47,33 +47,16 @@ link_start(PluginState, ExH, BH) ->
       io:format("No action in data1 for ~p: ~p~n", [Name, Data1]);
     <<"None">> ->
       io:format("No TRU action required for ~p~n", [Name]);
-    <<"Measure">> ->
-      io:format("~p needs to measure the fruit~n", [Name]),
-      TRUs = base_link_ep:call_partner(<<"TRU_LIST">>, <<"Request">>, ExH),
-      Data = measure(TRUs),
-      io:format("Measure Data: ~p~n",[Data]),
-      base_task_ep:write_execution_data(#{<<"TRU_Data">>=>Data}, base_link_ep:get_shell(ExH),BH);
-%%      io:format("~p received partner reply: ~p~n", [Name, Data]);
-    <<"Collect">> ->
-      io:format("~p needs to collect the TRU~n", [Name]),
+    <<"Store">>->
+      io:format("~p needs to store the fruit. ~n", [Name]),
+      %% TODO also needs to update the current capacity because values are entered
 
-      PartnerBC = base_link_ep:get_partner_bc(ExH),
-
-      %% TODO this needs to come from the Requirements!
-      Data = #{
-        <<"name">> => myFuncs:myName(BH),
-        <<"type">> => <<"apple">>,
-        <<"amount">> => 3,
-        <<"process">>=> base_business_card:get_name(PartnerBC)
+      FSM_data = #{
+        <<"execution">>=>ExH,
+        <<"BH">>= BH,
+        <<"Data1">>=>Data1
       },
-
-      TaskHolons = bhive:discover_bases(#base_discover_query{capabilities = <<"TRU_INSTANCE">>}, BH),
-      [TRUs] = base_signal:emit_request(TaskHolons,<<"NEW">>, Data, BH),
-
-      base_link_ep:signal_partner(<<"New_TRUs">>, TRUs, ExH);
-    <<"Transform">> ->
-      io:format("~p needs to Transform the TRU~n", [Name]);
-    %% tru:change_tru(In, Out, OriginalMap)
+      {ok, StateMachinePID} = gen_statem:start_link({global, base_business_card:get_id(base:get_my_bc(BH))}, no_operator_task_FSM, FSM_data, []);
     _ ->
       io:format("Invalid TRU action of~p for ~p~n", [Action, Name])
   end,
@@ -104,13 +87,3 @@ base_variable_update({<<"TaskStatus">>, Variable, Value}, PluginState, ExH, BH) 
   {ok, no_state}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%% TODO Remove once testing is done
-measure(TRUs) ->
-  File = "C:/Users/LENOVO/Desktop/base-getting-started/phyla_manager_BASE/plugin_libraries/operator_RT_lib/src/testTRUdata.csv",
-  Data = myFuncs:csv_to_maps(File),
-
-  lists:foldl(fun({Map, Index}, Acc) ->
-    UpdatedMap = maps:update(<<"name">>, lists:nth(Index, TRUs), Map),
-    Acc ++ [UpdatedMap]
-              end, [], lists:zip(Data, lists:seq(1, length(Data)))).

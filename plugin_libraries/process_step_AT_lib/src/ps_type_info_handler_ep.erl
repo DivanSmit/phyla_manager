@@ -20,28 +20,29 @@ init(Pars, BH) ->
   base_variables:write(<<"TypesOfPS">>, <<"FilePath">>, FilePath, BH),
 
   base:wait_for_base_ready(BH),
-  timer:sleep(100),
   TableName = "process_steps",
   Columns = [
     {"name", "text"},
     {"type", "text"},
     {"parent", "text"},
-    {"startUnix", "bigint"},
-    {"endUnix", "bigint"},
+    {"startunix", "bigint"},
+    {"endunix", "bigint"},
     {"duration","numeric"},
-    {"resource", "text"}
+    {"resource", "text"},
+    {"action", "text"},
+    {"trus","text"}
   ],
-  postgresql_functions:create_new_table(TableName, Columns),
-
-  timer:sleep(2000),
-  Data = #{<<"duration">> => <<"2.69">>,
-    <<"name">> => <<"MT1">>,<<"parent">> => <<"Trial 1">>,
-    <<"resource">> => jsx:encode([<<"FM1">>,<<"MT1">>]),
-    <<"startunix">> => <<"1720992428837">>,
-    <<"endunix">> => <<"1720992431531">>,
-    <<"type">> => <<"measure_temp">>},
-  handle_signal(<<"STORE_DATA">>, Data, BH),
-
+  try
+    timer:sleep(100),
+    postgresql_functions:create_new_table(TableName, Columns)
+  catch
+    _:_ ->
+      try
+        io:format("Trying to create ~p again~n", [TableName])
+      catch
+        _:_ -> io:format("################POSTGRES ERROR###################~n~p cannot be opended~n~n",[TableName])
+      end
+  end,
   ok.
 
 stop(BH) ->
@@ -55,7 +56,8 @@ handle_signal(<<"END">>, ID, BH) ->
 
 handle_signal(<<"STORE_DATA">>, Data, BH) ->
 
-  io:format("Data in PS Type: ~p~n",[Data]),
+%%  io:format("Data in PS Type: ~p~n",[Data]),
+
 
   Result = postgresql_functions:write_data_to_postgresql_database(Data, "process_steps"),
   case Result of
@@ -67,7 +69,7 @@ handle_signal(<<"STORE_DATA">>, Data, BH) ->
 handle_request(<<"SPAWN_PS_INSTANCE">>,Payload, FROM, BH)->
 
   IDInt = rand:uniform(10000),
-  ID = integer_to_binary(IDInt),
+  ID = maps:get(<<"processID">>, Payload,integer_to_binary(IDInt)),
 
   Name = case maps:get(<<"name">>, Payload) of
            no_entry -> list_to_binary("PS_" ++ integer_to_list(IDInt));
@@ -129,7 +131,55 @@ handle_request(<<"newComponent">>,Payload, FROM, BH)->
       FilePath = base_variables:read(<<"TypesOfPS">>, <<"FilePath">>, BH),
       myFuncs:add_map_to_json_file(FilePath, Data),
       {reply, ok}
-  end.
+  end;
+
+handle_request(<<"requestForData">>,Layout, FROM, BH)->
+
+  io:format("P Step received a request for data with layout: ~p~n",[Layout]),
+  {Name, Actions} = Layout,
+  {ok, Entry} = postgresql_functions:execute_combined_queries("process_steps", [{equal, "name", binary_to_list(Name)}]),
+
+  Answer = case Entry of
+    [] -> [];
+    [Data] ->
+      TRUAction = element(9, Data),
+      T = jsx:decode(element(10, Data)),
+      {TRUs, _} = tru:in_and_out(T),
+      lists:foldl(fun(Elem, Acc) ->
+        ElemAct = maps:get(<<"action">>, Elem),
+        io:format("ElemAct = ~p, TRUAct = ~p~n",[ElemAct, TRUAction]),
+        if
+          TRUAction == ElemAct ->
+
+            [Resource] = jsx:decode(element(8, Data)),
+
+            Data_map = maps:merge(Elem, #{
+              <<"process">> => Name,
+              <<"TRUs">> => TRUs
+            }),
+            TargetBC = bhive:discover_bases(#base_discover_query{capabilities = <<"TRU_MEASURED_VALUES">>}, BH),
+            [Replies] = base_signal:emit_request(TargetBC, <<"requestForData">>, Data_map, BH),
+            io:format("Reply from OP Type: ~p~n", [Replies]),
+            #{<<"name">> => Name,
+              <<"date">>=> myFuncs:convert_unix_time_to_normal(binary_to_integer(element(5, Data))),
+              <<"values">>=> Replies,
+              <<"type">>=> TRUAction};
+          true-> Acc
+
+        end
+                  end, [], Actions)
+  end,
+
+  Reply = case Answer of
+            [] -> none;
+            _ ->
+              Answer
+
+          end,
+  {reply, Reply}.
+
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% External functions

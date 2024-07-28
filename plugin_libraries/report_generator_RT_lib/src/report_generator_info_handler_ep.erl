@@ -32,6 +32,44 @@ handle_request(<<"RequestForList">>, Tag, From, BH) ->
   end, [<<"All">>], TargetBC),
   {reply, ListOfnames};
 
+handle_request(<<"generateTrialReport">>, Data, From, BH) ->
+  io:format("Generate Report!~n"),
+
+  Name = maps:get(<<"name">>, Data, none),
+  Report = maps:get(<<"reportType">>, Data, <<"general">>),
+  FileName = maps:get(<<"file">>, Data, "report1"),
+
+
+%% TODO put the Layout in a json (config) file
+  ReportLayout = case Report of
+                   <<"general">> ->
+                     #{
+                       <<"process">>=> Name,
+                       <<"actions">> => [
+                         #{
+                           <<"action">> => <<"Measure">>,
+                           <<"values">> => [<<"weight">>],
+                           <<"stats">> => [<<"average">>]
+                         },
+                         #{
+                           <<"action">> => <<"Store">>,
+                           <<"values">> => [<<"temperature">>, <<"duration">>, <<"start">>, <<"end">>],
+                           <<"stats">> => [<<"average">>,<<"min">>, <<"max">>,<<"all_data">>]
+                         }
+                       ]
+                     };
+                   _ -> #{}
+                 end,
+
+  TargetBC = bhive:discover_bases(#base_discover_query{capabilities = <<"SPAWN_PROCESS_TASK_INSTANCE">>}, BH),
+  [Reply] = base_signal:emit_request(TargetBC, <<"requestForData">>, ReportLayout, BH),
+  io:format("Report datails: ~p~n",[Reply]),
+
+  generate_report(FileName, Report, Reply),
+
+
+  {reply, ok};
+
 handle_request(<<"generateReport">>, Data, From, BH) ->
 
 %%  io:format("Data: ~p~n",[Data]),
@@ -78,6 +116,9 @@ handle_request(<<"generateReport">>, Data, From, BH) ->
 
   {reply, Summary}.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% External functions
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%FilePath = "C:/Users/LENOVO/Desktop/base-getting-started/phyla_manager_BASE/plugin_libraries/report_generator_RT_lib/src/testData.csv",
 %%CSV = write_rows_to_csv(FilePath, Rows),
@@ -127,3 +168,75 @@ average_of_numbers(List, Index) ->
     0 -> 0;
     _ -> S / C
   end.
+
+generate_report(FileName, Type, Data)->
+
+  FilePath = "C:/Users/LENOVO/Desktop/base-getting-started/phyla_manager_BASE/plugin_libraries/report_generator_RT_lib/src/"++FileName++".csv",
+
+  {ok, File} = file:open(FilePath, [write]),
+
+  case Type of
+    <<"general">> ->
+      io:format("Creating General Report~n"),
+      lists:foreach(fun(Elem) when is_map(Elem) ->
+        TypeOfVal = maps:get(<<"type">>, Elem, none),
+
+        case TypeOfVal of
+          <<"Measure">> -> io:format("Measure Data~n"),
+            Name = maps:get(<<"name">>, Elem),
+            Date = maps:get(<<"date">>, Elem),
+            Values = maps:get(<<"values">>, Elem),
+            Keys = maps:keys(Values),
+            BIN = [<<"Name">>, <<"date">>] ++ Keys,
+
+            Headers = [binary_to_list(Value) || Value <- BIN],
+            io:format("Head: ~p~n", [Headers]),
+            io:format(File, "~s~n", [string:join(Headers, ",")]),
+            Row = lists:foldl(fun(Key, Acc) ->
+              Val = float_to_binary(maps:get(Key, Values), [{decimals, 2}]),
+              io:format("val: ~p~n",[Val]),
+              Acc++[binary_to_list(Val)]
+            end, [binary_to_list(Name), binary_to_list(Date)], Keys),
+            io:format("Row: ~p~n",[Row]),
+            io:format(File, "~s~n", [string:join(Row, ",")]),
+            io:format(File, "~n", [])
+          ;
+          <<"Store">> -> io:format("Store Data~n");
+          _ -> none
+        end
+
+                    end, Data);
+    _ -> ok
+  end,
+
+%%  % Define headers for the first table
+%%  Headers1 = ["name", "result", "duration"],
+%%
+%%  % Write headers for the first table
+%%  io:format(File, "~s~n", [string:join(Headers1, ",")]),
+%%
+%%  % Write data for the first table
+%%  lists:foreach(
+%%    fun(Map) ->
+%%      Row = [maps:get(name, Map), maps:get(result, Map), integer_to_list(maps:get(duration, Map))],
+%%      io:format(File, "~s~n", [string:join(Row, ",")])
+%%    end, Table1),
+%%
+%%  % Add a separator (empty line)
+%%  io:format(File, "~n", []),
+%%
+%%  % Define headers for the second table
+%%  Headers2 = ["id", "status", "time_spent"],
+%%
+%%  % Write headers for the second table
+%%  io:format(File, "~s~n", [string:join(Headers2, ",")]),
+%%
+%%  % Write data for the second table
+%%  lists:foreach(
+%%    fun(Map) ->
+%%      Row = [maps:get(id, Map), maps:get(status, Map), integer_to_list(maps:get(time_spent, Map))],
+%%      io:format(File, "~s~n", [string:join(Row, ",")])
+%%    end, Table2),
+
+  % Close the file
+  file:close(File).

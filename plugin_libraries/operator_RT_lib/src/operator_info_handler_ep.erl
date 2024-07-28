@@ -22,18 +22,16 @@ init(Pars, BH) ->
   case Role of
     <<"operator">> ->
 
-      %Testing
-      {ok, BinaryData} = file:read_file("C:/Users/LENOVO/Desktop/base-getting-started/phyla_manager_BASE/plugin_libraries/treatment_process_AT_lib/src/process_config_test.json"),
-      JsonString = bason:json_to_map(BinaryData), %%%%%%%%%%%%%%%%%%%%%%%%%%%%% Remove once testing is done!
-
       io:format("Starting Testing from Operator Info Handler~n");
+%%      handle_request(<<"INFO">>, <<"Test2">>, BH, BH);
 %%      TaskHolons = bhive:discover_bases(#base_discover_query{capabilities = <<"manage_facility">>}, BH),
 %%      io:format("TBC: ~p~n", [TaskHolons]);
 %%      Reply1 = base_signal:emit_request(TaskHolons, <<"newConfig">>, JsonString, BH);
     _ ->
       H = 2
   end,
-%%    handle_request(<<"INFO">>,<<"Test1">>, BH, BH);
+
+
   ok.
 
 stop(BH) ->
@@ -147,50 +145,36 @@ handle_request(<<"INFO">>,<<"Test1">>, FROM, BH)->
 handle_request(<<"INFO">>,<<"Test2">>, FROM, BH)->
   io:format("Received test2~n"),
 
-  Elem = #{
-    <<"name">> => <<"Trial_1">>,
-    <<"childContract">> => <<"contracting_A">>,
-    <<"predecessor">> => [],
-    <<"children">> => [
-      #{
-        <<"name">> => <<"Process_1">>,
-        <<"startTime">> => base:get_origo() + 10000,
-        <<"predecessor">> => [],
-        <<"type">> => <<"SPAWN_PROCESS_TASK_INSTANCE">>,
-        <<"children">> => [
-          #{
-            <<"name">> => <<"Move_1">>,
-            <<"startTime">> => 0,
-            <<"predecessor">> => [],
-            <<"type">> => <<"SPAWN_PS_INSTANCE">>,
-            <<"children">>=>[
-              #{<<"capeability">>=><<"COLD_STORE_FRUIT">>,
-                <<"requirements">>=>{}}
-            ]
-          },
-          #{
-            <<"name">> => <<"Move_2">>,
-            <<"startTime">> => 0,
-            <<"predecessor">> => [],
-            <<"type">> => <<"SPAWN_PS_INSTANCE">>,
-            <<"meta">> => #{
-              <<"machine">> => #{},
-              <<"change">>=>60
-            }
-          }
-        ]
-      }
+  Data = #{
+    <<"children">> =>
+    [#{<<"children">> => [],
+      <<"customTime">> => false,
+      <<"name">> => <<"CF1">>,
+      <<"predecessor">> => <<>>,
+      <<"processID">> => <<"rbs4lp4qu">>,
+      <<"processType">> =>
+      <<"Collect_Initial_Fruit">>,
+      <<"startTime">> => 0},
+      #{<<"children">> => [],
+        <<"customTime">> => false,
+        <<"name">> => <<"MT1">>,
+        <<"predecessor">> =>
+        <<"rbs4lp4qu">>,
+        <<"processID">> => <<"lue8l1azo">>,
+        <<"processType">> =>
+        <<"Measure_Fruit_Quality">>,
+        <<"startTime">> => 0}],
+    <<"customTime">> => false,
+    <<"name">> => <<"Trial 1">>,
+    <<"predecessor">> => <<>>,
+    <<"processID">> => <<"5sqq67swm">>,
+    <<"processType">> => <<"Sub_Trial_1">>,
+    <<"startTime">> => 0},
 
-    ]
-  },
-  MyBC = base:get_my_bc(BH),
-  MyID = base_business_card:get_id(MyBC),
-
-  Data_map = maps:merge(#{<<"parentID">> => MyID,<<"startTime">>=>base:get_origo()}, Elem),
 %%  io:format("Data map: ~p~n",[Data_map]),
   Spawn_Tag = <<"SPAWN_PROCESS_TASK_INSTANCE">>,
   TaskHolons = bhive:discover_bases(#base_discover_query{capabilities = Spawn_Tag}, BH),
-  Name = base_signal:emit_request(TaskHolons, Spawn_Tag, Data_map, BH),
+  Name = base_signal:emit_request(TaskHolons, Spawn_Tag, Data, BH),
   Reply = #{<<"Reply">>=>Name},
   {reply, Reply};
 
@@ -245,7 +229,7 @@ handle_request(<<"TASKS">>, Request, FROM, BH) ->
 
 handle_request(<<"Update">>, From, _, BH) ->
   % This because for the top activity holon their parent is the operator!
-  {reply, ready};
+  {reply, {ready, #{}}};
 
 handle_request(<<"CheckIn">>, From, _, BH) ->
   %% TODO this function should also change such that it check for the next task on sched according to time and not in list order
@@ -255,6 +239,7 @@ handle_request(<<"CheckIn">>, From, _, BH) ->
       Masters = myFuncs:extract_partner_names(Tasks, master),
       case lists:nth(1, Masters) of % If there is nothing on the execution and the next task on sched is with parent
         From ->
+
           {reply, ready};
         _ ->
           {reply, not_ready}

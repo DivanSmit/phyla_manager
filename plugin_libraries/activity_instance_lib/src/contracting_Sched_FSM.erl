@@ -60,7 +60,7 @@ spawn_and_wait_for_child(enter, OldState, State)->
                         <<>> -> % If not, it starts when the parent starts
                           base_attributes:read(<<"meta">>, <<"startTime">>, BH);
                         _ -> % If it does have a pred, the end time of the pred is now the start time for the next
-                          case base_variables:read(lists:nth(1,ChildPred), <<"endTime">>, BH) of
+                          case base_variables:read(ChildPred, <<"endTime">>, BH) of
                             no_entry -> % Just check to see that the pred has been spawned, if not, it takes the parents
                               base_attributes:read(<<"meta">>, <<"startTime">>, BH);
                             Time ->

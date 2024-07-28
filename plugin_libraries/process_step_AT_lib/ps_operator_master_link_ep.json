@@ -1,8 +1,0 @@
-{"name":"ps_operator_master_link_ep",
-  "lib":"process_step_AT_lib",
-  "base_link":"ps_operator",
-  "sector": "ep",
-  "bin_dir": "default",
-  "behaviour":"link",
-  "language":"beam"
-}

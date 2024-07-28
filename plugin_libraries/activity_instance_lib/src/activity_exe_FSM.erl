@@ -155,12 +155,13 @@ check_with_parent(cast, internal_check, State) ->
 
   %% Sending a request, because an answer is required if can continue or not
   [Reply] = base_signal:emit_request(TaskHolons, <<"Update">>, {MyName,query}, BH),
-  io:format("Reply from parent of ~p: ~p~n", [MyName,Reply]),
+  io:format("Reply from the parent of ~p: ~p~n", [MyName,Reply]),
   case Reply of
-    ready ->
-      {next_state, executing_tasks, State};
     not_ready ->
-      {next_state, parent_not_yet_ready, State}
+      {next_state, parent_not_yet_ready, State};
+    {ready, TRU} ->
+      base_variables:write(<<"TRU">>, <<"List">>, TRU, BH),
+      {next_state, executing_tasks, State}
   end;
 
 check_with_parent(cast, _, State) ->
@@ -181,7 +182,7 @@ parent_not_yet_ready(timeout, _EventContent, {State,_}) ->
 
 parent_not_yet_ready(cast, ready, {State,_}) ->
   io:format("~n *[CONTRACT E STATE]*: Parent said you can start~n"),
-  {next_state, wait_for_operator_start, State};
+  {next_state, executing_tasks, State};
 
 parent_not_yet_ready(cast, _, {State,OldTIme}) ->
   io:format("~n *[CONTRACT E STATE]*: Unsupported cast ~n"),
@@ -202,6 +203,8 @@ finish(enter, OldState, State)->
     Handle ->
       base_link_ep:end_link(Handle,completed)
   end,
+
+  contracting_master_link_ap:analysis(BH),
 
   io:format("~n### ~p IS COMPLETE WITH ITS TASKS ###~n~n",[myFuncs:myName(BH)]),
 

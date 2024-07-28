@@ -44,6 +44,8 @@ generate_instance_recipe(Name, ID, Contract,BH) ->
                    #{<<"name">> => <<"proTask_FSM_info_handler_ep">>, <<"lib">> => <<"process_task_AT_lib">>, <<"init_args">> => []},
                    #{<<"name">> => <<"contracting_master_link_A_sp">>, <<"lib">> => <<"activity_instance_lib">>, <<"init_args">> => []},
                    #{<<"name">> => <<"contracting_master_link_A_ep">>, <<"lib">> => <<"activity_instance_lib">>, <<"init_args">> => []},
+                   #{<<"name">> => <<"contracting_master_link_A_rp">>, <<"lib">> => <<"activity_instance_lib">>, <<"init_args">> => []},
+                   #{<<"name">> => <<"contracting_master_link_A_ap">>, <<"lib">> => <<"activity_instance_lib">>, <<"init_args">> => []},
                    #{<<"name">> => <<"contracting_servant_link_B_sp">>, <<"lib">> => <<"activity_instance_lib">>, <<"init_args">> => []},
                    #{<<"name">> => <<"contracting_servant_link_B_ep">>, <<"lib">> => <<"activity_instance_lib">>, <<"init_args">> => []}
 
@@ -71,6 +73,8 @@ generate_instance_recipe(Name, ID, Contract,BH) ->
                    #{<<"name">> => <<"contracting_servant_link_A_sp">>, <<"lib">> => <<"activity_instance_lib">>, <<"init_args">> => []},
                    #{<<"name">> => <<"contracting_servant_link_A_ep">>, <<"lib">> => <<"activity_instance_lib">>, <<"init_args">> => []},
                    #{<<"name">> => <<"contracting_master_link_B_sp">>, <<"lib">> => <<"activity_instance_lib">>, <<"init_args">> => []},
+                   #{<<"name">> => <<"contracting_master_link_B_ap">>, <<"lib">> => <<"activity_instance_lib">>, <<"init_args">> => []},
+                   #{<<"name">> => <<"contracting_master_link_B_rp">>, <<"lib">> => <<"activity_instance_lib">>, <<"init_args">> => []},
                    #{<<"name">> => <<"contracting_master_link_B_ep">>, <<"lib">> => <<"activity_instance_lib">>, <<"init_args">> => []}
 
                  ],
@@ -78,7 +82,7 @@ generate_instance_recipe(Name, ID, Contract,BH) ->
                    <<"identity">> => #{
                      <<"id">> => ID,
                      <<"name">> => Name,
-                     <<"taxonomy">> => #{<<"arti_class">> => <<"resource-instance">>, <<"base_type">> => <<"process_task_TYPE">>}
+                     <<"taxonomy">> => #{<<"arti_class">> => <<"resource-instance">>, <<"base_type">> => <<"PROCESS_TASK_TYPE">>}
                    },
                    <<"capabilities">> => [],
                    <<"responsibilities">> => [],

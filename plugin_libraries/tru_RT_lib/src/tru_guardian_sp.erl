@@ -26,24 +26,15 @@ stop(BH) ->
 
 instance_spawn_request(Pars, BH) ->
   ID = maps:get(<<"id">>,Pars),
-  Type = maps:get(<<"type">>,Pars),
+  Name = maps:get(<<"name">>,Pars),
 
-  {ok, Recipe} = generate_instance_recipe(ID, Type, BH),
+  {ok, Recipe} = generate_instance_recipe(ID, Name, BH),
   Tsched = base:get_origo(),
-  Data1 = Pars,
+  Data1 = #{},
   base_guardian_sp:schedule_instance_guardian(Tsched,Recipe,Data1,BH),
   ok.
 
-generate_instance_recipe(ID, Type, BH) ->
-  Capabilities = case Type of
-                   <<"outgoingTRU">> -> [
-                      <<"outgoingTRU">>
-                   ];
-                   <<"incomingTRU">> -> [
-                     <<"incomingTRU">>
-                   ]
-                 end,
-
+generate_instance_recipe(ID, Name, BH) ->
   RECIPE = #{
     <<"plugins">>=> [
       #{<<"name">>=><<"tru_info_handler_ep">>,<<"lib">>=><<"tru_RT_lib">>,<<"init_args">>=>[]}
@@ -52,10 +43,10 @@ generate_instance_recipe(ID, Type, BH) ->
     <<"bc">> => #{
       <<"identity">>=>#{
         <<"id">>=>ID,
-        <<"name">>=>ID,
+        <<"name">>=>Name,
         <<"taxonomy">>=>#{<<"arti_class">>=><<"resource-instance">>,<<"base_type">>=><<"OPERATOR_TYPE">>}
       },
-      <<"capabilities">>=>Capabilities,
+      <<"capabilities">>=>[<<"TRU_INSTANCE">>],
       <<"responsibilities">>=>[],
       <<"addresses">>=>#{},
       <<"meta">>=>#{}

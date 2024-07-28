@@ -15,17 +15,22 @@
 
 init(Pars, BH) ->
   base:wait_for_base_ready(BH),
-  % Starting the Exe FSM
-  FSM = base_attributes:read(<<"meta">>,<<"FSM_Execute">>,BH),
-  FSM_Data = #{
-    <<"BH">>=>BH,
-    <<"children">>=>base_attributes:read(<<"meta">>,<<"children">>,BH)
-  },
-  {ok, StateMachinePID} = gen_statem:start_link({global, make_ref()}, FSM, FSM_Data, []),
 
-  base_variables:write(<<"FSM_EXE">>, <<"FSM_PID">>, StateMachinePID, BH),
+  % Starting the Exe FSM
+  spawn(fun()->
+    FSM = base_attributes:read(<<"meta">>,<<"FSM_Execute">>,BH),
+    FSM_Data = #{
+      <<"BH">>=>BH,
+      <<"children">>=>base_attributes:read(<<"meta">>,<<"children">>,BH)
+    },
+    {ok, StateMachinePID} = gen_statem:start_link({global, make_ref()}, FSM, FSM_Data, []),
+    base_variables:write(<<"FSM_EXE">>, <<"FSM_PID">>, StateMachinePID, BH)
+%%    io:format("Master EP INSTALLED FOR ~p with FSM: ~p~n",[myFuncs:myName(BH), FSM])
+  end),
+
   base_variables:write(<<"FSM_EXE">>, <<"ExecutionHandels">>,[],BH),
-  io:format("Master EP INSTALLED FOR ~p with FSM: ~p~n",[myFuncs:myName(BH), FSM]),
+  base_variables:write(<<"TRU">>,<<"List">>, #{}, BH),
+  base_variables:write(<<"TRU">>, <<"Data">>,[],BH),
   ok.
 
 stop(BH) ->
@@ -53,27 +58,60 @@ request_resume_link(PluginState, ExH, BH) ->
   {cancel, no_state}.
 
 link_start(PluginState, ExH, BH) ->
-  MyBC = base:get_my_bc(BH),
-  MyName = base_business_card:get_name(MyBC),
-  PartnerBC = base_link_ep:get_partner_bc(ExH),
-  PartnerName = base_business_card:get_name(PartnerBC),
-  io:format("Contract ~p with ----- ~p~n",[MyName,PartnerName]),
-  {ok, no_state}.
+  spawn(fun()->
+    MyBC = base:get_my_bc(BH),
+    MyName = base_business_card:get_name(MyBC),
+    PartnerBC = base_link_ep:get_partner_bc(ExH),
+    PartnerName = base_business_card:get_name(PartnerBC),
+    io:format("Contract ~p with <-----> ~p started.~n",[MyName,PartnerName])
+  end),
+  {ok, started}.
 
 link_resume(PluginState, ExH, BH) ->
   erlang:error(not_implemented).
 
-partner_call(Payload, PluginState, ExH, BH) ->
-  io:format("Received partner call: ~p~n",[Payload]),
-  {reply, ok, PluginState}.
+% This is requesting for TRU data
+partner_call({<<"TRU_LIST">>, Payload}, PluginState, ExH, BH) ->
+  io:format("~p received partner call of request~n",[myFuncs:myName(BH)]),
+  TRU = base_variables:read(<<"TRU">>,<<"List">>,BH),
+  List = tru:current(TRU),
+  {reply, List, PluginState};
 
-partner_signal({<<"SIGNAL">>,Payload}, PluginState, ExH, BH) ->
-  io:format("Received partner signal: ~p~n",[Payload]),
+partner_call({<<"END_Task">>, <<"Request">>}, PluginState, ExH, BH) ->
+  % This request is for if a resource requests to end the task
+  %% TODO potentially do more with this task than just a finish reply
+  %% TODO This needs to reflect in the FSM as well that the task is finished
+  % You need to check what state the fsm is in and what cast is required
+  % You need to update the exe FSM to accommodate that no operator is present
+  {reply_end, finish, completed, PluginState}.
+
+partner_signal({<<"TRU_DATA">>, Data}, PluginState, ExH, BH) ->
+  io:format("~p received partner call with Data~n",[myFuncs:myName(BH)]),
+  PreviousData = base_variables:read(<<"TRU">>, <<"Data">>,BH),
+  fun() when is_list(Data) -> base_variables:write(<<"TRU">>, <<"Data">>, PreviousData++Data, BH) end(),
+  {ok, PluginState};
+
+partner_signal({<<"Update_TRU">>, Payload}, PluginState, ExH, BH) ->
+  TRU = base_variables:read(<<"TRU">>,<<"List">>, BH),
+  NewTRU = tru:add_new(Payload, TRU),
+  base_variables:write(<<"TRU">>,<<"List">>, NewTRU, BH),
+%%  io:format("New TRU: ~p for ~p~n",[NewTRU, myFuncs:myName(BH)]),
+  {ok, PluginState};
+
+
+% This is informing the master on the current TRU List/ A New List
+partner_signal({<<"New_TRUs">>,Payload}, PluginState, ExH, BH) ->
+  io:format("~p received partner signal: ~p~n",[myFuncs:myName(BH),Payload]),
+  TRU = base_variables:read(<<"TRU">>,<<"List">>, BH),
+  NewTRU = tru:change_tru(Payload, [], TRU),
+  base_variables:write(<<"TRU">>,<<"List">>, NewTRU, BH),
+%%  io:format("New TRU for ~p: ~p~n",[myFuncs:myName(BH), NewTRU]),
   {ok,PluginState}.
 
 link_end(Reason, PluginState, ExH, BH) ->
   io:format("The link is finished~n"),
-  archive.
+  % TODO process task needs to reflect on the affected TRUs that form part of it in a DB
+  reflect.
 
 base_variable_update(_, PluginState, ExH, BH) ->
   {ok,PluginState}.

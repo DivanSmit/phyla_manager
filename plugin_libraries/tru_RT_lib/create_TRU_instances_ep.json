@@ -1,8 +1,0 @@
-{"name":"create_TRU_instances_ep",
-  "lib":"tru_RT_lib",
-  "base_task": "create_TRU",
-  "sector": "ep",
-  "bin_dir": "default",
-  "behaviour":"task",
-  "language":"beam"
-}

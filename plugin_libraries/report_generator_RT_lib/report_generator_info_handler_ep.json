@@ -1,6 +1,6 @@
 {"name":"report_generator_info_handler_ep",
   "lib":"report_generator_RT_lib",
-  "tags":["RequestForList","generateReport"],
+  "tags":["RequestForList","generateReport", "generateTrialReport"],
   "bin_dir": "default",
   "behaviour":"receptor",
   "sector": "cm",

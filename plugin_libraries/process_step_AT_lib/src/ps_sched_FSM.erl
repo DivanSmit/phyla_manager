@@ -53,7 +53,8 @@ searching_for_operator(enter, OldState, State)->
     <<"capabilities">>=><<"OPERATOR_INSTANCE_INFO">>,
     <<"processType">>=> base_attributes:read(<<"meta">>, <<"processType">>,BH),
     <<"description">>=> base_attributes:read(<<"meta">>, <<"description">>,BH),
-    <<"duration">>=> base_attributes:read(<<"meta">>, <<"duration">>,BH)
+    <<"duration">>=> base_attributes:read(<<"meta">>, <<"duration">>,BH),
+    <<"truAction">> => base_attributes:read(<<"meta">>, <<"truAction">>, BH)
   } ,
 
 %% TODO Implement the correct requirements in a robust manner

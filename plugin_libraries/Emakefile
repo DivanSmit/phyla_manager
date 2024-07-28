@@ -3,11 +3,6 @@
   {outdir, "operator_RT_lib/ebin"},
   debug_info
 ]}.
-{ [ 'move_AT_lib/src/*'], [
-  {i, "include"},
-  {outdir, "move_AT_lib/ebin"},
-  debug_info
-]}.
 { [ 'interface_lib/src/*'], [
   {i, "include"},
   {outdir, "interface_lib/ebin"},
@@ -46,11 +41,6 @@
 { [ 'process_task_AT_lib/src/*'], [
   {i, "include"},
   {outdir, "process_task_AT_lib/ebin"},
-  debug_info
-]}.
-{ [ 'treatment_process_AT_lib/src/*'], [
-  {i, "include"},
-  {outdir, "treatment_process_AT_lib/ebin"},
   debug_info
 ]}.
 { [ 'report_generator_RT_lib/src/*'], [
