@@ -179,10 +179,11 @@ handle_cast(Request, State) ->
 %%                                    INETS SERVER SETUP
 %% ============================================================================================%%
 
-start_http_server(SERVER_DIR,PORT,EXPID)->
+start_http_server(SERVER_DIR, PORT, EXPID) ->
   inets:start(),
   io:format("start_http_server-------------------------------~n"),
-  {ok, Pid} = inets:start(httpd, [{port, PORT},
+  {ok, Pid} = inets:start(httpd, [
+    {port, PORT},
     {modules, [
       mod_alias,
       mod_actions,
@@ -191,12 +192,16 @@ start_http_server(SERVER_DIR,PORT,EXPID)->
       mod_log,
       mod_disk_log
     ]},
-    {server_name,pid_to_list(EXPID)},
-    {server_root,SERVER_DIR},
+    {server_name, pid_to_list(EXPID)},
+    {server_root, SERVER_DIR},
     {script_alias, {"/erl/", SERVER_DIR}},
     {erl_script_alias, {"/erl", [http_session_gen_server]}},
-    {document_root,SERVER_DIR}, {bind_address, any},{error_log, "./errors.log"}]),
-  io:format("~n [INFO] HTTP SERVER STARTED ON PORT ~p ~n",[PORT]).
+    {document_root, SERVER_DIR},
+    {bind_address, {0,0,0,0}},  % Bind to all interfaces
+    {error_log, "./errors.log"}
+  ]),
+  io:format("~n [INFO] HTTP SERVER STARTED ON PORT ~p ~n", [PORT]).
+
 
 %% ============================================================================================%%
 %%                                    ROUTING
@@ -247,13 +252,13 @@ extract_message(Request)->
       {error,<<"bad_request">>}
   end.
 
-deliver(RESPONSE,ENV,SessionID)->
+deliver(RESPONSE, ENV, SessionID) ->
   case bason:map_to_json(RESPONSE) of
-    {ok,JSON}->
+    {ok, JSON} ->
       JSON;
-    _->
+    _ ->
       JSON = <<"{'code':'json_error'}">>
   end,
-  Headers = "Content-Type: application/json \r\n Access-Control-Allow-Origin: * \r\n\r\n",
-  mod_esi:deliver(SessionID, Headers),  %Headers must be a string.
+  Headers = "Content-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n\r\n",
+  mod_esi:deliver(SessionID, Headers),  % Headers must be a string.
   mod_esi:deliver(SessionID, [JSON]).

@@ -1,6 +1,8 @@
 {
   "plugins": [
-    {"name":"control_center_http_session_ep","lib":"interface_lib","init_args": ["C:/Users/LENOVO/Desktop/base-getting-started/phyla_manager_BASE/INTERFACE_INETS",9001]}],
+    {"name":"control_center_http_session_ep",
+      "lib":"interface_lib",
+      "init_args": ["C:/Users/LENOVO/Desktop/base-getting-started/phyla_manager_BASE/INTERFACE_INETS",9001]}],
   "bc":{
     "identity":
     {

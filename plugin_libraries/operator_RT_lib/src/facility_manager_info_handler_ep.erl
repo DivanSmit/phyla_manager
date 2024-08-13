@@ -46,7 +46,7 @@ handle_request(<<"SPAWN">>,<<"currentConfig">>, FROM, BH)->
   Reply = #{<<"Reply">>=>CurrentConfig},
   {reply, Reply};
 
-%% TODO setup the UI to send messages to the FM instead of PT Type
+%% TODO setup the UI to send messages to the FM instead of PT Type [Potentially delete]
 handle_request(<<"newConfig">>,Configurations, FROM, BH)->
 %%  io:format("FM received request to create new Treatment Process~n"),
   TaskHolons = bhive:discover_bases(#base_discover_query{capabilities = <<"SPAWN_TREATMENT_PROCESS_INSTANCE">>}, BH),

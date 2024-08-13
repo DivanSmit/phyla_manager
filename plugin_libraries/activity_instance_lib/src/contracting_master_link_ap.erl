@@ -62,10 +62,13 @@ analysis(BH) ->
       ChildrenNames = lists:delete(myFuncs:myName(BH), ChildrenNamesBIN),
 
       TRUs = base_variables:read(<<"TRU">>, <<"List">>, BH),
-      fun() when map_size(TRUs) > 0 ->
-        TRUBC = bhive:discover_bases(#base_discover_query{name = <<"TRU_Representative">>}, BH),
-        base_signal:emit_signal(TRUBC, <<"CompletedTask">>, {myFuncs:myName(BH), TRUs}, BH)
-      end(),
+      if
+        map_size(TRUs) > 0 ->
+          TRUBC = bhive:discover_bases(#base_discover_query{name = <<"TRU_Representative">>}, BH),
+          base_signal:emit_signal(TRUBC, <<"CompletedTask">>, {myFuncs:myName(BH), TRUs}, BH);
+        true ->
+          ok % or any other action when map_size(TRUs) is 0
+      end,
 
       % Send data to Type
       MyBC = base:get_my_bc(BH),
@@ -73,6 +76,7 @@ analysis(BH) ->
       Tax = MyID#identity.taxonomy,
       TypeType = Tax#base_taxonomy.base_type_code,
       TaskHolons = bhive:discover_bases(#base_discover_query{name = TypeType}, BH),
+
 
       StoreData = case TypeType of
                     <<"PROCESS_STEP_TYPE">> ->

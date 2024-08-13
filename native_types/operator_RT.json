@@ -7,13 +7,6 @@
         "role": "facility_manager",
         "password": "",
         "BreakTime": "12:00"
-      },
-      {
-        "name": "Test2",
-        "id": "2",
-        "role": "operator",
-        "password": "",
-        "BreakTime": "12:00"
       }
     ]},
     {"name": "operator_guardian_ep","lib": "operator_RT_lib","init_args": []},

@@ -44,7 +44,7 @@ generate_proposal([Requirements], PluginState, NegH, BH) ->
   end.
 
 proposal_accepted({PluginState, Requirements}, NegH, BH) ->
-  %% TODO send the requirements for the reflection plugin
+
   Tsched = PluginState,
   LinkID = list_to_binary(ref_to_list(make_ref())),
   Data1 = Requirements,

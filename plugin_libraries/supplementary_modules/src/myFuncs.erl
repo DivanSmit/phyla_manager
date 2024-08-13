@@ -15,7 +15,7 @@
   get_task_shell_element/2, get_partner_task_id/1, get_partner_names/2, get_task_shell_from_id/2, get_task_type/1,
   get_task_sort/1, get_task_id/1, check_if_my_task/2, convert_unix_time_to_normal/1, convert_unix_time_to_normal/2, check_availability/4,
   update_list_and_average/2, add_map_to_json_file/2, read_json_file/1, write_json_file/2, extract_partner_ids/2,
-  csv_to_maps/1]).
+  csv_to_maps/1, get_task_metadata/1]).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -24,6 +24,55 @@
 
 myName(BH)->
   base_business_card:get_name(base:get_my_bc(BH)).
+
+get_task_metadata(BH)->
+  SchedData = base_schedule:get_all_tasks(BH),
+  SchedList = maps:values(SchedData),
+  ScheduledTasks = lists:foldl(fun(X, Acc) ->
+
+    Shell = X#base_task.task_shell,
+    StartTime = Shell#task_shell.tsched,
+    ID = Shell#task_shell.id,
+    Requirements = X#base_task.data1,
+
+    io:format("The requirements in myFuncs are: ~p~n",[Requirements]),
+
+    Meta = X#base_task.meta,
+    BC = Meta#base_contract.master_bc,
+    Name = base_business_card:get_name(BC),
+    Data = #{
+      <<"name">>=>Name,
+      <<"time">>=>StartTime,
+      <<"id">>=> ID,
+      <<"sector">>=><<"S">>,
+      <<"operator">>=> myName(BH)
+    },
+    [maps:merge(Data,Requirements) | Acc]
+              end, [], SchedList),
+
+  ExecutionData = base_execution:get_all_tasks(BH),
+  ExecutionList = maps:values(ExecutionData),
+  ExecutionTasks = lists:foldl(fun(X, Acc) ->
+
+    Shell = X#base_task.task_shell,
+    StartTime = Shell#task_shell.tsched,
+    ID = Shell#task_shell.id,
+    Requirements = X#base_task.data1,
+
+    Meta = X#base_task.meta,
+    BC = Meta#base_contract.master_bc,
+    Name = base_business_card:get_name(BC),
+    Data = #{
+      <<"name">>=>Name,
+      <<"time">>=>StartTime,
+      <<"id">>=> ID,
+      <<"sector">>=><<"E">>,
+      <<"operator">>=> myName(BH)
+    },
+    [maps:merge(Data,Requirements) | Acc]
+                               end, [], ExecutionList),
+
+  lists:reverse(ScheduledTasks)++lists:reverse(ExecutionTasks).
 
 extract_partner_names(Tasks, Type) ->
   Values = maps:values(Tasks),
@@ -110,6 +159,7 @@ get_task_type_from_BH(BH) ->
 get_partner_names(BH,Type)->
   Data = base_schedule:get_all_tasks(BH),
   extract_partner_names(Data,Type).
+
 
 
 get_task_shell_element(Element, BH) ->

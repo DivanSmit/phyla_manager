@@ -12,6 +12,23 @@
 %% API
 -export([init/2, stop/1, instance_spawn_request/2, generate_instance_recipe/4]).
 
+%%,
+%%{
+%%"name": "evaluation_room_1",
+%%"id": "414",
+%%"capacity": 1000000,
+%%"sensors": [
+%%
+%%]
+%%},
+%%{
+%%"name": "waste_removal",
+%%"id": "135",
+%%"capacity": 1000000,
+%%"sensors": [
+%%
+%%]
+%%}
 
 init(Pars, BH) ->
   %% we want to create an instance

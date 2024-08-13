@@ -54,7 +54,7 @@ start_reflection(PluginState, ReflectorHandle, BH) ->
     {none, none} -> ok;
     {MinValue, none} when MinValue > Value -> SendAlert(1);
     {none, MaxValue} when MaxValue < Value -> SendAlert(2);
-    {MinValue, MaxValue} when is_integer(MinValue) and is_integer(MaxValue) ->
+    {MinValue, MaxValue} when is_float(MinValue) and is_float(MaxValue) ->
       case {MinValue > Value, MaxValue < Value} of
         {true, _} -> SendAlert(3);
         {_, true} -> SendAlert(4);
@@ -66,6 +66,7 @@ start_reflection(PluginState, ReflectorHandle, BH) ->
 
 %%  io:format("~p has a ~p:~p~n",[myFuncs:myName(BH), Type, Value]),
 
+  base_variables:write(<<"SENSORS">>, Type, Value, BH),
   base_task_rp:write_reflection_data(#{<<"type">>=>Type, <<"value">>=>Value}, ReflectorHandle, BH),
 
   ok.

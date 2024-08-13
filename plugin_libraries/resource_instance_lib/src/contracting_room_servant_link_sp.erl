@@ -26,7 +26,7 @@ request_start_negotiation(MasterBC, NegH, BH) ->
   {start,no_state}.
 
 generate_proposal([Requirements], PluginState, NegH, BH) ->
-  io:format("~p received requirements: ~p~n",[myFuncs:myName(BH), Requirements]),
+%%  io:format("~p received requirements: ~p~n",[myFuncs:myName(BH), Requirements]),
   StartTime = maps:get(<<"AVAILABILITY">>,Requirements),
   Change = maps:get(<<"action">>, Requirements),
   {Result, _} = check_my_capacity(StartTime, Change, BH),
@@ -36,7 +36,7 @@ generate_proposal([Requirements], PluginState, NegH, BH) ->
       Proposal = #{<<"proposal">>=>accept,
         <<"startTime">>=>StartTime,
         <<"endTime">>=> StartTime+60000},
-      {proposal,Proposal,#{<<"action">>=>Change, <<"startTime">>=>StartTime}};
+      {proposal,Proposal,maps:merge(#{<<"action">>=>Change, <<"startTime">>=>StartTime}, Requirements)};
     false-> {refuse,not_qualified}
   end.
 
@@ -62,11 +62,11 @@ check_my_capacity(StartTime, Change,BH)-> % returns {FinalStatus, FinalCapacity}
   AllTasks = base_schedule:get_all_tasks(BH),
   BaseTasks = maps:values(AllTasks),
 
-  io:format("~p has currentCap: ~p and Max: ~p and schedLen of ~p~n", [myFuncs:myName(BH), CurrentCap, MaxCap, length(BaseTasks)]),
+%%  io:format("~p has currentCap: ~p and Max: ~p and schedLen of ~p~n", [myFuncs:myName(BH), CurrentCap, MaxCap, length(BaseTasks)]),
   {Stat, Capis, _} = case BaseTasks of
                        [] ->
                          Cap1 = Change + CurrentCap,
-                         io:format("Cap1 = ~p~n",[Cap1]),
+%%                         io:format("Cap1 = ~p~n",[Cap1]),
                          if
                            Cap1 > MaxCap -> {false, Cap1, none};
                            Cap1 < 0 -> {false, Cap1, none};
@@ -81,8 +81,8 @@ check_my_capacity(StartTime, Change,BH)-> % returns {FinalStatus, FinalCapacity}
                            Value = maps:get(<<"action">>, ScheduleData),
 
                            Cap1 = Total + Value,
-                           io:format("Cap1 second = ~p~n",[Cap1]),
-                           io:format("Start: ~p and sched: ~p~n",[StartTime,Tsched]),
+%%                           io:format("Cap1 second = ~p~n",[Cap1]),
+%%                           io:format("Start: ~p and sched: ~p~n",[StartTime,Tsched]),
                            Cap = if
                                    StartTime >= Tsched andalso not Added ->
                                      Cap1 + Change;
@@ -97,5 +97,5 @@ check_my_capacity(StartTime, Change,BH)-> % returns {FinalStatus, FinalCapacity}
                      end,
 
 
-  io:format("Final values for ~p: ~p and ~p~n", [myFuncs:myName(BH), Stat, Capis]),
+%%  io:format("Final values for ~p: ~p and ~p~n", [myFuncs:myName(BH), Stat, Capis]),
   {Stat, Capis}.

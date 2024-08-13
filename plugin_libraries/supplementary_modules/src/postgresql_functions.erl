@@ -168,7 +168,8 @@ connect_to_database(Host, Username, Password, Database, Port) ->
   %% Check if the connection has been established successfully %%
   case {ok, C} =:= {ok, C} of
     true ->
-      io:format("~n Connection has been established, with ~p C: ~p~n", [Database, C]);
+%%      io:format("~n Connection has been established, with ~p C: ~p~n", [Database, C]);
+      ok;
     false ->
       io:format("~n Connection failed ~n")
   end,
@@ -190,7 +191,7 @@ cycle_data_tuple_list([DataTuple | Rest], Table, Row_ID, C) ->
     % Write the value to the appropriate column in the table
     Query = "UPDATE \"" ++ Table ++ "\" SET \"" ++ Column ++ "\" = '" ++ Value ++ "' WHERE \"id\" = '" ++ binary_to_list(Row_ID) ++ "';",
     Result = epgsql:squery(C, Query),
-    io:format("Column: ~p Value: ~p with results: ~p~n",[Column, Value, Result]),
+%%    io:format("Column: ~p Value: ~p with results: ~p~n",[Column, Value, Result]),
     case Result of
       {ok, 1} ->
         cycle_data_tuple_list(Rest, Table, Row_ID, C);

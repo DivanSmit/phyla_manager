@@ -13,10 +13,19 @@
 %% API
 -export([init/2, stop/1, handle_signal/3, handle_request/4]).
 
+%%,
+%%{
+%%"name": "Test2",
+%%"id": "2",
+%%"role": "operator",
+%%"password": "",
+%%"BreakTime": "12:00"
+%%}
+
 
 init(Pars, BH) ->
   base:wait_for_base_ready(BH),
-  TableName = "operator_work_schedule", %% TODO add the table value as a base_variable
+  TableName = "operator_work_schedule",
   Columns = [
     {"unix", "bigint"},
     {"date", "date"},
@@ -39,7 +48,7 @@ init(Pars, BH) ->
       end
   end,
 
-  TableName1 = "tru_measurements", %% TODO add the table value as a base_variable
+  TableName1 = "tru_measurements",
   Columns1 = [
     {"unix", "bigint"},
     {"process", "text"},
@@ -63,14 +72,14 @@ init(Pars, BH) ->
       end
   end,
 
-  spawn(fun()->
-    timer:sleep(2000),
-%%    TaskHolons = bhive:discover_bases(#base_discover_query{capabilities = <<"manage_facility">>}, BH),
-%%    base_signal:emit_request(TaskHolons, <<"INFO">>, <<"Test2">>, BH)
-    TargetBC = bhive:discover_bases(#base_discover_query{name = <<"Report Generator">>}, BH),
-    [Data] = base_signal:emit_request(TargetBC, <<"generateTrialReport">>, #{<<"name">>=> <<"Trial 1">>}, BH)
-
-        end),
+%%  spawn(fun()->
+%%    timer:sleep(2000),
+%%%%    TaskHolons = bhive:discover_bases(#base_discover_query{capabilities = <<"manage_facility">>}, BH),
+%%%%    base_signal:emit_request(TaskHolons, <<"INFO">>, <<"Test2">>, BH)
+%%%%    TargetBC = bhive:discover_bases(#base_discover_query{name = <<"Report Generator">>}, BH),
+%%%%    [Data] = base_signal:emit_request(TargetBC, <<"generateTrialReport">>, #{<<"name">>=> <<"Trial 1">>}, BH)
+%%
+%%        end),
 
 
   ok.

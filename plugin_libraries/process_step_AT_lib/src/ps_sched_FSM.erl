@@ -39,10 +39,8 @@ searching_for_operator(enter, OldState, State)->
 %%    },Base_Link,BH)
 %%      end),
 
-%%  MetaData = base_attributes:read(<<"meta">>, <<"resources">>,BH),
-
-
-
+  [MetaData] = base_attributes:read(<<"meta">>,<<"resources">>,BH),
+  io:format("Meta data: ~p~n",[MetaData]),
 
   Change = 10,
 
@@ -50,7 +48,7 @@ searching_for_operator(enter, OldState, State)->
     <<"AVAILABILITY">>=>StartTime,
     <<"action">>=>Change,
     <<"type">>=>resource,
-    <<"capabilities">>=><<"OPERATOR_INSTANCE_INFO">>,
+    <<"capabilities">>=>maps:get(<<"capabilities">>, MetaData),
     <<"processType">>=> base_attributes:read(<<"meta">>, <<"processType">>,BH),
     <<"description">>=> base_attributes:read(<<"meta">>, <<"description">>,BH),
     <<"duration">>=> base_attributes:read(<<"meta">>, <<"duration">>,BH),
@@ -66,16 +64,6 @@ searching_for_operator(enter, OldState, State)->
 searching_for_operator(cast, contracted, State)->
   io:format("~n *[PS STATE]*: Found an operator ~n"),
 
-%%  Child = maps:get(<<"children">>,State),
-%%  Machine = maps:get(<<"machine">>,Child),
-%%
-%%  case map_size(Machine) of
-%%    0 ->
-%%      io:format("Operator only task~n"),
-%%
-%%    _ ->
-%%      {next_state, searching_for_fta_machine, State}
-%%  end;
   {next_state, task_scheduled, State};
 
 searching_for_operator(cast, no_operator, State)->

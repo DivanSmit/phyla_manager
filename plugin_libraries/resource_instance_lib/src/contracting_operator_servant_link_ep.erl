@@ -28,6 +28,8 @@ request_start_link(PluginState, ExH, BH) ->
   PartnerName = base_business_card:get_name(PartnerBC),
   CurrentTime = binary_to_list(myFuncs:convert_unix_time_to_normal(base:get_origo())),
   io:format("Servant contract: ~p with parent ~p ready to start at ~p~n",[MyName,PartnerName,CurrentTime]),
+  base_variables:write(<<"TaskStatus">>, <<"TRU">>, [], BH),
+  base_variables:subscribe(<<"TaskStatus">>, <<"TRU">>, self(), BH),
 
   {start, nostate}.
 
@@ -99,8 +101,8 @@ link_end(Reason, State, ExAgentHandle, BH) ->
   %% TODO remember to act differently when a task is canceled
   reflect. %Change later to ensure that it also reflects the data for analysis
 
-base_variable_update({<<"TaskStatus">>, Variable, Value}, PluginState, ExH, BH) ->
-  io:format("~n The variable has been updated, ~p to ~p~n",[Variable,Value]),
+base_variable_update({<<"TaskStatus">>, <<"TRU">>, Value}, PluginState, ExH, BH) ->
+  io:format("~n The TRU has been updated to ~p~n",[Value]),
   {ok, no_state}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -110,7 +112,18 @@ measure(TRUs) ->
   File = "C:/Users/LENOVO/Desktop/base-getting-started/phyla_manager_BASE/plugin_libraries/operator_RT_lib/src/testTRUdata.csv",
   Data = myFuncs:csv_to_maps(File),
 
-  lists:foldl(fun({Map, Index}, Acc) ->
-    UpdatedMap = maps:update(<<"name">>, lists:nth(Index, TRUs), Map),
-    Acc ++ [UpdatedMap]
-              end, [], lists:zip(Data, lists:seq(1, length(Data)))).
+  lists:foldl(fun(Elem, Acc)->
+    Map = #{
+      <<"name">>=>Elem,
+      <<"fruittype">>=><<"apple">>,
+      <<"weight">>=>float_to_binary(random:uniform()+12.0,[{decimals, 2}]),
+      <<"amount">>=><<"12">>,
+      <<"harvestdate">>=><<"2024/07/14">>
+    },
+    Acc++[Map]
+  end, [], TRUs).
+
+%%  lists:foldl(fun({Map, Index}, Acc) ->
+%%    UpdatedMap = maps:update(<<"name">>, lists:nth(Index, TRUs), Map),
+%%    Acc ++ [UpdatedMap]
+%%              end, [], lists:zip(Data, lists:seq(1, length(Data)))).

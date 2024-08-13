@@ -20,8 +20,7 @@ init(Pars, BH) ->
   spawn(fun()->
     FSM = base_attributes:read(<<"meta">>,<<"FSM_Execute">>,BH),
     FSM_Data = #{
-      <<"BH">>=>BH,
-      <<"children">>=>base_attributes:read(<<"meta">>,<<"children">>,BH)
+      <<"BH">>=>BH
     },
     {ok, StateMachinePID} = gen_statem:start_link({global, make_ref()}, FSM, FSM_Data, []),
     base_variables:write(<<"FSM_EXE">>, <<"FSM_PID">>, StateMachinePID, BH)
@@ -29,6 +28,8 @@ init(Pars, BH) ->
   end),
 
   base_variables:write(<<"FSM_EXE">>, <<"ExecutionHandels">>,[],BH),
+  base_variables:write(<<"FSM_EXE">>,<<"execution">>,false,BH),
+  base_variables:write(<<"FSM_EXE">>,<<"waiting">>, [],BH),
   base_variables:write(<<"TRU">>,<<"List">>, #{}, BH),
   base_variables:write(<<"TRU">>, <<"Data">>,[],BH),
   ok.
@@ -48,7 +49,7 @@ request_start_link(PluginState, ExH, BH) ->
   Handles = base_variables:read(<<"FSM_EXE">>, <<"ExecutionHandels">>,BH),
   base_variables:write(<<"FSM_EXE">>, <<"ExecutionHandels">>,[ExH|Handles],BH),
 
-  % Start the FSM, if it is required. Otherwise FSM will just ignore
+%%  % Start the FSM, if it is required. Otherwise FSM will just ignore
   FSM_PID = base_variables:read(<<"FSM_EXE">>, <<"FSM_PID">>, BH),
   gen_statem:cast(FSM_PID, scheduled_time_arrived),
 
@@ -79,11 +80,9 @@ partner_call({<<"TRU_LIST">>, Payload}, PluginState, ExH, BH) ->
 
 partner_call({<<"END_Task">>, <<"Request">>}, PluginState, ExH, BH) ->
   % This request is for if a resource requests to end the task
-  %% TODO potentially do more with this task than just a finish reply
-  %% TODO This needs to reflect in the FSM as well that the task is finished
-  % You need to check what state the fsm is in and what cast is required
-  % You need to update the exe FSM to accommodate that no operator is present
-  {reply_end, finish, completed, PluginState}.
+  FSM_PID = base_variables:read(<<"FSM_EXE">>, <<"FSM_PID">>, BH),
+  gen_statem:cast(FSM_PID, end_task),
+  {reply, finish, PluginState}.
 
 partner_signal({<<"TRU_DATA">>, Data}, PluginState, ExH, BH) ->
   io:format("~p received partner call with Data~n",[myFuncs:myName(BH)]),
@@ -110,7 +109,8 @@ partner_signal({<<"New_TRUs">>,Payload}, PluginState, ExH, BH) ->
 
 link_end(Reason, PluginState, ExH, BH) ->
   io:format("The link is finished~n"),
-  % TODO process task needs to reflect on the affected TRUs that form part of it in a DB
+  FSM_PID = base_variables:read(<<"FSM_EXE">>, <<"FSM_PID">>, BH),
+  gen_statem:cast(FSM_PID, completed),
   reflect.
 
 base_variable_update(_, PluginState, ExH, BH) ->

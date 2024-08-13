@@ -82,7 +82,7 @@ analyse_data(BH)->
   end,
 
   spawn(fun() ->
-    timer:sleep(10000),% Every Two minutes
+    timer:sleep(30000),% Every Two minutes
     analyse_data(BH)
         end),
   ok.

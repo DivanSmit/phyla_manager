@@ -53,7 +53,7 @@ link_start(PluginState, ExH, BH) ->
 
       FSM_data = #{
         <<"execution">>=>ExH,
-        <<"BH">>= BH,
+        <<"BH">>=> BH,
         <<"Data1">>=>Data1
       },
       {ok, StateMachinePID} = gen_statem:start_link({global, base_business_card:get_id(base:get_my_bc(BH))}, no_operator_task_FSM, FSM_data, []);

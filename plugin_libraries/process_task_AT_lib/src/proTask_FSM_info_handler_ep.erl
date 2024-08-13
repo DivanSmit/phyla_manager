@@ -35,8 +35,6 @@ handle_signal(<<"Update">>, {From, Value}, BH)->
   FSM_PID = base_variables:read(<<"FSM_EXE">>, <<"FSM_PID">>, BH),
   case Value of
     parent_ready ->
-      Count = base_variables:read(<<"FSM_INFO">>, <<"FSM_Ready">>, BH),
-      base_variables:write(<<"FSM_INFO">>, <<"FSM_Ready">>, Count + 1, BH),
       gen_statem:cast(FSM_PID, ready);
     completed ->
       gen_statem:cast(FSM_PID, completed)
@@ -61,31 +59,37 @@ handle_signal(<<"taskScheduled">>, {Name,Start,End}, BH) ->
   gen_statem:cast(FSM_PID,task_scheduled).
 
 handle_request(<<"Update">>, {From, Value}, _, BH) ->
+
+  Execution = base_variables:read(<<"FSM_EXE">>,<<"execution">>,BH),
+  io:format("Execution for ~p: ~p~n",[myFuncs:myName(BH), Execution]),
   case Value of
-    query ->
+    query when Execution == true ->
       Pred = base_variables:read(<<"predecessors">>, From, BH), %Pred can only be one
       io:format("Predecessor for ~p: ~p~n", [From, Pred]),
       case Pred of
         <<>> ->
-          TRU = base_variables:read(<<"TRU">>,<<"List">>,BH),
-          {reply, {ready,TRU}};
+          TRU = base_variables:read(<<"TRU">>, <<"List">>, BH),
+          {reply, {ready, TRU}};
         _ ->
           CompletedTasksShells = base_biography:get_all_tasks(BH),
           CompletedTasks = case is_map(CompletedTasksShells) of
                              true -> % Will always be a map
-                               %TODO Change this to search for child ID
-                               myFuncs:extract_partner_ids(CompletedTasksShells,servant)
+                               myFuncs:extract_partner_ids(CompletedTasksShells, servant)
                            end,
           case lists:member(Pred, CompletedTasks) of
             true ->
-              TRU = base_variables:read(<<"TRU">>,<<"List">>,BH),
-              {reply, {ready,TRU}};
+              TRU = base_variables:read(<<"TRU">>, <<"List">>, BH),
+              {reply, {ready, TRU}};
             false ->
               {reply, not_ready}
           end
       end;
-  _->
-    {reply, not_ready}
+    query when Execution == false ->
+      List = base_variables:read(<<"FSM_EXE">>, <<"waiting">>, BH),
+      base_variables:write(<<"FSM_EXE">>, <<"waiting">>, List ++ [From], BH),
+      {reply, not_ready};
+    _ ->
+      {reply, not_ready}
   end.
 
 

@@ -86,7 +86,6 @@ spawn_and_wait_for_child(enter, OldState, State)->
           <<"startTime">>=>StartTime}
       ), BH),
 
-      %TODO this should link the names or id to processID to be able to search for them or see if they are complete
       base_variables:write(<<"predecessors">>,ChildName,maps:get(<<"predecessor">>,ChildData),BH),
       {keep_state, {State,ChildName}}
   end;
@@ -138,7 +137,11 @@ contract_child(cast, _, State)->
 
 rescheduling(enter, OldState, State)->
   io:format("~n *[CONTRACT S STATE]*: Contract needs rescheduling ~n"),
+  % Send message to the parent
+  {keep_state, State};
 
+rescheduling(cast, NewSchedule, State)->
+  % can be cancel, continue with current schedule, or a new schedule
   {keep_state, State};
 
 rescheduling(cast, _, State)->

@@ -186,18 +186,13 @@ handle_request(<<"INFO">>,<<"INFO">>, FROM, BH)->
 
 
 handle_request(<<"INFO">>,<<"TASKSID">>, FROM, BH)->
-  TaskNames = myFuncs:get_partner_names(BH,master),
-  TaskIDs = myFuncs:get_task_id_from_BH(BH),
-  TaskTypes  = myFuncs:get_task_type_from_BH(BH),
-  TaskTimes = myFuncs:get_task_shell_element(2,BH),
-  TaskTimesC = lists:map(fun(Time) -> myFuncs:convert_unix_time_to_normal(Time) end, TaskTimes),
-  Reply = #{<<"id">>=>TaskIDs,<<"time">>=>TaskTimesC, <<"type">>=>TaskTypes,<<"names">>=>TaskNames},
+  Reply = myFuncs:get_task_metadata(BH),
   {reply, Reply};
 
 handle_request(<<"TASKS">>, Request, FROM, BH) ->
   MyBC = base:get_my_bc(BH),
 
-  ID = maps:get(<<"taskID">>, Request),
+  TaskData = maps:get(<<"taskID">>, Request),
   Param = maps:get(<<"param">>, Request),
 
   case Param of
@@ -205,13 +200,34 @@ handle_request(<<"TASKS">>, Request, FROM, BH) ->
       Pass = base_attributes:read(<<"attributes">>, <<"password">>, BH),
       io:format("The Password is: ~p~n",[Pass]),
       if
-        Pass == ID ->
+        Pass == TaskData ->
           Role = base_attributes:read(<<"attributes">>,<<"role">>,BH),
           {reply, #{<<"reply">>=><<"OK">>,<<"role">>=>Role}};
         true -> {reply,#{<<"reply">>=><<"error">>}}
       end;
+    <<"TRU">>->
+      % Confirm task
+      % Conform TRUs
+      % Update variables
+      % Reply with answer
+      ID = maps:get(<<"id">>, TaskData),
+      TRUs = maps:get(<<"tru">>, TaskData),
+
+      Tasks = base_execution:get_all_tasks(BH),
+      Is_in_execution = maps:fold(fun(Shell,_Value, Acc) ->
+        ElemId = Shell#task_shell.id,
+        if
+          ID == ElemId ->
+            io:format("TRUS: ~p~n", [TRUs]),
+            base_variables:write(<<"TaskStatus">>, <<"TRU">>,TRUs,BH),
+            true;
+          true -> Acc
+        end
+                                    end, false, Tasks),
+      io:format("Is in execution: ~p~n",[Is_in_execution]),
+      {reply, ok};
     _ ->
-      {PartnerID, PartnerName} = myFuncs:extract_partner_and_task_id(ID, master, BH),
+      {PartnerID, PartnerName} = myFuncs:extract_partner_and_task_id(TaskData, master, BH),
 
       case PartnerName of
         task_completed ->

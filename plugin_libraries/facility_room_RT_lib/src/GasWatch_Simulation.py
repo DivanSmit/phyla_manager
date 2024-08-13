@@ -11,7 +11,7 @@ def handle_request():
     
     # Interpret the message and create a response
     if message == 'temperature':
-        response = {'value': random.randint(20,25)}
+        response = {'value': random.random()*0.4+1.8}
     elif message == 'humidity':
         response = {'value': random.randint(0,100)}
     else:

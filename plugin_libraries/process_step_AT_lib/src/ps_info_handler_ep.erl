@@ -54,10 +54,8 @@ handle_signal(<<"Update">>,Value, BH)->
   case Value of
     {parent, parent_ready} ->
       FSM_PID = base_variables:read(<<"FSM_EXE">>, <<"FSM_PID">>, BH),
-      gen_statem:cast(FSM_PID, ready);
+      gen_statem:cast(FSM_PID, parent_ready);
     _ ->
-      Count = base_variables:read(<<"FSM_INFO">>, <<"FSM_Ready">>, BH),
-      base_variables:write(<<"FSM_INFO">>, <<"FSM_Ready">>, Count + 1, BH),
       FSM_PID = base_variables:read(<<"FSM_EXE">>, <<"FSM_PID">>, BH),
       gen_statem:cast(FSM_PID, ready)
   end,

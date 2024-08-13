@@ -34,7 +34,8 @@ wait_for_schedule(cast, scheduled, State)->
   {next_state, wait_for_scheduled_time, State};
 
 
-wait_for_schedule(cast, _, State)->
+wait_for_schedule(cast, Cast, State)->
+  io:format("~n *[ACTIVITY E STATE]*: Unsupported cast in waiting for sched ~p ~n",[Cast]),
   {keep_state, State}.
 
 
@@ -46,10 +47,12 @@ wait_for_scheduled_time(enter, _OldState, State) ->
 
 wait_for_scheduled_time(cast, internal_check, State)->
   BH = maps:get(<<"BH">>,State),
-  Delay = base_variables:read(<<"FSM_INFO">>,<<"startTime">>,BH) - base:get_origo(),
+  Delay = base_variables:read(<<"FSM_INFO">>,<<"startTime">>,BH) - base:get_origo()+1000,
+  timer:sleep(1000),
 
   if
-    Delay<0 -> {next_state, check_with_parent, State};
+    Delay<0 ->
+      {next_state, check_with_parent, State};
     true ->
       {keep_state, {State,base:get_origo()}, Delay}
 
@@ -58,22 +61,38 @@ wait_for_scheduled_time(cast, internal_check, State)->
 wait_for_scheduled_time(timeout, _EventContent, {State,_}) ->
   {next_state, check_with_parent, State};
 
-wait_for_scheduled_time(cast, _, {State,OldTIme}) ->
-  io:format("~n *[CONTRACT E STATE]*: Unsupported cast ~n"),
+wait_for_scheduled_time(cast, Cast, {State,OldTIme}) ->
+  io:format("~n *[ACTIVITY E STATE]*: Unsupported cast in waiting for sched ~p ~n",[Cast]),
   BH = maps:get(<<"BH">>,State),
-  Delay = base_variables:read(<<"FSM_INFO">>,<<"startTime">>,BH) - base:get_origo(),
-  {keep_state, {State,OldTIme}, Delay}.
+  Delay = base_variables:read(<<"FSM_INFO">>,<<"startTime">>,BH),
+  RemainingTIme = Delay - base:get_origo() ,
+
+  case RemainingTIme < 0 of
+    true -> {next_state, check_with_parent, State};
+    false -> {keep_state, {State, OldTIme}, RemainingTIme}
+  end.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 executing_tasks(enter, OldState, State)->
-  io:format("~n *[ACTIVITY E STATE]*: executing tasks ~n"),
-
   BH = maps:get(<<"BH">>,State),
+
+  io:format("~n *[ACTIVITY E STATE | ~p]*: executing tasks ~n",[myFuncs:myName(BH)]),
+  base_variables:write(<<"FSM_EXE">>,<<"execution">>,true,BH),
+
+  % Notify waiting list of ready
+  List = base_variables:read(<<"FSM_EXE">>, <<"waiting">>, BH),
+  lists:foreach(fun(Elem)->
+    TaskHolons = bhive:discover_bases(#base_discover_query{name = Elem}, BH),
+    base_signal:emit_signal(TaskHolons, <<"Update">>, {parent, parent_ready}, BH)
+  end, List),
+
   Handles = base_variables:read(<<"FSM_EXE">>, <<"ExecutionHandels">>,BH),
-  lists:foldl(fun(Elem,Acc)->
-    base_link_ep:start_link(Elem)
-              end, [], Handles),
+% Check if Handles is not an empty list
+  case Handles of
+    [] -> ok;  % Do nothing if Handles is empty
+    _ -> lists:foreach(fun(Elem) -> base_link_ep:start_link(Elem) end, Handles)
+  end,
 
   % Starting link with parent, if it has one
   case base_variables:read(<<"FSM_EXE">>, <<"parentExecutionHandel">>, BH) of
@@ -86,7 +105,7 @@ executing_tasks(enter, OldState, State)->
 
 executing_tasks(cast, scheduled_time_arrived, State)->
   BH = maps:get(<<"BH">>,State),
-  io:format("~n *[ACTIVITY E STATE]*: Scheduled time arrived for ~p~n",[myFuncs:myName(BH)]),
+  io:format("~n *[ACTIVITY E STATE | ~p]*: tasks schedule time arrived ~n",[myFuncs:myName(BH)]),
   Handles = base_variables:read(<<"FSM_EXE">>, <<"ExecutionHandels">>,BH),
   lists:foldl(fun(Elem,Acc)->
     base_link_ep:start_link(Elem)
@@ -94,16 +113,17 @@ executing_tasks(cast, scheduled_time_arrived, State)->
   {keep_state, State};
 
 executing_tasks(cast, completed, State)->
-  io:format("~n *[ACTIVITY E STATE]*: Task completed ~n"),
   BH = maps:get(<<"BH">>,State),
+  io:format("~n *[ACTIVITY E STATE | ~p]*: Task completed ~n",[myFuncs:myName(BH)]),
   Tasks = base_biography:get_all_tasks(BH),
-  CompletedChildren = myFuncs:extract_partner_names(Tasks,servant),
+  CompletedChildren = myFuncs:extract_partner_ids(Tasks,servant),
 
   Children = base_attributes:read(<<"meta">>,<<"children">>,BH),
 
   Check = lists:foldl(fun(X, Acc) -> % This list goes through the children to see if they are complete or not
-    Name = maps:get(<<"name">>, X),
-    case lists:member(Name, CompletedChildren) of
+    ID = maps:get(<<"processID">>, X),
+    Name = maps:get(<<"processID">>,X),
+    case lists:member(ID, CompletedChildren) of
       true -> % If All children are in the completed list, then it Check = true
         Acc;
       _ -> % If a single child is not in the list, Acc = false will be for the rest of the list
@@ -113,7 +133,7 @@ executing_tasks(cast, completed, State)->
             false;
           _ -> case lists:member(Pred, CompletedChildren) of % If it does have a pred that is complete, it will send a message
                  true ->
-                   TaskHolons = bhive:discover_bases(#base_discover_query{name = Name}, BH),
+                   TaskHolons = bhive:discover_bases(#base_discover_query{id = ID}, BH),
                    base_signal:emit_signal(TaskHolons, <<"Update">>, {parent, parent_ready}, BH);
                  false->
                    false
@@ -131,8 +151,9 @@ executing_tasks(cast, completed, State)->
       {keep_state, State}
   end;
 
-executing_tasks(cast, _, State)->
-  io:format("~n *[ACTIVITY E STATE]*: Unsupported cast ~n"),
+executing_tasks(cast, Cast, State)->
+  BH = maps:get(<<"BH">>,State),
+  io:format("~n *[ACTIVITY E STATE | ~p]*: Unsupported cast in executing task ~p ~n",[myFuncs:myName(BH),Cast]),
 
   {keep_state, State}.
 
@@ -145,11 +166,10 @@ check_with_parent(enter, _OldState, State) ->
   {keep_state, State};
 
 check_with_parent(cast, internal_check, State) ->
-  io:format("~n *[ACTIVITY E STATE]*: Checking with parent ~n"),
+  BH = maps:get(<<"BH">>,State),
+  io:format("~n *[ACTIVITY E STATE | ~p]*: Checking with parent ~n",[myFuncs:myName(BH)]),
 
-  BH = maps:get(<<"BH">>, State),
-  MyBC = base:get_my_bc(BH),
-  MyName = base_business_card:get_name(MyBC),
+  MyName = myFuncs:myName(BH),
   ProID = base_attributes:read(<<"meta">>, <<"parentID">>, BH),
   TaskHolons = bhive:discover_bases(#base_discover_query{id = ProID}, BH),
 
@@ -164,7 +184,10 @@ check_with_parent(cast, internal_check, State) ->
       {next_state, executing_tasks, State}
   end;
 
-check_with_parent(cast, _, State) ->
+check_with_parent(cast, Cast, State)->
+  BH = maps:get(<<"BH">>, State),
+  io:format("~n *[ACTIVITY E STATE | ~p]*: Unsupported cast in check with parent ~p ~n",[myFuncs:myName(BH),Cast]),
+
   {keep_state, State}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -172,21 +195,23 @@ check_with_parent(cast, _, State) ->
 parent_not_yet_ready(enter, _OldState, State) ->
   BH = maps:get(<<"BH">>,State),
   Delay = base_attributes:read(<<"meta">>,<<"FSM_WAIT_FOR_PARENTS_DELAY">>,BH),
-  io:format("~n *[CONTRACT E STATE]*: Parent not yet ready, going to wait for ~ps ~n",[Delay/1000]),
+  io:format("~n *[ACTIVITY E STATE | ~p]*: Parent not yet ready, going to wait for ~ps ~n",[myFuncs:myName(BH),Delay/1000]),
 
   {keep_state, {State,base:get_origo()}, Delay};
 
 parent_not_yet_ready(timeout, _EventContent, {State,_}) ->
-  io:format("~n *[CONTRACT E STATE]*: Timer expired, checking with parent again~n"),
+  BH = maps:get(<<"BH">>, State),
+  io:format("~n *[ACTIVITY E STATE | ~p]*: Timer expired, checking with parent again~n",[myFuncs:myName(BH)]),
   {next_state, check_with_parent, State};
 
 parent_not_yet_ready(cast, ready, {State,_}) ->
-  io:format("~n *[CONTRACT E STATE]*: Parent said you can start~n"),
-  {next_state, executing_tasks, State};
+  BH = maps:get(<<"BH">>, State),
+  io:format("~n *[ACTIVITY E STATE | ~p]*: Parent said you can start~n",[myFuncs:myName(BH)]),
+  {next_state, check_with_parent, State};
 
-parent_not_yet_ready(cast, _, {State,OldTIme}) ->
-  io:format("~n *[CONTRACT E STATE]*: Unsupported cast ~n"),
-  BH = maps:get(<<"BH">>,State),
+parent_not_yet_ready(cast, Cast, {State,OldTIme}) ->
+  BH = maps:get(<<"BH">>, State),
+  io:format("~n *[ACTIVITY E STATE | ~p]*: Unsupported cast in parent not ready ~p ~n",[myFuncs:myName(BH),Cast]),
   Delay = base_attributes:read(<<"meta">>,<<"FSM_WAIT_FOR_PARENTS_DELAY">>,BH),
   RemainingTIme = Delay-base:get_origo()+OldTIme,
   {keep_state, {State,OldTIme}, RemainingTIme}.
@@ -194,8 +219,8 @@ parent_not_yet_ready(cast, _, {State,OldTIme}) ->
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 finish(enter, OldState, State)->
-  io:format("~n *[ACTIVITY E STATE]*: FSM completed ~n"),
   BH = maps:get(<<"BH">>,State),
+  io:format("~n *[ACTIVITY E STATE | ~p]*: FSM completed ~n",[myFuncs:myName(BH)]),
 
   % Ending link with parent, if it has one
   case base_variables:read(<<"FSM_EXE">>, <<"parentExecutionHandel">>, BH) of
@@ -211,9 +236,10 @@ finish(enter, OldState, State)->
   {stop, normal, State};
 
 
-finish(cast, _, State)->
+finish(cast, Cast, State)->
+  BH = maps:get(<<"BH">>,State),
+  io:format("~n *[ACTIVITY E STATE | ~p]*: Unsupported cast in finish ~p ~n",[myFuncs:myName(BH),Cast]),
   {keep_state, State}.
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 terminate(Reason, _StateName, State) ->

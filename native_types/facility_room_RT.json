@@ -8,22 +8,6 @@
         "sensors": [
 
         ]
-      },
-      {
-        "name": "evaluation_room_1",
-        "id": "414",
-        "capacity": 1000000,
-        "sensors": [
-
-        ]
-      },
-      {
-        "name": "waste_removal",
-        "id": "135",
-        "capacity": 1000000,
-        "sensors": [
-
-        ]
       }
     ]},
     {"name": "facility_room_guardian_ep","lib": "facility_room_RT_lib","init_args": []},

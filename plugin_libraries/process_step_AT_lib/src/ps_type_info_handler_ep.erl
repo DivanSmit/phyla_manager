@@ -122,7 +122,7 @@ handle_request(<<"newComponent">>,Payload, FROM, BH)->
 
   %Sort the map here
   FSM = maps:get(<<"FSM">>, Payload),
-  case binary_to_existing_atom(FSM, utf8) of
+  case binary_to_atom(FSM, utf8) of
     undefined -> % If the atom doesn't exist
       {reply, fsm_not_atom_error};
     Atom ->

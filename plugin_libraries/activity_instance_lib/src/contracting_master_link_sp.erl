@@ -89,6 +89,7 @@ all_proposals_received(ProposalList, PluginState, NegH, BH) ->
       end;
 
     resource ->
+      % TODO There should be a preference given for an operator to execute the task rather than a FM
       case ProposalList of
         [] ->
           {ok, [], nostate};

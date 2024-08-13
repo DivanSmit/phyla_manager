@@ -16,13 +16,10 @@
 init(_Pars, BH) ->
   ListOfSensors = base_attributes:read(<<"attributes">>, <<"sensors">>, BH),
 
-%%  {
-%%    "type": "temperature",
-%%    "frequency": 1000,
-%%    "max": 30
-%%  }
 
   lists:foldl(fun(X,Acc)->
+    Sensor = maps:get(<<"type">>, X, error),
+    base_variables:write(<<"SENSORS">>, Sensor, null, BH),
     handle_spawn_request(X,BH)
   end, [], ListOfSensors),
   ok.

@@ -43,7 +43,7 @@ generate_instance_recipe(Name, BH) ->
 
     RECIPE = #{
       <<"plugins">> => [
-        #{<<"name">>=><<"contracting_operator_servant_link_ep">>,<<"lib">>=><<"resource_instance_lib">>,<<"init_args">>=>[]},
+        #{<<"name">>=><<"contracting_resource_servant_link_ep">>,<<"lib">>=><<"resource_instance_lib">>,<<"init_args">>=>[]},
         #{<<"name">>=><<"contracting_room_servant_link_sp">>,<<"lib">>=><<"resource_instance_lib">>,<<"init_args">>=>[]},
         #{<<"name">>=><<"contracting_resource_servant_ap">>,<<"lib">>=><<"resource_instance_lib">>,<<"init_args">>=>[]},
         #{<<"name">>=><<"contracting_resource_servant_rp">>,<<"lib">>=><<"resource_instance_lib">>,<<"init_args">>=>[]},

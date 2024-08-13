@@ -3,19 +3,19 @@
     {
       "children": [
         {
-          "processType": "Collect_Initial_Fruit"
-        },
-        {
-          "processType": "Measure_Fruit_Quality"
+          "processType": "Process_101"
         }
       ],
-      "processType": "Sub_Trial_1",
+      "processType": "Process_102",
       "type": "SPAWN_PROCESS_TASK_INSTANCE"
     },
     {
       "children": [
         {
-          "processType": "Process_11"
+          "processType": "Operator_Only"
+        },
+        {
+          "processType": "Operator_Only"
         }
       ],
       "processType": "Process_101",
@@ -24,43 +24,55 @@
     {
       "children": [
         {
-          "processType": "Process_21"
+          "processType": "Collect_Initial_Fruit"
         }
       ],
-      "processType": "Process_31",
+      "processType": "Operator_Only",
       "type": "SPAWN_PROCESS_TASK_INSTANCE"
     },
     {
       "children": [
         {
-          "processType": "Process_11"
+          "processType": "Operator_and_Room"
+        }
+      ],
+      "processType": "Test_3",
+      "type": "SPAWN_PROCESS_TASK_INSTANCE"
+    },
+    {
+      "children": [
+        {
+          "processType": "Collect_Initial_Fruit"
         },
         {
-          "processType": "Process_12"
-        }
-      ],
-      "processType": "Process_21",
-      "type": "SPAWN_PROCESS_TASK_INSTANCE"
-    },
-    {
-      "children": [
-        {
-          "processType": "measure_temp"
+          "processType": "Measure_Fruit_Quality"
         },
         {
-          "processType": "Collect_Fruit"
+          "processType": "Test Store"
         }
       ],
-      "processType": "Process_12",
+      "processType": "TestTrial1",
       "type": "SPAWN_PROCESS_TASK_INSTANCE"
     },
     {
       "children": [
         {
-          "processType": "measure_temp"
+          "processType": "Test Store"
         }
       ],
-      "processType": "Process_11",
+      "processType": "Test Store Fruit",
+      "type": "SPAWN_PROCESS_TASK_INSTANCE"
+    },
+    {
+      "children": [
+        {
+          "processType": "Collect_Initial_Fruit"
+        },
+        {
+          "processType": "Measure_Fruit_Quality"
+        }
+      ],
+      "processType": "Sub_Trial_1",
       "type": "SPAWN_PROCESS_TASK_INSTANCE"
     }
   ]

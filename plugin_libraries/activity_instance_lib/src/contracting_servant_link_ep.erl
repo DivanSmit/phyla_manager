@@ -51,11 +51,11 @@ partner_signal(_, PluginState, ExH, BH) ->
   erlang:error(not_implemented).
 
 link_end(Reason, PluginState, ExH, BH) ->
-  MyBC = base:get_my_bc(BH),
-  MyName = base_business_card:get_name(MyBC),
-  ProID = base_attributes:read(<<"meta">>, <<"parentID">>, BH),
-  TaskHolons = bhive:discover_bases(#base_discover_query{id = ProID}, BH),
-  base_signal:emit_signal(TaskHolons, <<"Update">>, {MyName,completed}, BH),
+%%  MyBC = base:get_my_bc(BH),
+%%  MyName = base_business_card:get_name(MyBC),
+%%  ProID = base_attributes:read(<<"meta">>, <<"parentID">>, BH),
+%%  TaskHolons = bhive:discover_bases(#base_discover_query{id = ProID}, BH),
+%%  base_signal:emit_signal(TaskHolons, <<"Update">>, {MyName,completed}, BH),
   archive.
 
 base_variable_update({<<"TRU">>,<<"List">>, Value}, PluginState, ExH, BH) ->

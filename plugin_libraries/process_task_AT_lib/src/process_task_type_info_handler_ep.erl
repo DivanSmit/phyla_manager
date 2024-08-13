@@ -131,11 +131,12 @@ handle_request(<<"SPAWN_PROCESS_TASK_INSTANCE">>, Payload, FROM, BH) ->
 
   {ok, Recipe} = process_task_guardian_sp:generate_instance_recipe(Name, ID, ChildContract, BH),
 
+%%  io:format("New Payload: ~p~n",[NewPayload]),
   SchedData1 = maps:put(<<"childContract">>, ChildContract, NewPayload),
-  SchedData = update_with(<<"parentID">>,
-    fun(_) -> base_business_card:get_id(base:get_my_bc(BH)) end,
-    base_business_card:get_id(base:get_my_bc(BH)),
-    SchedData1),
+  SchedData = case maps:get(<<"parentID">>, SchedData1, none) of
+                none -> maps:put(<<"parentID">>, base_business_card:get_id(base:get_my_bc(BH)), SchedData1);
+                _ -> SchedData1
+              end,
 
   Tsched = base:get_origo(),
   Data1 = SchedData,
