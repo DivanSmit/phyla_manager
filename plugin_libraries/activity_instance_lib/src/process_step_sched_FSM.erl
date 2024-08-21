@@ -20,6 +20,9 @@ init(Pars) ->
   BH = maps:get(<<"BH">>,Pars),
   Resources = base_attributes:read(<<"meta">>,<<"resources">>,BH),
 
+  SchedTime = base_attributes:read(<<"meta">>, <<"startTime">>, BH),
+  base_variables:write(<<"FSM_INFO">>, <<"old_Sched">>,SchedTime, BH),
+
   Negotiating = maps:get(<<"resources">>,Pars, none),
   State = case Negotiating of
             none -> maps:merge(#{<<"resources">> => Resources}, Pars);
@@ -46,13 +49,40 @@ negotiate_with_resource(enter, _OldState, State) ->
 
 % Cast function for handling different events
 negotiate_with_resource(cast, contracted, State) ->
-  io:format("~n *[PS STATE]*: Found an operator ~n"),
+  BH = maps:get(<<"BH">>, State),
+  io:format("~n *[PS STATE| ~p]*: Found a resource ~n",[myFuncs:myName(BH)]),
   % TODO Look at the scheduled time and see if there is a difference. Might need to reschedule.
-  case maps:get(<<"resources">>, State, []) of
+
+  Old = base_variables:read(<<"FSM_INFO">>, <<"old_Sched">>, BH),
+  StartTime = base_variables:read(<<"FSM_INFO">>,<<"startTime">>,BH),
+%%  timer:sleep(2000),
+  State1 = if
+    Old==StartTime -> State;
+    true ->
+      timer:sleep(2000),
+      io:format("Old Time: ~p~nNew Time: ~p~n",[myFuncs:convert_unix_time_to_normal(Old),myFuncs:convert_unix_time_to_normal(StartTime)]),
+      AllTasks = base_schedule:get_all_tasks(BH),
+      Keys = maps:keys(AllTasks),
+      lists:foreach(fun(Elem) ->
+        Task = maps:get(Elem, AllTasks),
+        Meta = Task#base_task.meta,
+        BC = Meta#base_contract.servant_bc,
+        base_signal:emit_signal([BC], <<"REMOVE_TASK">>, myFuncs:myName(BH), BH),
+        base_schedule:take_task(Elem, BH)
+                    end, Keys),
+
+      base_variables:write(<<"FSM_INFO">>, <<"old_Sched">>,StartTime, BH),
+      Resources = base_attributes:read(<<"meta">>,<<"resources">>,BH),
+      maps:update(<<"resources">>, Resources, State)
+  end,
+
+
+
+  case maps:get(<<"resources">>, State1, []) of
     [] ->
-      {next_state, task_scheduled, State};
+      {next_state, task_scheduled, State1};
     [Resource | Rest] ->
-      NewState = process_resource(State, Resource, Rest),
+      NewState = process_resource(State1, Resource, Rest),
       {keep_state, NewState}
   end;
 
@@ -67,7 +97,12 @@ negotiate_with_resource(cast, _, State) ->
 process_resource(State, Resource, Rest) ->
   BH = maps:get(<<"BH">>, State),
   Base_Link = base_attributes:read(<<"meta">>, <<"childContract">>, BH),
-  StartTime = base_attributes:read(<<"meta">>, <<"startTime">>, BH),
+  StartTime = base_variables:read(<<"FSM_INFO">>,<<"startTime">>,BH),
+
+  Name = if
+           <<"processType">> == <<"Maintenance">>-> base_attributes:read(<<"meta">>, <<"resourceName">>, BH);
+           true -> maps:get(<<"name">>, Resource)
+         end,
 
   Change = 10,
   Requirements = #{
@@ -78,10 +113,13 @@ process_resource(State, Resource, Rest) ->
     <<"processType">> => base_attributes:read(<<"meta">>, <<"processType">>, BH),
     <<"description">> => base_attributes:read(<<"meta">>, <<"description">>, BH),
     <<"duration">> => base_attributes:read(<<"meta">>, <<"duration">>, BH),
-    <<"truAction">> => base_attributes:read(<<"meta">>, <<"truAction">>, BH)
+    <<"truAction">> => base_attributes:read(<<"meta">>, <<"truAction">>, BH),
+    <<"resource">> => maps:get(<<"name">>, Resource)
+
   },
 
   spawn(fun() ->
+    log:message(<<"EVENT">>, myFuncs:myName(BH), <<"Negotiating with resource">>),
     base_link_master_sp:start_link_negotiation(Requirements, Base_Link, BH)
         end),
 
@@ -101,8 +139,9 @@ task_scheduled(enter, OldState, State)->
 
   ProID = base_attributes:read(<<"meta">>,<<"parentID">>,BH),
   TaskHolons = bhive:discover_bases(#base_discover_query{id = ProID}, BH),
+  log:message(myFuncs:myName(BH), base_business_card:get_name(hd(TaskHolons)), <<"Task scheduled">>),
   base_signal:emit_signal(TaskHolons, <<"taskScheduled">>,
-    {MyName,StartTime,EndTime}
+    {MyName, StartTime,EndTime}
     , BH),
 
   {stop, normal, State};
@@ -128,5 +167,6 @@ terminate(_Reason, _StateName, State) ->
   % Start FSM
   PID = base_variables:read(<<"FSM_EXE">>, <<"FSM_PID">>,BH),
   gen_statem:cast(PID, scheduled),
+  log:message(<<"EVENT">>,myFuncs:myName(BH), <<"Scheduling Complete">>),
   ok.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

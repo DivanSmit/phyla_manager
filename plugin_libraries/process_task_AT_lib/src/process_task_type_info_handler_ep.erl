@@ -64,6 +64,24 @@ handle_signal(<<"STORE_DATA">>, Data, BH) ->
     ok -> ok;
     error -> io:format("Error when trying to write to DB~nwith data -> Data: ~p~n", [Data])
   end,
+  ok;
+
+handle_signal(<<"ScheduleMaintenance">>, Data, BH) ->
+  io:format("Received a ScheduleMaintenance: ~p~n",[Data]),
+  Name = list_to_binary("maintenance_"++integer_to_list(rand:uniform(1000))),
+  StartTime = maps:get(<<"StartTime">>,Data),
+  ScheduleData = #{<<"children">> =>
+                        [
+                          #{<<"children">> => [], <<"customTime">> => true,
+                            <<"name">> => Name, <<"predecessor">> => <<>>,
+                            <<"processID">> => integer_to_binary(rand:uniform(1000)),
+                            <<"processType">> => <<"Maintenance">>,
+                            <<"startTime">> => StartTime, <<"resourceName">> => maps:get(<<"name">>, Data)}
+                        ],
+    <<"customTime">> => false,
+    <<"predecessor">> => <<>>,
+    <<"processType">> => <<"MaintenanceProcess">>, <<"startTime">> => 0},
+  handle_request(<<"SPAWN_PROCESS_TASK_INSTANCE">>, ScheduleData, BH, BH),
   ok.
 
 
@@ -107,13 +125,20 @@ handle_request(<<"INFO">>, Tag, From, BH) ->
       {reply, error}
   end;
 
-handle_request(<<"SPAWN_PROCESS_TASK_INSTANCE">>, Payload, FROM, BH) ->
+
+handle_request(<<"SPAWN_PROCESS_TASK_INSTANCE">>, Payload1, FROM, BH) ->
+
   IDInt = rand:uniform(1000),
-  ID =   ID = maps:get(<<"processID">>, Payload,integer_to_binary(IDInt)),
+  ID = maps:get(<<"processID">>, Payload1,integer_to_binary(IDInt)),
+
+  Payload = case maps:get(<<"processID">>, Payload1, none) of
+              none -> maps:put(<<"processID">>, ID, Payload1);
+              _ -> Payload1
+            end,
 
   Name = case maps:get(<<"name">>, Payload, <<"no_entry">>) of
-           <<"no_entry">> -> list_to_binary("PT_" ++ integer_to_list(IDInt));
-           <<>> -> list_to_binary("PT_" ++ integer_to_list(IDInt));
+           <<"no_entry">> -> list_to_binary("P_" ++ integer_to_list(IDInt));
+           <<>> -> list_to_binary("P_" ++ integer_to_list(IDInt));
            Something -> Something
          end,
 
@@ -246,7 +271,7 @@ get_root_structure(Name, Actions, TRUs, BH) ->
             io:format("Response from child ~p of ~p: ~p~n", [Child, Name, Response]),
             case is_map(Response) of
               true -> Acc ++ [Response];
-              false -> Acc
+              false -> Acc++ Response
             end
         end
 

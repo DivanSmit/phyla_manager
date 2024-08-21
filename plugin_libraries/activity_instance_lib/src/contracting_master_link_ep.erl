@@ -32,6 +32,7 @@ init(Pars, BH) ->
   base_variables:write(<<"FSM_EXE">>,<<"waiting">>, [],BH),
   base_variables:write(<<"TRU">>,<<"List">>, #{}, BH),
   base_variables:write(<<"TRU">>, <<"Data">>,[],BH),
+  base_variables:write(<<"TRU">>, <<"CurrentTRU">>, <<"">>, BH),
   ok.
 
 stop(BH) ->
@@ -52,7 +53,7 @@ request_start_link(PluginState, ExH, BH) ->
 %%  % Start the FSM, if it is required. Otherwise FSM will just ignore
   FSM_PID = base_variables:read(<<"FSM_EXE">>, <<"FSM_PID">>, BH),
   gen_statem:cast(FSM_PID, scheduled_time_arrived),
-
+  base_variables:subscribe(<<"TRU">>, <<"CurrentTRU">>, self(), BH),
   {wait, no_state}.
 
 request_resume_link(PluginState, ExH, BH) ->
@@ -85,9 +86,14 @@ partner_call({<<"END_Task">>, <<"Request">>}, PluginState, ExH, BH) ->
   {reply, finish, PluginState}.
 
 partner_signal({<<"TRU_DATA">>, Data}, PluginState, ExH, BH) ->
-  io:format("~p received partner call with Data~n",[myFuncs:myName(BH)]),
+  io:format("~p received partner signal with Data ~p~n",[myFuncs:myName(BH),Data]),
   PreviousData = base_variables:read(<<"TRU">>, <<"Data">>,BH),
   fun() when is_list(Data) -> base_variables:write(<<"TRU">>, <<"Data">>, PreviousData++Data, BH) end(),
+  {ok, PluginState};
+
+partner_signal({<<"CurrentTRU">>, Data}, PluginState, ExH, BH) ->
+  io:format("~p received partner signal with Data ~p~n",[myFuncs:myName(BH),Data]),
+  base_variables:write(<<"TRU">>,<<"CurrentTRU">>,Data, BH),
   {ok, PluginState};
 
 partner_signal({<<"Update_TRU">>, Payload}, PluginState, ExH, BH) ->
@@ -113,5 +119,7 @@ link_end(Reason, PluginState, ExH, BH) ->
   gen_statem:cast(FSM_PID, completed),
   reflect.
 
-base_variable_update(_, PluginState, ExH, BH) ->
+base_variable_update({<<"TRU">>, <<"CurrentTRU">>, Value}, PluginState, ExH, BH) ->
+  io:format("Master Current TRU updated for ~p: ~p~n",[myFuncs:myName(BH), Value]),
+  base_link_ep:signal_partner(<<"CurrentTRU">>, Value, ExH),
   {ok,PluginState}.

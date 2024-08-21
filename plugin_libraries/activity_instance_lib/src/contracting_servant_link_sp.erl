@@ -32,13 +32,16 @@ generate_proposal(Requirements, PluginState, NegH, BH) ->
     MyName ->
       StartTime = base_variables:read(<<"FSM_INFO">>,<<"startTime">>,BH),
       EndTime = base_variables:read(<<"FSM_INFO">>,<<"endTime">>,BH),
+      log:message(myFuncs:myName(BH), <<"Master">>, <<"Proposal">>),
       {proposal, {accept,{StartTime,EndTime}}, StartTime};
     _ ->
       {refuse, not_qualified}
   end.
 
 proposal_accepted(PluginState, NegH, BH) ->
+  log:message(<<"EVENT">>, myFuncs:myName(BH), <<"Proposal accepted">>),
   Tsched = PluginState,
   LinkID = list_to_binary(ref_to_list(make_ref())),
   Data1 = #{<<"LinkID">>=>LinkID},
+  log:message(myFuncs:myName(BH), <<"Master">>, <<"Promise">>),
   {promise, Tsched, LinkID,Data1, no_state}.

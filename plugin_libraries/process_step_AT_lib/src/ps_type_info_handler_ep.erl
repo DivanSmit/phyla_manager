@@ -66,10 +66,14 @@ handle_signal(<<"STORE_DATA">>, Data, BH) ->
   end,
   ok.
 
-handle_request(<<"SPAWN_PS_INSTANCE">>,Payload, FROM, BH)->
+handle_request(<<"SPAWN_PS_INSTANCE">>,Payload1, FROM, BH)->
+  IDInt = rand:uniform(1000),
+  ID = maps:get(<<"processID">>, Payload1,integer_to_binary(IDInt)),
 
-  IDInt = rand:uniform(10000),
-  ID = maps:get(<<"processID">>, Payload,integer_to_binary(IDInt)),
+  Payload = case maps:get(<<"processID">>, Payload1, none) of
+              none -> maps:put(<<"processID">>, ID, Payload1);
+              _ -> Payload1
+            end,
 
   Name = case maps:get(<<"name">>, Payload) of
            no_entry -> list_to_binary("PS_" ++ integer_to_list(IDInt));
@@ -135,7 +139,7 @@ handle_request(<<"newComponent">>,Payload, FROM, BH)->
 
 handle_request(<<"requestForData">>,Layout, FROM, BH)->
 
-  io:format("P Step received a request for data with layout: ~p~n",[Layout]),
+  io:format("P Step received a request for data with layout~n"),
   {Name, Actions} = Layout,
   {ok, Entry} = postgresql_functions:execute_combined_queries("process_steps", [{equal, "name", binary_to_list(Name)}]),
 
@@ -151,17 +155,25 @@ handle_request(<<"requestForData">>,Layout, FROM, BH)->
         if
           TRUAction == ElemAct ->
 
-            [Resource] = jsx:decode(element(8, Data)),
+            Cape = case TRUAction of
+                     <<"Store">> -> <<"TRU_STORED_VALUES">>;
+                     <<"Measured">> -> <<"TRU_MEASURED_VALUES">>
+                   end,
 
             Data_map = maps:merge(Elem, #{
               <<"process">> => Name,
-              <<"TRUs">> => TRUs
+              <<"resource">>=> hd(jsx:decode(element(8, Data))),
+              <<"TRUs">> => TRUs,
+              <<"start">> => binary_to_integer(element(5, Data)),
+              <<"end">> => binary_to_integer(element(6, Data))
             }),
-            TargetBC = bhive:discover_bases(#base_discover_query{capabilities = <<"TRU_MEASURED_VALUES">>}, BH),
+            TargetBC = bhive:discover_bases(#base_discover_query{capabilities = Cape}, BH),
             [Replies] = base_signal:emit_request(TargetBC, <<"requestForData">>, Data_map, BH),
             io:format("Reply from OP Type: ~p~n", [Replies]),
             #{<<"name">> => Name,
+              <<"start">> => binary_to_integer(element(5, Data)),
               <<"date">>=> myFuncs:convert_unix_time_to_normal(binary_to_integer(element(5, Data))),
+              <<"end">>=> binary_to_integer(element(6, Data)),
               <<"values">>=> Replies,
               <<"type">>=> TRUAction};
           true-> Acc

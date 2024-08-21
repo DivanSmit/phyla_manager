@@ -9,6 +9,7 @@
 -module(ps_info_handler_ep).
 -author("LENOVO").
 -behaviour(base_receptor).
+-include("../../../base_include_libs/base_terms.hrl").
 %% API
 -export([init/2, stop/1, handle_signal/3, handle_request/4]).
 
@@ -20,9 +21,20 @@ stop(BH) ->
   ok.
 
 handle_request(<<"INFO">>,<<"INFO">>, FROM ,BH)->
-  MyBC = base:get_my_bc(BH),
-  MyName = base_business_card:get_name(MyBC),
-  Reply = #{},
+  Schedule = maps:keys(base_schedule:get_all_tasks(BH)),
+  Execution = maps:keys(base_execution:get_all_tasks(BH)),
+  {Status, Time} = case Schedule of
+                     [] -> case Execution of
+                             [] -> {<<"completed">>, base:get_origo()};
+                             _ -> Task = hd(Execution),
+                               End = Task#task_shell.tstart,
+                               {<<"execution">>, End}
+                           end;
+                     _ -> Task = hd(Schedule),
+                       Start = Task#task_shell.tsched,
+                       {<<"scheduled">>, Start}
+                   end,
+  Reply = #{<<"time">> => Time, <<"name">> => myFuncs:myName(BH), <<"status">> => Status},
   {reply, Reply}.
 
 handle_signal(<<"StartTask">>,ID, BH)->

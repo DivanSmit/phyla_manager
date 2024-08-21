@@ -815,3 +815,12 @@
 [08/Aug/2024:19:26:35 +0200] access to /erl/http_session_gen_server/fetchdata failed for 192.168.56.1, reason: 
 "Not found"
 [08/Aug/2024:19:26:35 +0200], Server: <0.502.0>, Protocol: HTTP, Transport: TCP, URI: /erl/http_session_gen_server/fetchdata, Host: 192.168.56.1:9001, Peer: 192.168.56.1:62331, Reason: [{statuscode,404},{description,"Object Not Found"}]
+[21/Aug/2024:22:21:24 +0200] access to /erl/http_session_gen_server/fetchdata?MSG=%7B%22subject%22%3A%22INFO%22%2C%22queryParam%22%3A%22INFO%22%2C%22tag%22%3A%22OPERATOR_INSTANCE_INFO%22%7D failed for 192.168.1.50, reason: 
+"Not found"
+[21/Aug/2024:22:21:24 +0200], Server: <0.424.0>, Protocol: HTTP, Transport: TCP, URI: /erl/http_session_gen_server/fetchdata?MSG=%7B%22subject%22%3A%22INFO%22%2C%22queryParam%22%3A%22INFO%22%2C%22tag%22%3A%22OPERATOR_INSTANCE_INFO%22%7D, Host: 192.168.1.50:9001, Peer: 192.168.1.50:65259, Reason: [{statuscode,404},{description,"Object Not Found"}]
+[21/Aug/2024:22:21:29 +0200] access to /erl/http_session_gen_server/fetchdata?MSG=%7B%22subject%22%3A%22INFO%22%2C%22queryParam%22%3A%22INFO%22%2C%22tag%22%3A%22FTA_INSTANCE_INFO%22%7D failed for 192.168.1.50, reason: 
+"Not found"
+[21/Aug/2024:22:21:29 +0200], Server: <0.424.0>, Protocol: HTTP, Transport: TCP, URI: /erl/http_session_gen_server/fetchdata?MSG=%7B%22subject%22%3A%22INFO%22%2C%22queryParam%22%3A%22INFO%22%2C%22tag%22%3A%22FTA_INSTANCE_INFO%22%7D, Host: 192.168.1.50:9001, Peer: 192.168.1.50:65271, Reason: [{statuscode,404},{description,"Object Not Found"}]
+[21/Aug/2024:22:21:34 +0200] access to /erl/http_session_gen_server/fetchdata?MSG=%7B%22subject%22%3A%22INFO%22%2C%22queryParam%22%3A%22INFO%22%2C%22tag%22%3A%22FACILITY_ROOM_INSTANCE_INFO%22%7D failed for 192.168.1.50, reason: 
+"Not found"
+[21/Aug/2024:22:21:34 +0200], Server: <0.424.0>, Protocol: HTTP, Transport: TCP, URI: /erl/http_session_gen_server/fetchdata?MSG=%7B%22subject%22%3A%22INFO%22%2C%22queryParam%22%3A%22INFO%22%2C%22tag%22%3A%22FACILITY_ROOM_INSTANCE_INFO%22%7D, Host: 192.168.1.50:9001, Peer: 192.168.1.50:65271, Reason: [{statuscode,404},{description,"Object Not Found"}]

@@ -12,24 +12,6 @@
 %% API
 -export([init/2, stop/1, instance_spawn_request/2, generate_instance_recipe/4]).
 
-%%,
-%%{
-%%"name": "evaluation_room_1",
-%%"id": "414",
-%%"capacity": 1000000,
-%%"sensors": [
-%%
-%%]
-%%},
-%%{
-%%"name": "waste_removal",
-%%"id": "135",
-%%"capacity": 1000000,
-%%"sensors": [
-%%
-%%]
-%%}
-
 init(Pars, BH) ->
   %% we want to create an instance
   base:wait_for_base_ready(BH),
@@ -69,9 +51,9 @@ generate_instance_recipe(Name, ID, Contract, BH) ->
                    <<"identity">> => #{
                      <<"id">> => ID,
                      <<"name">> => Name,
-                     <<"taxonomy">> => #{<<"arti_class">> => <<"resource-instance">>, <<"base_type">> => <<"PS_TYPE">>}
+                     <<"taxonomy">> => #{<<"arti_class">> => <<"resource-instance">>, <<"base_type">> => <<"PROCESS_STEP_TYPE">>}
                    },
-                   <<"capabilities">> => [<<"PS_INSTANCE_INFO">>, <<"EXECUTABLE_TASK">>],
+                   <<"capabilities">> => [<<"PS_INSTANCE_INFO">>, <<"EXECUTABLE_TASK">>, <<"ACTIVITY_INSTANCE">>],
                    <<"responsibilities">> => [],
                    <<"addresses">> => #{},
                    <<"meta">> => #{}
@@ -99,7 +81,7 @@ generate_instance_recipe(Name, ID, Contract, BH) ->
                    <<"name">> => Name,
                    <<"taxonomy">> => #{<<"arti_class">> => <<"resource-instance">>, <<"base_type">> => <<"PROCESS_STEP_TYPE">>}
                  },
-                 <<"capabilities">> => [<<"PS_INSTANCE_INFO">>, <<"EXECUTABLE_TASK">>],
+                 <<"capabilities">> => [<<"PS_INSTANCE_INFO">>, <<"EXECUTABLE_TASK">>, <<"ACTIVITY_INSTANCE">>],
                  <<"responsibilities">> => [],
                  <<"addresses">> => #{},
                  <<"meta">> => #{}

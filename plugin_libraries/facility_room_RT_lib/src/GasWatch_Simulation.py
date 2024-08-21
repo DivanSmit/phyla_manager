@@ -21,10 +21,3 @@ def handle_request():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
-
-
-# URL = "http://localhost:5000/api",
-# io:format("Starting api call to ~p~n",[URL]),
-# {ok, {{"HTTP/1.1", 200, "OK"}, _Headers, Body}} = httpc:request(get, {URL, []}, [], []),
-# io:format("Response: ~s~n", [Body]),
-

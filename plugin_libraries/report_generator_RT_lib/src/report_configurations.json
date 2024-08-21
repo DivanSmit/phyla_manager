@@ -1,0 +1,15 @@
+{
+  "reports": [
+    {
+      "name":"fruit_storage_temperature",
+      "fileType": ".csv",
+        "outputs": [
+          {
+            "actions": "Store",
+            "values": ["temperature"],
+            "stats": ["min_value", "max_value", "Average"]
+          }
+        ]
+    }
+  ]
+}

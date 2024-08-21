@@ -16,7 +16,7 @@
 
 init(Pars, BH) ->
   timer:sleep(3000),
-%%  analysis(BH),
+  analysis(BH),
   ok.
 
 stop(BH) ->
@@ -24,13 +24,13 @@ stop(BH) ->
 
 analysis(BH)->
 
-  Frequency = 120000,
+  Frequency = 1800000,
   StartOfWork = base:get_origo()-Frequency,
   EndOfWork = base:get_origo(),
 
   SQ = #task_shell_query{field = tend, range = {StartOfWork,EndOfWork}},
   {ok, Shells} = base_biography:query_task_shells(SQ,BH),
-  io:format("Shells: ~p~n",[Shells]),
+%%  io:format("Shells: ~p~n",[Shells]),
 
   TotalTime = lists:foldl(fun(Elem, Acc)->
     Task = base_biography:get_task(Elem, BH),

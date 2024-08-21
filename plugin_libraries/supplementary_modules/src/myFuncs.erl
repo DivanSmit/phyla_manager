@@ -35,8 +35,6 @@ get_task_metadata(BH)->
     ID = Shell#task_shell.id,
     Requirements = X#base_task.data1,
 
-    io:format("The requirements in myFuncs are: ~p~n",[Requirements]),
-
     Meta = X#base_task.meta,
     BC = Meta#base_contract.master_bc,
     Name = base_business_card:get_name(BC),
@@ -330,24 +328,49 @@ update_list_and_average(List, Value) ->
 % Functions for calculating the availability of a resource at a time
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-check_availability(StartTime, Duration, Type, BH) ->
+check_availability(StartTimeTarget, DurationTarget, _Type, BH) ->
+  % Get all tasks from the system
+  All_tasks = maps:values(base_schedule:get_all_tasks(BH)),
 
-  ListSced = extract_sched_time(BH),
-  ListExe = extract_exe_time(BH),
-  TaskList = ListSced ++ ListExe,
+  % Fold through tasks to find the first available start time
+  {ok, AvailableStart} =
+    lists:foldl(fun(Elem, {ok, Tstart}) ->
+      Data1 = Elem#base_task.data1,
+      Shell = Elem#base_task.task_shell,
+      TaskDuration = maps:get(<<"duration">>, Data1, 0),
+      TaskStart = Shell#task_shell.tsched,
+      TaskFinish = TaskStart + TaskDuration,
 
-  case check_if_possible(TaskList, StartTime, Duration, BH) of
-    {ok, Time} ->
-      {ok, Time};
-    {not_possible, Time} ->
-      case Type of
-        now ->
-          {not_possible, Time};
-        earliest_from_now ->
-          check_availability(Time, Duration, Type,BH)
+      if
+      % Check if the task overlaps with the current start time and duration
+        (Tstart >= TaskStart andalso Tstart < TaskFinish) orelse
+          (Tstart + DurationTarget > TaskStart andalso Tstart + DurationTarget =< TaskFinish) ->
+          {ok, TaskFinish}; % If it does, set the start time to just after the task's finish time
+        true ->
+          {ok, Tstart} % Otherwise, keep the current start time
       end
+                end, {ok, StartTimeTarget}, All_tasks),
 
-  end.
+  {ok, AvailableStart}.
+
+%%check_availability(StartTime, Duration, Type, BH) ->
+%%
+%%  ListSced = extract_sched_time(BH),
+%%  ListExe = extract_exe_time(BH),
+%%  TaskList = ListSced ++ ListExe,
+%%
+%%  case check_if_possible(TaskList, StartTime, Duration, BH) of
+%%    {ok, Time} ->
+%%      {ok, Time};
+%%    {not_possible, Time} ->
+%%      case Type of
+%%        now ->
+%%          {not_possible, Time};
+%%        earliest_from_now ->
+%%          check_availability(Time, Duration, Type,BH)
+%%      end
+%%
+%%  end.
 
 check_if_possible([], Tstart, _, _) ->
   {ok, Tstart};

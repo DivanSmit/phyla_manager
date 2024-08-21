@@ -2,6 +2,202 @@
   "list": [
     {
       "FSM": "contracting_exe_FSM",
+      "description": "",
+      "duration": 600000,
+      "processType": "Store Fruit 2",
+      "resources": [
+        {
+          "capabilities": "COLD_STORE_FRUIT",
+          "change": 0,
+          "name": "cold_storage_1",
+          "port": 0
+        }
+      ],
+      "truAction": "Store",
+      "type": "SPAWN_PS_INSTANCE"
+    },
+    {
+      "FSM": "contracting_exe_FSM",
+      "description": "Perform Maintenance on a machine.",
+      "duration": 300000,
+      "processType": "Maintenance",
+      "resources": [
+        {
+          "capabilities": "OPERATOR_INSTANCE_INFO",
+          "change": 0,
+          "name": "",
+          "port": 0
+        },
+        {
+          "capabilities": "FTA_INSTANCE_INFO",
+          "change": 0,
+          "name": "",
+          "port": 0
+        }
+      ],
+      "truAction": "None",
+      "type": "SPAWN_PS_INSTANCE"
+    },
+    {
+      "FSM": "contracting_exe_FSM",
+      "description": "Measure the fruit initially.",
+      "duration": 60000,
+      "processType": "Initial Measurements",
+      "resources": [
+        {
+          "capabilities": "OPERATOR_INSTANCE_INFO",
+          "change": 0,
+          "name": "",
+          "port": 0
+        }
+      ],
+      "truAction": "None",
+      "type": "SPAWN_PS_INSTANCE"
+    },
+    {
+      "FSM": "contracting_exe_FSM",
+      "description": "Measure the end values of the fruit.",
+      "duration": 60000,
+      "processType": "Final Measurements",
+      "resources": [
+        {
+          "capabilities": "OPERATOR_INSTANCE_INFO",
+          "change": 0,
+          "name": "",
+          "port": 0
+        }
+      ],
+      "truAction": "None",
+      "type": "SPAWN_PS_INSTANCE"
+    },
+    {
+      "FSM": "contracting_exe_FSM",
+      "description": "Move fruit from CA to the Evaluation.",
+      "duration": 60000,
+      "processType": "Move Fruit 2",
+      "resources": [
+        {
+          "capabilities": "OPERATOR_INSTANCE_INFO",
+          "change": 0,
+          "name": "",
+          "port": 0
+        },
+        {
+          "capabilities": "COLD_STORE_FRUIT",
+          "change": -3,
+          "name": "cold_storage_1",
+          "port": 0
+        },
+        {
+          "capabilities": "FACILITY_ROOM_INSTANCE_INFO",
+          "change": 3,
+          "name": "evaluation_1",
+          "port": 0
+        }
+      ],
+      "truAction": "Move",
+      "type": "SPAWN_PS_INSTANCE"
+    },
+    {
+      "FSM": "contracting_exe_FSM",
+      "description": "Storage of fruit below 2C for 5 Min.",
+      "duration": 180000,
+      "processType": "Store Fruit 1",
+      "resources": [
+        {
+          "capabilities": "COLD_STORE_FRUIT",
+          "change": 0,
+          "name": "cold_storage_1",
+          "port": 0
+        }
+      ],
+      "truAction": "Store",
+      "type": "SPAWN_PS_INSTANCE"
+    },
+    {
+      "FSM": "contracting_exe_FSM",
+      "description": "Move the measured fruit to CA1.",
+      "duration": 60000,
+      "processType": "Move Fruit 1",
+      "resources": [
+        {
+          "capabilities": "OPERATOR_INSTANCE_INFO",
+          "change": 0,
+          "name": "",
+          "port": 0
+        },
+        {
+          "capabilities": "COLD_STORE_FRUIT",
+          "change": 3,
+          "name": "cold_storage_1",
+          "port": 0
+        },
+        {
+          "capabilities": "FACILITY_ROOM_INSTANCE_INFO",
+          "change": -3,
+          "name": "evaluation_1",
+          "port": 0
+        }
+      ],
+      "truAction": "Move",
+      "type": "SPAWN_PS_INSTANCE"
+    },
+    {
+      "FSM": "contracting_exe_FSM",
+      "description": "Label the Moved fruit with the QR codes.",
+      "duration": 60000,
+      "processType": "Label Fruit",
+      "resources": [
+        {
+          "capabilities": "OPERATOR_INSTANCE_INFO",
+          "change": 0,
+          "name": "",
+          "port": 0
+        }
+      ],
+      "truAction": "Transform",
+      "type": "SPAWN_PS_INSTANCE"
+    },
+    {
+      "FSM": "contracting_exe_FSM",
+      "description": "Move the fruit from Storage Room 1 to the Evaluation Room.",
+      "duration": 60000,
+      "processType": "Collect Fruit 1",
+      "resources": [
+        {
+          "capabilities": "OPERATOR_INSTANCE_INFO",
+          "change": 0,
+          "name": "",
+          "port": 0
+        }
+      ],
+      "truAction": "Move",
+      "type": "SPAWN_PS_INSTANCE"
+    },
+    {
+      "FSM": "contracting_exe_FSM",
+      "description": "Measure the values with a machine.",
+      "duration": 120000,
+      "processType": "Machine and Op",
+      "resources": [
+        {
+          "capabilities": "OPERATOR_INSTANCE_INFO",
+          "change": 0,
+          "name": "",
+          "port": 0
+        },
+        {
+          "capabilities": "FTA_INSTANCE_INFO",
+          "change": 0,
+          "name": "",
+          "port": 0
+        }
+      ],
+      "truAction": "Measure",
+      "type": "SPAWN_PS_INSTANCE"
+    },
+    {
+      "FSM": "contracting_exe_FSM",
       "description": "Test",
       "duration": 10000,
       "processType": "Operator_and_Room",
@@ -40,8 +236,8 @@
     },
     {
       "FSM": "contracting_exe_FSM",
-      "description": "Collect the fruit from storage.",
-      "duration": 1000,
+      "description": "Move the fruit from storage.",
+      "duration": 10000,
       "processType": "Collect_Initial_Fruit",
       "resources": [
         {
@@ -51,7 +247,7 @@
           "port": 0
         }
       ],
-      "truAction": "Collect",
+      "truAction": "Move",
       "type": "SPAWN_PS_INSTANCE"
     },
     {

@@ -57,7 +57,7 @@ init(Pars, BH) ->
       end
   end,
 
-
+  base_variables:write(<<"barcodes">>, <<"map">>, #{}, BH),
 
   ok.
 
@@ -90,8 +90,19 @@ handle_request(<<"NEW">>, Data, From, BH) ->
   % Need type [apple, other], process [Trial name], name [PS name], amount [number of trus to generate]
   Type = maps:get(<<"type">>, Data),
   {ok, List} = postgresql_functions:execute_combined_queries("all_trus", [{equal, "type", binary_to_list(Type)}]),
-  N = maps:get(<<"amount">>,Data, 1),
-  TRUs = generate_trus(Data, List, N),
+  N = maps:get(<<"barcodes">>,Data, []),
+  TRUs = generate_trus(Data, List, length(N)),
+  save_barcodes(N, TRUs, BH),
+  {reply, TRUs};
+
+handle_request(<<"GetTRUs">>, Barcodes, From, BH) ->
+  Map = base_variables:read(<<"barcodes">>, <<"map">>, BH),
+  TRUs = lists:foldl(fun(Code, Acc) ->
+    case maps:get(Code, Map, none) of
+      none -> Acc;
+      TRU -> Acc ++ [TRU]
+    end
+                     end, [], Barcodes),
   {reply, TRUs}.
 
 generate_trus(_Data, _List, 0) -> [];
@@ -156,3 +167,10 @@ generate_random_chars(Length, Characters, Acc) ->
   Index = crypto:rand_uniform(1, ListLength + 1),
   Char = lists:nth(Index, Characters),
   generate_random_chars(Length - 1, Characters, [Char | Acc]).
+
+save_barcodes(Codes, TRUs, BH) ->
+  Pairs = lists:zip(Codes, TRUs),
+  Map = maps:from_list(Pairs),
+  OldMap = base_variables:read(<<"barcodes">>, <<"map">>, BH),
+  base_variables:write(<<"barcodes">>, <<"map">>, maps:merge(OldMap, Map), BH),
+  io:format("The new barcode map is: ~p~n",[maps:merge(OldMap, Map)]).

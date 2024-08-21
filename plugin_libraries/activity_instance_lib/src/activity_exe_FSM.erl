@@ -172,14 +172,17 @@ check_with_parent(cast, internal_check, State) ->
   MyName = myFuncs:myName(BH),
   ProID = base_attributes:read(<<"meta">>, <<"parentID">>, BH),
   TaskHolons = bhive:discover_bases(#base_discover_query{id = ProID}, BH),
+  log:message(myFuncs:myName(BH), base_business_card:get_name(hd(TaskHolons)), <<"Request to start">>),
 
   %% Sending a request, because an answer is required if can continue or not
   [Reply] = base_signal:emit_request(TaskHolons, <<"Update">>, {MyName,query}, BH),
   io:format("Reply from the parent of ~p: ~p~n", [MyName,Reply]),
   case Reply of
     not_ready ->
+      log:message(base_business_card:get_name(hd(TaskHolons)),myFuncs:myName(BH),  <<"Not ready">>),
       {next_state, parent_not_yet_ready, State};
     {ready, TRU} ->
+      log:message(base_business_card:get_name(hd(TaskHolons)),myFuncs:myName(BH),  <<"Ready">>),
       base_variables:write(<<"TRU">>, <<"List">>, TRU, BH),
       {next_state, executing_tasks, State}
   end;
@@ -194,6 +197,7 @@ check_with_parent(cast, Cast, State)->
 
 parent_not_yet_ready(enter, _OldState, State) ->
   BH = maps:get(<<"BH">>,State),
+  log:message(<<"EVENT">>,myFuncs:myName(BH), <<"Waiting for parent">>),
   Delay = base_attributes:read(<<"meta">>,<<"FSM_WAIT_FOR_PARENTS_DELAY">>,BH),
   io:format("~n *[ACTIVITY E STATE | ~p]*: Parent not yet ready, going to wait for ~ps ~n",[myFuncs:myName(BH),Delay/1000]),
 
@@ -231,6 +235,7 @@ finish(enter, OldState, State)->
 
   contracting_master_link_ap:analysis(BH),
 
+  log:message(<<"EVENT">>, myFuncs:myName(BH), <<"Completed">>),
   io:format("~n### ~p IS COMPLETE WITH ITS TASKS ###~n~n",[myFuncs:myName(BH)]),
 
   {stop, normal, State};

@@ -21,7 +21,6 @@ init(Pars, BH) ->
     instance_spawn_request(Elem,BH)
               end, [], Pars),
   base_attributes:write(<<"INSTANCE">>,<<"CAPABILITIES">>, [
-    <<"MEASURE_FTA_VALUES">>,
     <<"FTA_INSTANCE_INFO">>
   ], BH),
   ok.
@@ -34,14 +33,18 @@ instance_spawn_request(Pars, BH) ->
   ID = maps:get(<<"id">>,Pars),
   {ok, Recipe} = generate_instance_recipe(Name,ID, BH),
   Tsched = base:get_origo(),
-  Data1 = no_data,
+  Data1 = Pars,
   base_guardian_sp:schedule_instance_guardian(Tsched,Recipe,Data1,BH),
   ok.
 
 generate_instance_recipe(Name,ID, BH) ->
   RECIPE = #{
     <<"plugins">>=> [
-      #{<<"name">>=><<"fta_info_handler_ep">>,<<"lib">>=><<"fta_machine_RT_lib">>,<<"init_args">>=>[]}
+      #{<<"name">>=><<"fta_info_handler_ep">>,<<"lib">>=><<"fta_machine_RT_lib">>,<<"init_args">>=>[]},
+      #{<<"name">>=><<"resource_maintenance_ap">>,<<"lib">>=><<"resource_instance_lib">>,<<"init_args">>=>[]},
+      #{<<"name">>=><<"contracting_resource_servant_link_ep">>,<<"lib">>=><<"resource_instance_lib">>,<<"init_args">>=>[]},
+      #{<<"name">>=><<"contracting_operator_servant_link_sp">>,<<"lib">>=><<"resource_instance_lib">>,<<"init_args">>=>[]},
+      #{<<"name">>=><<"contracting_resource_servant_rp">>,<<"lib">>=><<"resource_instance_lib">>,<<"init_args">>=>[]}
     ],
     <<"bc">> => #{
       <<"identity">>=>#{
@@ -51,7 +54,6 @@ generate_instance_recipe(Name,ID, BH) ->
       },
       % Remember to update Type attributes as new capabilities are added.
       <<"capabilities">>=>[
-        <<"MEASURE_FTA_VALUES">>,
         <<"FTA_INSTANCE_INFO">>
       ],
       <<"responsibilities">>=>[],

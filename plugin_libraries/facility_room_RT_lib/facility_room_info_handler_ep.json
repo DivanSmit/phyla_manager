@@ -1,6 +1,6 @@
 {"name":"facility_room_info_handler_ep",
   "lib":"facility_room_RT_lib",
-  "tags":["INFO", "CheckIn"],
+  "tags":["INFO", "CheckIn", "REMOVE_TASK"],
   "bin_dir": "default",
   "behaviour":"receptor",
   "sector": "cm",

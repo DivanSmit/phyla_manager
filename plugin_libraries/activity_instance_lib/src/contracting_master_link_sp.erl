@@ -21,7 +21,7 @@ init(Pars, BH) ->
   base_variables:write(<<"FSM_INFO">>,<<"FSM_Ready">>, 0,BH),
   base_variables:write(<<"FSM_INFO">>,<<"startTime">>, base_attributes:read(<<"meta">>,<<"startTime">>, BH),BH),
   base_variables:write(<<"FSM_INFO">>,<<"endTime">>, base:get_origo(),BH),
-  io:format("Master SP INSTALLED FOR ~p with Contract: ~p~n",[myFuncs:myName(BH), base_attributes:read(<<"meta">>,<<"childContract">>,BH)]),
+  io:format("Master SP INSTALLED FOR ~p with startTime: ~p~n",[myFuncs:myName(BH), base_attributes:read(<<"meta">>,<<"startTime">>,BH)]),
 
 
   FSM = base_attributes:read(<<"meta">>,<<"FSM_Schedule">>,BH),
@@ -47,44 +47,56 @@ generate_requirements(Pars, NegH, BH) ->
 get_candidates(Requirements, PluginState, NegH, BH) ->
   TypeOfRequirements = maps:get(<<"type">>,Requirements),
   case TypeOfRequirements of
-      activity->
-        Name = maps:get(<<"name">>,Requirements),
-        DR = #base_discover_query{name = Name},
-        CandidateBCs = bhive:discover_bases(DR,BH),
-        {candidates,CandidateBCs, activity};
-    resource->
-      Cape = maps:get(<<"capabilities">>,Requirements),
-      DR = #base_discover_query{capabilities = Cape},
-      CandidateBCs = bhive:discover_bases(DR,BH),
+    activity ->
+      Name = maps:get(<<"name">>, Requirements),
+      DR = #base_discover_query{name = Name},
+      CandidateBCs = bhive:discover_bases(DR, BH),
+      log:message(myFuncs:myName(BH), base_business_card:get_name(hd(CandidateBCs)), <<"Sending requirements">>),
+      {candidates, CandidateBCs, activity};
+    resource ->
+      Resource = maps:get(<<"resource">>, Requirements, none),
+      CandidateBCs = case Resource of
+                       none -> Cape = maps:get(<<"capabilities">>, Requirements),
+                         DR = #base_discover_query{capabilities = Cape},
+                         bhive:discover_bases(DR, BH);
+                       <<"">> -> Cape = maps:get(<<"capabilities">>, Requirements),
+                         DR = #base_discover_query{capabilities = Cape},
+                         bhive:discover_bases(DR, BH);
+                       Valid ->
+                         DR = #base_discover_query{name = Valid},
+                         bhive:discover_bases(DR, BH)
+                     end,
+
       case CandidateBCs of
         [] ->
           FSM_PID = base_variables:read(<<"FSM_INFO">>, <<"FSM_PID">>, BH),
           gen_statem:cast(FSM_PID, no_operator),
           base_variables:write(<<"FSM_INFO">>, <<"FSM_status">>, no_operator, BH),
-          {candidates, CandidateBCs, resource}
-        ;
+          log:message(myFuncs:myName(BH), base_business_card:get_name(hd(CandidateBCs)), <<"Sending requirements">>),
+          {candidates, CandidateBCs, resource};
         _ ->
           {candidates, CandidateBCs, resource}
       end
-end.
+  end.
 
 evaluate_proposal(Proposal, PluginState, NegH, BH) ->
+  log:message(<<"EVENT">>, myFuncs:myName(BH), <<"Received proposal">>),
   {ok,PluginState}.
 
 
 all_proposals_received(ProposalList, PluginState, NegH, BH) ->
-
+  log:message(<<"EVENT">>,myFuncs:myName(BH), <<"All proposals received">>),
   case PluginState of
     activity ->
       [CandidateBC] = maps:keys(ProposalList),
       [Proposal] = maps:values(ProposalList),
-      Name = base_business_card:get_name(CandidateBC),
+      ID = base_business_card:get_id(CandidateBC),
       case Proposal of
         {accept, {Start, End}} ->
-          base_variables:write(Name, <<"startTime">>, Start, BH),
-          base_variables:write(Name, <<"endTime">>, End, BH),
-          {ok, [CandidateBC], nostate};
-        _ -> io:format("~n### Incorrect Proposal from ~p ###~n", [Name]),
+          base_variables:write(ID, <<"startTime">>, Start, BH),
+          base_variables:write(ID, <<"endTime">>, End, BH),
+          {ok, [CandidateBC], CandidateBC};
+        _ -> io:format("~n### Incorrect Proposal from ~p ###~n", [ID]),
           {ok, [], nostate}
       end;
 
@@ -116,6 +128,7 @@ all_proposals_received(ProposalList, PluginState, NegH, BH) ->
                                  end, null, ProposalList),
           % retrieve the winning BC
           CanidateProposal = maps:get(<<"proposal">>,WinningMap),
+          io:format("Proposal: ~p~n",[CanidateProposal]),
           base_variables:write(<<"FSM_INFO">>,<<"startTime">>, maps:get(<<"startTime">>, CanidateProposal),BH),
           base_variables:write(<<"FSM_INFO">>,<<"endTime">>, maps:get(<<"endTime">>, CanidateProposal),BH),
 
@@ -126,14 +139,15 @@ all_proposals_received(ProposalList, PluginState, NegH, BH) ->
                           true ->
                             []
                         end,
-
-          {ok, [CandidateBC], nostate}
+          log:message(myFuncs:myName(BH), base_business_card:get_name(CandidateBC), <<"Accept proposal">>),
+          {ok, [CandidateBC], CandidateBC}
       end
   end.
 
 
 
 promise_received(Promise, PluginState, NegH, BH) ->
+  log:message(base_business_card:get_name(PluginState), myFuncs:myName(BH),<<"Promise">>),
   FSM_PID = base_variables:read(<<"FSM_INFO">>,<<"FSM_PID">>,BH),
   gen_statem:cast(FSM_PID,contracted),
   Count = base_variables:read(<<"FSM_INFO">>,<<"FSM_Count">>,BH),

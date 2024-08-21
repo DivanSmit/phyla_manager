@@ -9,6 +9,7 @@
 -module(activity_info_handler_ep).
 -author("LENOVO").
 -behaviour(base_receptor).
+-include("../../../base_include_libs/base_terms.hrl").
 %% API
 -export([init/2, stop/1, handle_signal/3, handle_request/4]).
 
@@ -19,13 +20,28 @@ init(Pars, BH) ->
 stop(BH) ->
   ok.
 
-handle_request(Tag, Signal, FROM, BH) ->
-  erlang:error(not_implemented);
-
 handle_request(<<"INFO">>,<<"INFO">>, FROM ,BH)->
-  MyBC = base:get_my_bc(BH),
-  MyName = base_business_card:get_name(MyBC),
-  Reply = #{},
+
+  Schedule = maps:keys(base_schedule:get_all_tasks(BH)),
+  Execution = maps:keys(base_execution:get_all_tasks(BH)),
+  Bio = maps:keys(base_biography:get_all_tasks(BH)),
+
+  {Status, Time} = case Schedule of
+                     [] -> case Execution of
+                             [] ->
+                               Task = hd(Bio),
+                               End = Task#task_shell.tend,
+                               {<<"Completed">>, End};
+                             _ -> Task = hd(Execution),
+                               RealStart = Task#task_shell.tstart,
+                               {<<"Execution">>, RealStart}
+                           end;
+                     _ -> Task = hd(Schedule),
+                       Start = Task#task_shell.tsched,
+                       {<<"Scheduled">>, Start}
+                   end,
+
+  Reply = #{<<"time">> => Time, <<"name">> => myFuncs:myName(BH), <<"status">> => Status},
   {reply, Reply}.
 
 handle_signal(<<"StartTask">>,ID, BH)->
@@ -49,6 +65,7 @@ handle_signal(<<"EndTask">>,ID, BH)->
   end,
   ok;
 
+% TODO Add this functionality if time
 handle_signal(<<"CancelTask">>,ID, BH)-> %Not yet implemented but does work. Only works if task is on schedule
   case myFuncs:check_if_my_task(ID, BH) of
     my_task ->

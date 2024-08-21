@@ -12,7 +12,7 @@
 
 
 -export([request_start/2, start_task_error/3, request_resume/2,
-  resume_task/3, start_task/3, end_task/3, init/2, stop/1]).
+  resume_task/3, start_task/3, end_task/3, init/2, stop/1, task_cancel/4, base_variable_update/4]).
 
 %% ============================================================================================%%
 %%                                    BASE TASK CALLBACKS
@@ -66,3 +66,9 @@ schedule_this_behaviour(ServerFolder,Port,BH)->
   base_attributes:write(?HTTP_CONNECTOR_PAGE,<<"PORT">>,Port,BH),
   io:format("The HTTP is requested to start~n"),
   base_task_sp:schedule_task(TSCHED,?INTERFACE_SERVER_TASK,?INTERFACE_SERVER_TASK,Data1,BH).
+
+task_cancel(Reason, TaskState, ExecutorHandle, BH) ->
+  erlang:error(not_implemented).
+
+base_variable_update(_, TaskState, ExecutorHandle, BH) ->
+  erlang:error(not_implemented).

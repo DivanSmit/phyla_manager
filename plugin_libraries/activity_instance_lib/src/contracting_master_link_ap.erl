@@ -22,9 +22,6 @@ stop(BH) ->
 
 analysis(BH) ->
 
-  Schedule = base_schedule:get_all_tasks(BH),
-  Execution = base_execution:get_all_tasks(BH),
-
   try
     fun() ->
       io:format("Analysis starting for ~p~n", [myFuncs:myName(BH)]),
@@ -51,7 +48,6 @@ analysis(BH) ->
         {NewEarliestStart, NewLatestEnd}
                                          end, {FirstTask#task_shell.tstart, FirstTask#task_shell.tend}, maps:keys(AllTasks)),
       Duration = EndTime - StartTime,
-
       ParentID = base_attributes:read(<<"meta">>, <<"parentID">>, BH),
       [ParentBC] = bhive:discover_bases(#base_discover_query{id = ParentID}, BH),
       ParentName = base_business_card:get_name(ParentBC),
@@ -69,6 +65,7 @@ analysis(BH) ->
         true ->
           ok % or any other action when map_size(TRUs) is 0
       end,
+      io:format("TRUs after sent for ~p: ~p~n",[myFuncs:myName(BH),TRUs]),
 
       % Send data to Type
       MyBC = base:get_my_bc(BH),
@@ -76,6 +73,7 @@ analysis(BH) ->
       Tax = MyID#identity.taxonomy,
       TypeType = Tax#base_taxonomy.base_type_code,
       TaskHolons = bhive:discover_bases(#base_discover_query{name = TypeType}, BH),
+      io:format("TRUs for ~p: ~p~n",[myFuncs:myName(BH),TRUs]),
 
 
       StoreData = case TypeType of
@@ -104,6 +102,7 @@ analysis(BH) ->
                         <<"trus">> => jsx:encode(TRUs)
                       }
                   end,
+      io:format("Storedata for ~p: ~p~n",[myFuncs:myName(BH),StoreData]),
 
 %%      io:format("StoreData for ~p: ~p~n",[myFuncs:myName(BH), StoreData]),
       base_signal:emit_signal(TaskHolons, <<"STORE_DATA">>, StoreData, BH),

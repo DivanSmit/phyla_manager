@@ -37,7 +37,19 @@ init(Pars, BH) ->
 stop(BH) ->
   ok.
 
-handle_signal(Tag, Data, BH) ->
+handle_signal(<<"REMOVE_TASK">>, Data, BH) ->
+  io:format("~p removing task: ~p~n",[myFuncs:myName(BH), Data]),
+  Values = base_schedule:get_all_tasks(BH),
+  lists:foreach(fun(X) ->
+    Task = maps:get(X, Values),
+    Meta = Task#base_task.meta,
+    BC = Meta#base_contract.master_bc,
+    Name = base_business_card:get_name(BC),
+    if
+      Name == Data -> base_schedule:take_task(X, BH);
+      true -> ok
+    end
+                end, maps:keys(Values)),
   ok.
 
 handle_request(<<"INFO">>,<<"Test">>, FROM, BH)->
@@ -58,124 +70,6 @@ handle_request(<<"INFO">>,<<"Test">>, FROM, BH)->
   TaskHolons = bhive:discover_bases(#base_discover_query{capabilities = Spawn_Tag}, BH),
   base_signal:emit_request(TaskHolons, Spawn_Tag, Data_map, BH),
   Reply = #{<<"Reply">>=>ok},
-  {reply, Reply};
-
-handle_request(<<"INFO">>,<<"Test1">>, FROM, BH)->
-  io:format("Received test1~n"),
-
-  Elem = #{
-    <<"name">> => <<"Trial_1">>,
-    <<"childContract">>=><<"contracting_A">>,
-%%    <<"pred">> => [],
-    <<"children">> => [
-      #{
-        <<"name">> => <<"Process_1">>,
-        <<"startTime">> => base:get_origo()+10000,
-        <<"predecessor">> => [],
-        <<"type">> => <<"SPAWN_PROCESS_TASK_INSTANCE">>,
-        <<"children">> => [
-            #{
-            <<"name">> => <<"Move_1">>,
-            <<"startTime">> => 0,
-            <<"predecessor">> => [],
-            <<"type">> => <<"SPAWN_PS_INSTANCE">>,
-            <<"meta">> => #{
-              <<"machine">> => #{}
-            }
-          },
-          #{
-            <<"name">> => <<"Step_1">>,
-            <<"startTime">> => 0,
-            <<"predecessor">> => [<<"Move_1">>],
-            <<"type">> => <<"SPAWN_PS_INSTANCE">>,
-            <<"meta">> => #{
-              <<"machine">> => #{}
-            }
-          }
-        ]}
-    ,
-    #{
-      <<"name">> => <<"Process_2">>,
-      <<"startTime">> => base:get_origo()+10000,
-      <<"predecessor">> => [],
-      <<"type">> => <<"SPAWN_PROCESS_TASK_INSTANCE">>,
-      <<"children">> => [
-        #{
-          <<"name">> => <<"Move_2">>,
-          <<"startTime">> => 0,
-          <<"predecessor">> => [],
-          <<"type">> => <<"SPAWN_PS_INSTANCE">>,
-          <<"meta">> => #{
-            <<"machine">> => #{}
-          }
-        },
-        #{
-          <<"name">> => <<"Step_2">>,
-          <<"startTime">> => 0,
-          <<"predecessor">> => [<<"Move_2">>],
-          <<"type">> => <<"SPAWN_PS_INSTANCE">>,
-          <<"meta">> => #{
-            <<"machine">> => #{}
-          }
-        },
-        #{
-          <<"name">> => <<"Move_3">>,
-          <<"startTime">> => 0,
-          <<"predecessor">> => [<<"Step_2">>],
-          <<"type">> => <<"SPAWN_PS_INSTANCE">>,
-          <<"meta">> => #{
-            <<"machine">> => #{}
-          }
-        }]
-    }
- ]
-  },
-
-  MyBC = base:get_my_bc(BH),
-  MyID = base_business_card:get_id(MyBC),
-
-  Data_map = maps:merge(#{<<"parentID">> => MyID,<<"startTime">>=>base:get_origo()}, Elem),
-%%  io:format("Data map: ~p~n",[Data_map]),
-  Spawn_Tag = <<"SPAWN_PROCESS_TASK_INSTANCE">>,
-  TaskHolons = bhive:discover_bases(#base_discover_query{capabilities = Spawn_Tag}, BH),
-  Name = base_signal:emit_request(TaskHolons, Spawn_Tag, Data_map, BH),
-  Reply = #{<<"Reply">>=>Name},
-  {reply, Reply};
-
-handle_request(<<"INFO">>,<<"Test2">>, FROM, BH)->
-  io:format("Received test2~n"),
-
-  Data = #{
-    <<"children">> =>
-    [#{<<"children">> => [],
-      <<"customTime">> => false,
-      <<"name">> => <<"CF1">>,
-      <<"predecessor">> => <<>>,
-      <<"processID">> => <<"rbs4lp4qu">>,
-      <<"processType">> =>
-      <<"Collect_Initial_Fruit">>,
-      <<"startTime">> => 0},
-      #{<<"children">> => [],
-        <<"customTime">> => false,
-        <<"name">> => <<"MT1">>,
-        <<"predecessor">> =>
-        <<"rbs4lp4qu">>,
-        <<"processID">> => <<"lue8l1azo">>,
-        <<"processType">> =>
-        <<"Measure_Fruit_Quality">>,
-        <<"startTime">> => 0}],
-    <<"customTime">> => false,
-    <<"name">> => <<"Trial 1">>,
-    <<"predecessor">> => <<>>,
-    <<"processID">> => <<"5sqq67swm">>,
-    <<"processType">> => <<"Sub_Trial_1">>,
-    <<"startTime">> => 0},
-
-%%  io:format("Data map: ~p~n",[Data_map]),
-  Spawn_Tag = <<"SPAWN_PROCESS_TASK_INSTANCE">>,
-  TaskHolons = bhive:discover_bases(#base_discover_query{capabilities = Spawn_Tag}, BH),
-  Name = base_signal:emit_request(TaskHolons, Spawn_Tag, Data, BH),
-  Reply = #{<<"Reply">>=>Name},
   {reply, Reply};
 
 handle_request(<<"INFO">>,<<"INFO">>, FROM, BH)->
@@ -211,15 +105,16 @@ handle_request(<<"TASKS">>, Request, FROM, BH) ->
       % Update variables
       % Reply with answer
       ID = maps:get(<<"id">>, TaskData),
-      TRUs = maps:get(<<"tru">>, TaskData),
+      Barcodes = maps:get(<<"tru">>, TaskData),
 
       Tasks = base_execution:get_all_tasks(BH),
       Is_in_execution = maps:fold(fun(Shell,_Value, Acc) ->
         ElemId = Shell#task_shell.id,
         if
           ID == ElemId ->
-            io:format("TRUS: ~p~n", [TRUs]),
-            base_variables:write(<<"TaskStatus">>, <<"TRU">>,TRUs,BH),
+            io:format("TRUS: ~p~n", [Barcodes]),
+            log:message(<<"EVENT">>, myFuncs:myName(BH), <<"Scanned TRUs">>),
+            base_variables:write(<<"TaskStatus">>, <<"TRU">>,Barcodes,BH),
             true;
           true -> Acc
         end
@@ -234,6 +129,7 @@ handle_request(<<"TASKS">>, Request, FROM, BH) ->
           {reply, task_completed};
         _ ->
           TaskHolons = bhive:discover_bases(#base_discover_query{name = PartnerName}, BH),
+          log:message(myFuncs:myName(BH), base_business_card:get_name(hd(TaskHolons)), Param),
           base_signal:emit_signal(TaskHolons, Param, PartnerID, BH),
 
           MyBC = base:get_my_bc(BH),

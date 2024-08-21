@@ -89,11 +89,14 @@ check_with_contracted_child(cast, internal_check, State)->
       X == MyName -> Acc; % Some of the tasks we are the servant for our parents. SKip those tasks
       true ->
         TaskHolons = bhive:discover_bases(#base_discover_query{name = X}, BH),
+        log:message(myFuncs:myName(BH), base_business_card:get_name(hd(TaskHolons)), <<"Availability">>),
         [Reply] = base_signal:emit_request(TaskHolons, <<"CheckIn">>, MyName, BH),
         io:format("Reply from child ~p for ~p is ~p~n",[X,MyName, Reply]),
         case Reply of
-          ready -> Acc;
-          not_ready -> false
+
+          ready -> log:message(base_business_card:get_name(hd(TaskHolons)),myFuncs:myName(BH),  <<"Ready">>),Acc;
+
+          not_ready -> log:message(myFuncs:myName(BH), base_business_card:get_name(hd(TaskHolons)), <<"Not Ready">>),false
         end
     end
                       end, true, Children),
@@ -148,13 +151,16 @@ check_with_parent(cast, internal_check, State) ->
   MyName = base_business_card:get_name(MyBC),
   ProID = base_attributes:read(<<"meta">>, <<"parentID">>, BH),
   TaskHolons = bhive:discover_bases(#base_discover_query{id = ProID}, BH),
+  log:message(myFuncs:myName(BH), base_business_card:get_name(hd(TaskHolons)), <<"Request to start">>),
   [Reply] = base_signal:emit_request(TaskHolons, <<"Update">>, {MyName,query}, BH),
   case Reply of
     not_ready ->
+      log:message(base_business_card:get_name(hd(TaskHolons)), myFuncs:myName(BH),  <<"Not ready">>),
       {next_state, parent_not_yet_ready, State};
     {ready, TRU} ->
       io:format("~p received TRU list from parent: ~p~n",[myFuncs:myName(BH),TRU]),
       base_variables:write(<<"TRU">>, <<"List">>, TRU, BH),
+      log:message( base_business_card:get_name(hd(TaskHolons)),myFuncs:myName(BH), <<"Ready">>),
       {next_state, check_with_contracted_child, State}
   end;
 
@@ -167,6 +173,7 @@ check_with_parent(cast, Cast, State) ->
 
 parent_not_yet_ready(enter, _OldState, State) ->
   BH = maps:get(<<"BH">>,State),
+  log:message(<<"EVENT">>, myFuncs:myName(BH), <<"Waiting for parent">>),
   Delay = base_attributes:read(<<"meta">>,<<"FSM_WAIT_FOR_PARENTS_DELAY">>,BH),
   io:format("~n *[CONTRACT E STATE | ~p]*: Parent not yet ready, going to wait for ~ps ~n",[myFuncs:myName(BH),Delay/1000]),
   {keep_state, {State,base:get_origo()}, Delay};
@@ -192,7 +199,8 @@ parent_not_yet_ready(cast, Cast, {State,OldTIme}) ->
 
 wait_for_operator_start(enter, OldState, State)->
   BH = maps:get(<<"BH">>,State),
-  io:format("~n *[CONTRACT E STATE | ~p]*: Waiting for operator ~n",[myFuncs:myName(BH)]),
+  log:message(<<"EVENT">>, myFuncs:myName(BH), <<"Waiting for operator to start">>),
+  io:format("~n *[CONTRACT E STATE | ~p]*: Waiting for operator to start ~n",[myFuncs:myName(BH)]),
   {keep_state, State};
 
 wait_for_operator_start(cast, start, State)->
@@ -212,12 +220,13 @@ wait_for_operator_start(cast, start, State)->
 
 wait_for_operator_start(cast, Cast, State)->
   BH = maps:get(<<"BH">>,State),
-  io:format("~n *[CONTRACT E STATE | ~p]*: Unsupported cast in waiting for op of ~p ~n",[myFuncs:myName(BH), Cast]),
+  io:format("~n *[CONTRACT E STATE | ~p]*: Unsupported cast in waiting for op to start of ~p ~n",[myFuncs:myName(BH), Cast]),
   {keep_state, State}.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 wait_for_operator_end(enter, OldState, State)->
   BH = maps:get(<<"BH">>,State),
+  log:message(<<"EVENT">>, myFuncs:myName(BH), <<"Started">>),
   io:format("~n *[CONTRACT E STATE | ~p]*: Waiting for operator to complete the task~n",[myFuncs:myName(BH)]),
   {keep_state, State};
 
@@ -233,7 +242,7 @@ wait_for_operator_end(cast, end_task, State)->
 
 wait_for_operator_end(cast, Cast, State)->
   BH = maps:get(<<"BH">>,State),
-  io:format("~n *[CONTRACT E STATE | ~p]*: Unsupported cast in waiting for op of ~p~n",[myFuncs:myName(BH), Cast]),
+  io:format("~n *[CONTRACT E STATE | ~p]*: Unsupported cast in waiting for op to end of ~p~n",[myFuncs:myName(BH), Cast]),
 
   {keep_state, State}.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -279,6 +288,7 @@ finish(enter, OldState, State)->
   end,
 
   contracting_master_link_ap:analysis(BH),
+  log:message(<<"EVENT">>, myFuncs:myName(BH), <<"Completed">>),
 
   io:format("~n### ~p IS COMPLETE WITH ITS TASKS ###~n~n",[myFuncs:myName(BH)]),
   {stop, normal, State};

@@ -48,40 +48,6 @@ init(Pars, BH) ->
       end
   end,
 
-  TableName1 = "tru_measurements",
-  Columns1 = [
-    {"unix", "bigint"},
-    {"process", "text"},
-    {"resource", "text"},
-    {"name", "text"},
-    {"fruittype", "text"},
-    {"weight", "numeric"},
-    {"amount", "numeric"},
-    {"harvestdate", "text"}
-  ],
-  base_variables:write(list_to_binary(TableName1), <<"columns">>, Columns1, BH),
-  try
-    timer:sleep(100),
-    postgresql_functions:create_new_table(TableName1, Columns1)
-  catch
-    _:_ ->
-      try
-        io:format("Trying to create ~p again~n", [TableName1])
-      catch
-        _:_ -> io:format("################POSTGRES ERROR###################~n~p cannot be opended~n~n", [TableName1])
-      end
-  end,
-
-%%  spawn(fun()->
-%%    timer:sleep(2000),
-%%%%    TaskHolons = bhive:discover_bases(#base_discover_query{capabilities = <<"manage_facility">>}, BH),
-%%%%    base_signal:emit_request(TaskHolons, <<"INFO">>, <<"Test2">>, BH)
-%%%%    TargetBC = bhive:discover_bases(#base_discover_query{name = <<"Report Generator">>}, BH),
-%%%%    [Data] = base_signal:emit_request(TargetBC, <<"generateTrialReport">>, #{<<"name">>=> <<"Trial 1">>}, BH)
-%%
-%%        end),
-
-
   ok.
 
 stop(BH) ->
@@ -104,23 +70,13 @@ handle_signal(<<"RESOURCE_USAGE">>, Data, BH) ->
   Data_map = maps:merge(Data_1,#{
     <<"unix">>=> Unix
   }),
-  io:format("Data map: ~p~n",[Data_map]),
+%%  io:format("Data map: ~p~n",[Data_map]),
 
   Result = postgresql_functions:write_data_to_postgresql_database(Data_map, "operator_work_schedule"),
   case Result of
     ok -> ok;
     error -> io:format("Error when trying to write to DB:~nData: ~p~n", [Data_map])
   end,
-  ok;
-
-handle_signal(<<"TRU_Data">>, Data, BH) ->
-
-  Result = postgresql_functions:write_data_to_postgresql_database(Data, "tru_measurements"),
-  case Result of
-    ok -> ok;
-    error -> io:format("Error when trying to write to DB:~nData: ~p~n", [Data])
-  end,
-
   ok.
 
 handle_request(<<"SPAWN_OPERATOR_INSTANCE">>,Payload, FROM, BH)->
@@ -161,7 +117,8 @@ handle_request(<<"requestForData">>,Request, FROM, BH)->
 %%  {range, "age", "20", "30"}
 
   Data = case maps:get(<<"action">>, Request, <<"operator_schedule">>) of
-           <<"operator_schedule">> -> TableName = "operator_work_schedule",
+           <<"operator_schedule">> ->
+             TableName = "operator_work_schedule",
              AlLdata = maps:get(<<"allData">>, Request),
 
              if

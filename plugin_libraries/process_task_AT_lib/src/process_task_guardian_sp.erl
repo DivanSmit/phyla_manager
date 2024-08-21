@@ -54,7 +54,7 @@ generate_instance_recipe(Name, ID, Contract,BH) ->
                    <<"identity">> => #{
                      <<"id">> => ID,
                      <<"name">> => Name,
-                     <<"taxonomy">> => #{<<"arti_class">> => <<"resource-instance">>, <<"base_type">> => <<"process_task_TYPE">>}
+                     <<"taxonomy">> => #{<<"arti_class">> => <<"resource-instance">>, <<"base_type">> => <<"PROCESS_TASK_TYPE">>}
                    },
                    <<"capabilities">> => [],
                    <<"responsibilities">> => [],

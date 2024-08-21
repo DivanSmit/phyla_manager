@@ -6,8 +6,24 @@
         "id": "1252",
         "capacity": 100,
         "sensors": [
-
+          {
+            "frequency": 1000,
+            "max": 30,
+            "type": "temperature"
+          }
         ]
+      },
+      {
+        "name": "evaluation_1",
+        "id": "1253",
+        "capacity": 100,
+        "sensors": []
+      },
+      {
+        "name": "waste_removal_1",
+        "id": "1254",
+        "capacity": 100,
+        "sensors": []
       }
     ]},
     {"name": "facility_room_guardian_ep","lib": "facility_room_RT_lib","init_args": []},
@@ -20,7 +36,7 @@
       "name":"FACILITY_ROOM_TYPE",
       "taxonomy":{"arti_class":"resource-type","base_type":"FACILITY_ROOM_TYPE"}
     },
-    "capabilities":["SPAWN_FACILITY_ROOM_INSTANCE","RESOURCE_INFO"],
+    "capabilities":["SPAWN_FACILITY_ROOM_INSTANCE","RESOURCE_INFO", "TRU_STORED_VALUES"],
     "responsibilities":[],
     "addresses":{},
     "meta":{}

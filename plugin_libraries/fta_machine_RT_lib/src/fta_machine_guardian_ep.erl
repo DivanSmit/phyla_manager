@@ -27,7 +27,8 @@ spawn_cancelled(Reason, State, ManagerHandle, BH) ->
   ok.
 
 request_start_instance(State, GuardianHandle, BH) ->
-  base_guardian_ep:write_instance_attribute_page(<<"MEASUREMENTS">>,#{<<"values">>=>[]},GuardianHandle,BH),
+  Data = base_task_ep:get_schedule_data(GuardianHandle,BH),
+  base_guardian_ep:write_instance_attribute_page(<<"attributes">>,Data,GuardianHandle,BH),
   %%  This is where we add the attributes and state variables
   {start_instance, State}.
 

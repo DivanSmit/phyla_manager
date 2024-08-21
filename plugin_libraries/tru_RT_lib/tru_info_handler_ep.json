@@ -1,6 +1,6 @@
 {"name":"tru_info_handler_ep",
   "lib":"tru_RT_lib",
-  "tags":["INFO", "NEW","CompletedTask"],
+  "tags":["INFO", "NEW","CompletedTask","GetTRUs"],
   "bin_dir": "default",
   "behaviour":"receptor",
   "sector": "cm",

@@ -3,6 +3,150 @@
     {
       "children": [
         {
+          "processType": "Operator_Only"
+        },
+        {
+          "processType": "Operator_Only"
+        },
+        {
+          "processType": "Operator_Only"
+        }
+      ],
+      "processType": "Test_Trial_2",
+      "type": "SPAWN_PROCESS_TASK_INSTANCE"
+    },
+    {
+      "children": [
+        {
+          "processType": "Fruit_Sample_2"
+        },
+        {
+          "processType": "Fruit_Sample_1"
+        },
+        {
+          "processType": "Trial1_Pre_Trial"
+        }
+      ],
+      "processType": "Trial 3",
+      "type": "SPAWN_PROCESS_TASK_INSTANCE"
+    },
+    {
+      "children": [
+        {
+          "processType": "Initial Measurements"
+        },
+        {
+          "processType": "Move Fruit 1"
+        },
+        {
+          "processType": "Store Fruit 2"
+        },
+        {
+          "processType": "Move Fruit 2"
+        },
+        {
+          "processType": "Final Measurements"
+        }
+      ],
+      "processType": "Fruit_Sample_2",
+      "type": "SPAWN_PROCESS_TASK_INSTANCE"
+    },
+    {
+      "children": [
+        {
+          "processType": "Label Fruit"
+        },
+        {
+          "processType": "Machine and Op"
+        },
+        {
+          "processType": "Move Fruit 1"
+        }
+      ],
+      "processType": "Trial 2",
+      "type": "SPAWN_PROCESS_TASK_INSTANCE"
+    },
+    {
+      "children": [
+        {
+          "processType": "Maintenance"
+        }
+      ],
+      "processType": "MaintenanceProcess",
+      "type": "SPAWN_PROCESS_TASK_INSTANCE"
+    },
+    {
+      "children": [
+        {
+          "processType": "Initial Measurements"
+        },
+        {
+          "processType": "Move Fruit 1"
+        },
+        {
+          "processType": "Store Fruit 1"
+        }
+      ],
+      "processType": "Test4",
+      "type": "SPAWN_PROCESS_TASK_INSTANCE"
+    },
+    {
+      "children": [
+        {
+          "processType": "Trial1_Pre_Trial"
+        },
+        {
+          "processType": "Trial2_Trial_Execution"
+        }
+      ],
+      "processType": "Trial_1",
+      "type": "SPAWN_PROCESS_TASK_INSTANCE"
+    },
+    {
+      "children": [
+        {
+          "processType": "Initial Measurements"
+        },
+        {
+          "processType": "Move Fruit 1"
+        },
+        {
+          "processType": "Store Fruit 1"
+        },
+        {
+          "processType": "Move Fruit 2"
+        },
+        {
+          "processType": "Final Measurements"
+        }
+      ],
+      "processType": "Fruit_Sample_1",
+      "type": "SPAWN_PROCESS_TASK_INSTANCE"
+    },
+    {
+      "children": [
+        {
+          "processType": "Collect Fruit 1"
+        },
+        {
+          "processType": "Label Fruit"
+        }
+      ],
+      "processType": "Trial1_Pre_Trial",
+      "type": "SPAWN_PROCESS_TASK_INSTANCE"
+    },
+    {
+      "children": [
+        {
+          "processType": "Machine and Op"
+        }
+      ],
+      "processType": "Test Measure",
+      "type": "SPAWN_PROCESS_TASK_INSTANCE"
+    },
+    {
+      "children": [
+        {
           "processType": "Process_101"
         }
       ],

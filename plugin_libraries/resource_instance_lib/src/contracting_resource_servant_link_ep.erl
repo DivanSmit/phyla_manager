@@ -15,6 +15,8 @@
 
 
 init(Pars, BH) ->
+  base_variables:write(<<"measure">>,<<"values">>,[],BH),
+
   ok.
 
 stop(BH) ->
@@ -39,7 +41,6 @@ link_start(PluginState, ExH, BH) ->
 
   Name = myFuncs:myName(BH),
   {ok, Data1} = base_task_ep:get_schedule_data(ExH, BH),
-
   Action = maps:get(<<"truAction">>, Data1, none),
   case Action of
     % Based on the instructed action, something needs to happen and then send data to the partner if needed
@@ -57,11 +58,15 @@ link_start(PluginState, ExH, BH) ->
         <<"Data1">>=>Data1
       },
       {ok, StateMachinePID} = gen_statem:start_link({global, base_business_card:get_id(base:get_my_bc(BH))}, no_operator_task_FSM, FSM_data, []);
+   <<"Measure">>->
+     spawn(fun()->
+       listen_on_port(9910,ExH,BH)
+     end);
     _ ->
       io:format("Invalid TRU action of~p for ~p~n", [Action, Name])
   end,
 
-  {ok, no_state}.
+  {ok, Action}.
 
 link_resume(PluginState, ExH, BH) ->
   erlang:error(not_implemented).
@@ -75,11 +80,22 @@ partner_call(Value, State, ExAgentHandle, BH) ->
   io:format("~n PARTNERCALL Value ~p ",[Value]),
   {reply, nothing, nothing}.
 
-partner_signal(Cast, State, ExAgentHandle, BH) ->
-  erlang:error(not_implemented).
+partner_signal({<<"CurrentTRU">>, Data}, PluginState, ExH, BH) ->
+  io:format("~p received partner signal with Data ~p~n",[myFuncs:myName(BH),Data]),
+  base_variables:write(<<"TRU">>,<<"CurrentTRU">>,Data, BH),
+  {ok, PluginState}.
 
 link_end(Reason, State, ExAgentHandle, BH) ->
   %% TODO remember to act differently when a task is canceled
+  spawn(fun()->
+    io:format("State: ~p~n", [State]),
+    if
+      State == <<"Measure">> ->
+        io:format("Going to end the port~n"),
+        send_message("localhost", 9910, "stop");
+      true -> ok
+    end
+        end),
   reflect. %Change later to ensure that it also reflects the data for analysis
 
 base_variable_update({<<"TaskStatus">>, Variable, Value}, PluginState, ExH, BH) ->
@@ -87,3 +103,44 @@ base_variable_update({<<"TaskStatus">>, Variable, Value}, PluginState, ExH, BH) 
   {ok, no_state}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+listen_on_port(Port,ExH,BH) ->
+  {ok, ListenSocket} = gen_tcp:listen(Port, [binary, {packet, 0}, {active, false}, {reuseaddr, true}]),
+  io:format("Listening on port ~p~n", [Port]),
+  listen(ListenSocket, [], ExH,BH).
+
+listen(ListenSocket, State,ExH,BH) ->
+  {ok, Socket} = gen_tcp:accept(ListenSocket),
+  {ok, Data} = gen_tcp:recv(Socket, 0),
+  case Data of
+    <<"stop">> -> gen_tcp:close(Socket),
+      State;
+    _ ->
+      case jsx:decode(Data) of
+        {error, _} ->
+          io:format("Invalid JSON received: ~p~n", [Data]),
+          gen_tcp:close(Socket),
+          State;
+        JsonValue -> io:format("Received JSON: ~p~n", [JsonValue]),
+          gen_tcp:close(Socket),
+          CurrentTRU = base_variables:read(<<"TRU">>,<<"CurrentTRU">>,BH),
+          NewJson = maps:update(<<"name">>, CurrentTRU, JsonValue),
+          NewData = [NewJson | State],
+          base_task_ep:write_execution_data(#{<<"TRU_Data">> => NewData}, base_link_ep:get_shell(ExH), BH),
+          base_variables:write(<<"measure">>,<<"values">>,NewData,BH),
+          io:format("New Data: ~p~n",[NewData]),
+          listen(ListenSocket, NewData,ExH,BH)
+      end
+  end.
+
+send_message(Host, Port, JsonData) ->
+  case gen_tcp:connect(Host, Port, [binary, {packet, 0}, {active, false}]) of
+    {ok, Socket} ->
+      gen_tcp:send(Socket, JsonData),
+      io:format("Message sent to ~p:~p~n", [Host, Port]),
+      gen_tcp:close(Socket),
+      ok;
+    {error, Reason} ->
+      io:format("Failed to connect: ~p~n", [Reason]),
+      {error, Reason}
+  end.

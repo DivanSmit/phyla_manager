@@ -16,6 +16,8 @@
 
 
 init(Pars, BH) ->
+  base_variables:write(<<"Maintenance">>, <<"TotalDuration">>, 0, BH),
+  base_variables:write(<<"Maintenance">>, <<"Scheduled">>,false,BH),
   ok.
 
 stop(BH) ->
@@ -82,6 +84,15 @@ end,
   Data3 = #{
     <<"duration">>=>Duration
   },
+
+  LastDuration = base_variables:read(<<"Maintenance">>, <<"TotalDuration">>, BH),
+  base_variables:write(<<"Maintenance">>, <<"TotalDuration">>, LastDuration + Duration, BH),
+
+  case Type of
+    <<"Maintenance">> -> base_variables:write(<<"Maintenance">>, <<"TotalDuration">>, 0, BH),
+      base_variables:write(<<"Maintenance">>, <<"Scheduled">>,false,BH);
+    _ -> ok
+  end,
 
   base_task_rp:write_reflection_data(Data3, ReflectorHandle, BH),
   ok.

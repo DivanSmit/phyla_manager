@@ -72,6 +72,7 @@ handle_call({http_request,<<"INFO">>,MSG}, From, State) ->
   {noreply,State};
 
 handle_call({http_request,<<"SPAWN">>,MSG}, From, State) ->
+  log:message(<<"HMI">>, <<"Facility Manager">>, <<"Spawn Instance Request">>),
   io:format("HTTP request recieved from: ~p~n",[MSG]),
   BH = State#http_state_management.base_handle,
   Query = maps:get(<<"queryParam">>,MSG),
@@ -80,6 +81,7 @@ handle_call({http_request,<<"SPAWN">>,MSG}, From, State) ->
              <<"SPAWN">> ->
                Param = maps:get(<<"param">>, MSG),
                TargetBC = bhive:discover_bases(#base_discover_query{capabilities = Tag}, BH),
+               log:message(<<"Facility Manager">>, base_business_card:get_name(hd(TargetBC)), Tag),
                case TargetBC of
                  [] ->
                    {error, no_instances};
@@ -99,6 +101,7 @@ handle_call({http_request,<<"USERInteract">>,MSG}, From, State) ->
   Tag = maps:get(<<"tag">>,MSG),
   User = maps:get(<<"user">>,MSG),
   Param = maps:get(<<"param">>, MSG),
+  log:message(<<"HMI">>, User, Param),
   TaskID = maps:get(<<"taskID">>,MSG),
   Init = #{<<"param">>=>Param,<<"taskID">>=>TaskID},
   TargetBC = bhive:discover_bases(#base_discover_query{name = User}, BH),

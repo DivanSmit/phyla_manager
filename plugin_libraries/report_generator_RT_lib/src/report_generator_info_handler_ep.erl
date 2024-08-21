@@ -37,8 +37,7 @@ handle_request(<<"generateTrialReport">>, Data, From, BH) ->
 
   Name = maps:get(<<"name">>, Data, none),
   Report = maps:get(<<"reportType">>, Data, <<"general">>),
-  FileName = maps:get(<<"file">>, Data, "report1"),
-
+  FileName = maps:get(<<"file">>, Data, <<"report1">>),
 
 %% TODO put the Layout in a json (config) file
   ReportLayout = case Report of
@@ -46,11 +45,11 @@ handle_request(<<"generateTrialReport">>, Data, From, BH) ->
                      #{
                        <<"process">>=> Name,
                        <<"actions">> => [
-                         #{
-                           <<"action">> => <<"Measure">>,
-                           <<"values">> => [<<"weight">>],
-                           <<"stats">> => [<<"average">>]
-                         },
+%%                         #{
+%%                           <<"action">> => <<"Measure">>,
+%%                           <<"values">> => [<<"weight">>],
+%%                           <<"stats">> => [<<"average">>]
+%%                         },
                          #{
                            <<"action">> => <<"Store">>,
                            <<"values">> => [<<"temperature">>, <<"duration">>, <<"start">>, <<"end">>],
@@ -65,7 +64,7 @@ handle_request(<<"generateTrialReport">>, Data, From, BH) ->
   [Reply] = base_signal:emit_request(TargetBC, <<"requestForData">>, ReportLayout, BH),
   io:format("Report datails: ~p~n",[Reply]),
 
-  generate_report(FileName, Report, Reply),
+  generate_report(binary_to_list(FileName), Report, Reply),
 
 
   {reply, ok};
@@ -127,7 +126,7 @@ write_rows_to_csv(FilePath, Rows) ->
   % Open or create the file for writing in binary mode
   case file:open(FilePath, [write, binary]) of
     {ok, File} ->
-      % Write each row to the file
+      % Write each row to the file, including the header if it's included in Rows
       lists:foreach(fun(Row) ->
         RowStr = string:join([binary_to_list(Value) || Value <- tuple_to_list(Row)], ",") ++ "\n",
         file:write(File, RowStr)
@@ -173,7 +172,7 @@ generate_report(FileName, Type, Data)->
 
   FilePath = "C:/Users/LENOVO/Desktop/base-getting-started/phyla_manager_BASE/plugin_libraries/report_generator_RT_lib/src/"++FileName++".csv",
 
-  {ok, File} = file:open(FilePath, [write]),
+  {ok, File} = file:open(FilePath, [append]),
 
   case Type of
     <<"general">> ->
@@ -194,14 +193,20 @@ generate_report(FileName, Type, Data)->
             io:format(File, "~s~n", [string:join(Headers, ",")]),
             Row = lists:foldl(fun(Key, Acc) ->
               Val = float_to_binary(maps:get(Key, Values), [{decimals, 2}]),
-              io:format("val: ~p~n",[Val]),
               Acc++[binary_to_list(Val)]
             end, [binary_to_list(Name), binary_to_list(Date)], Keys),
             io:format("Row: ~p~n",[Row]),
             io:format(File, "~s~n", [string:join(Row, ",")]),
             io:format(File, "~n", [])
           ;
-          <<"Store">> -> io:format("Store Data~n");
+          <<"Store">> ->
+            io:format("Store Data~n"),
+            Headers = "Name,Start Date,Duration,min_value,max_value,Average",
+            io:format(File, "~s~n", [Headers]),
+            Row = store_value_report(Elem, FilePath),
+            io:format("Row: ~p~n",[Row]),
+            io:format(File, "~s~n", [string:join(Row, ",")]),
+            io:format(File, "~n", []);
           _ -> none
         end
 
@@ -240,3 +245,44 @@ generate_report(FileName, Type, Data)->
 
   % Close the file
   file:close(File).
+
+store_value_report(DataMap, FilePath) ->
+  % Extract values from the map
+  Values = maps:get(<<"cold_storage_1">>, maps:get(<<"values">>, DataMap)),
+
+  % Calculate the statistics
+  {Min, Max, Avg} = calculate_stats(Values),
+
+  % Prepare the row to be written to CSV
+  Date = maps:get(<<"date">>, DataMap),
+  Start = maps:get(<<"start">>, DataMap),
+  End = maps:get(<<"end">>, DataMap),
+  Name = maps:get(<<"name">>, DataMap),
+  Row = [binary_to_list(Name),
+    binary_to_list(Date),
+    format_duration(End-Start),
+    float_to_list(Min, [{decimals, 2}]),
+    float_to_list(Max, [{decimals, 2}]),
+    float_to_list(Avg, [{decimals, 2}])],
+  Row.
+
+calculate_stats(Values) ->
+  % Convert the list of tuples to a list of temperatures (as floats)
+  Temperatures = [list_to_float(binary_to_list(element(7, Value))) || Value <- Values],
+  % Calculate the min, max, and average
+  Min = lists:min(Temperatures),
+  Max = lists:max(Temperatures),
+  Avg = lists:sum(Temperatures) / length(Temperatures),
+
+  {Min, Max, Avg}.
+
+%%to_string(Value) when is_binary(Value) -> binary_to_list(Value);
+%%to_string(Value) when is_integer(Value) -> integer_to_list(Value);
+%%to_string(Value) when is_float(Value) -> float_to_binary(Value);
+%%to_string(Value) when is_list(Value) -> Value.
+
+format_duration(DurationMillis) ->
+  Hours = DurationMillis div 3600000,
+  Minutes = (DurationMillis rem 3600000) div 60000,
+  Seconds = (DurationMillis rem 60000) div 1000,
+  io_lib:format("~p:~p:~p", [Hours, Minutes, Seconds]).

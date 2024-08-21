@@ -47,11 +47,11 @@ handle_signal(<<"taskScheduled">>, {Name,Start,End}, BH) ->
   OldEnd = base_variables:read(<<"FSM_INFO">>,<<"endTime">>,BH),
 
   if
-    OldStart > Start -> base_variables:write(Name,<<"startTime">>,Start,BH);
+    OldStart > Start -> base_variables:write(<<"FSM_INFO">>,<<"startTime">>,Start,BH);
     true -> true
   end,
   if
-    OldEnd > End -> base_variables:write(Name,<<"endTime">>,End,BH);
+    OldEnd < End -> base_variables:write(<<"FSM_INFO">>,<<"endTime">>,End,BH);
     true -> true
   end,
 

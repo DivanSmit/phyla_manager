@@ -2,9 +2,16 @@
   "plugins": [
     {"name": "operator_guardian_sp","lib": "operator_RT_lib","init_args": [
       {
-        "name": "FM1",
+        "name": "Facility Manager",
         "id": "1",
         "role": "facility_manager",
+        "password": "",
+        "BreakTime": "12:00"
+      },
+      {
+        "name": "Operator 1",
+        "id": "2",
+        "role": "operator",
         "password": "",
         "BreakTime": "12:00"
       }
@@ -19,7 +26,7 @@
       "name":"OPERATOR_TYPE",
       "taxonomy":{"arti_class":"resource-type","base_type":"OPERATOR_TYPE"}
     },
-    "capabilities":["SPAWN_OPERATOR_INSTANCE","RESOURCE_INFO","TRU_MEASURED_VALUES"],
+    "capabilities":["SPAWN_OPERATOR_INSTANCE","RESOURCE_INFO"],
     "responsibilities":[],
     "addresses":{},
     "meta":{}

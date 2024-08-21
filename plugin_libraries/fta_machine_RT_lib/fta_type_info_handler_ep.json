@@ -1,6 +1,6 @@
 {"name":"fta_type_info_handler_ep",
   "lib":"fta_machine_RT_lib",
-  "tags":["SPAWN_FTA_MACHINE_INSTANCE","INFO"],
+  "tags":["SPAWN_FTA_MACHINE_INSTANCE","INFO","TRU_Data"],
   "bin_dir": "default",
   "behaviour":"receptor",
   "sector": "cm",

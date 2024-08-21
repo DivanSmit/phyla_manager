@@ -30,7 +30,7 @@ request_start_instance(State, GuardianHandle, BH) ->
   InstanceData = #{
     <<"FSM_Schedule">> => contracting_Sched_FSM,
     <<"FSM_Execute">> => activity_exe_FSM,
-    <<"FSM_WAIT_FOR_PARENTS_DELAY">> => 60000 %One minute
+    <<"FSM_WAIT_FOR_PARENTS_DELAY">> => 20000 %One minute
   },
 
   %%  This is where we add the attributes and state variables
@@ -43,6 +43,7 @@ request_start_instance(State, GuardianHandle, BH) ->
   {start_instance, State}.
 
 instance_started(State, GuardianHandle, BH) ->
+
   spawn(fun()->
     InstBC = base_guardian_ep:get_instance_bc(GuardianHandle, BH),
     InstName = base_business_card:get_name(InstBC),

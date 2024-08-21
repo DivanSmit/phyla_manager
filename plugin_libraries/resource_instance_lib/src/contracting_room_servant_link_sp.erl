@@ -29,13 +29,14 @@ generate_proposal([Requirements], PluginState, NegH, BH) ->
 %%  io:format("~p received requirements: ~p~n",[myFuncs:myName(BH), Requirements]),
   StartTime = maps:get(<<"AVAILABILITY">>,Requirements),
   Change = maps:get(<<"action">>, Requirements),
+  TaskDuration = maps:get(<<"duration">>, Requirements),
   {Result, _} = check_my_capacity(StartTime, Change, BH),
 
   case Result of
     true->
       Proposal = #{<<"proposal">>=>accept,
         <<"startTime">>=>StartTime,
-        <<"endTime">>=> StartTime+60000},
+        <<"endTime">>=> StartTime+TaskDuration},
       {proposal,Proposal,maps:merge(#{<<"action">>=>Change, <<"startTime">>=>StartTime}, Requirements)};
     false-> {refuse,not_qualified}
   end.
@@ -78,7 +79,7 @@ check_my_capacity(StartTime, Change,BH)-> % returns {FinalStatus, FinalCapacity}
                            ScheduleData = Elem#base_task.data1,
                            Shell = Elem#base_task.task_shell,
                            Tsched = Shell#task_shell.tsched,
-                           Value = maps:get(<<"action">>, ScheduleData),
+                           Value = maps:get(<<"action">>, ScheduleData, 0),
 
                            Cap1 = Total + Value,
 %%                           io:format("Cap1 second = ~p~n",[Cap1]),

@@ -91,41 +91,53 @@ handle_request(<<"requestForData">>,Request, FROM, BH)->
 %%  {equal, "name", "John"},
 %%  {range, "age", "20", "30"}
 
+  Data = case maps:get(<<"action">>, Request, <<"facility_room">>) of
+           <<"facility_room">> ->
 
-  TableName = "room_sensor_data",
-  AlLdata = maps:get(<<"allData">>, Request),
+             TableName = "room_sensor_data",
+             AlLdata = maps:get(<<"allData">>, Request),
 
-  Data = if
-           AlLdata == false ->
-             Start = integer_to_list(maps:get(<<"startTime">>, Request)),
-             End = integer_to_list(maps:get(<<"endTime">>, Request)),
-             case maps:get(<<"selected">>, Request) of
-               <<"All">> ->
-                 TargetBC = bhive:discover_bases(#base_discover_query{capabilities = <<"FACILITY_ROOM_INSTANCE_INFO">>}, BH),
-                 lists:foldl(fun(Elem, Acc) ->
-                   Name = base_business_card:get_name(Elem),
-                   {ok, Rows} = postgresql_functions:execute_combined_queries(TableName, [{equal, "name", binary_to_list(Name)}, {range, "unix", Start, End}]),
-                   maps:merge(Acc, #{Name => Rows})
-                             end, #{}, TargetBC);
-               Other ->
-                 {ok, Rows} = postgresql_functions:execute_combined_queries(TableName, [{equal, "name", binary_to_list(Other)},
-                   {range, "unix", Start, End}]),
-                 #{Other => Rows}
+             if
+               AlLdata == false ->
+                 Start = integer_to_list(maps:get(<<"startTime">>, Request)),
+                 End = integer_to_list(maps:get(<<"endTime">>, Request)),
+                 case maps:get(<<"selected">>, Request) of
+                   <<"All">> ->
+                     TargetBC = bhive:discover_bases(#base_discover_query{capabilities = <<"FACILITY_ROOM_INSTANCE_INFO">>}, BH),
+                     lists:foldl(fun(Elem, Acc) ->
+                       Name = base_business_card:get_name(Elem),
+                       {ok, Rows} = postgresql_functions:execute_combined_queries(TableName, [{equal, "name", binary_to_list(Name)}, {range, "unix", Start, End}]),
+                       maps:merge(Acc, #{Name => Rows})
+                                 end, #{}, TargetBC);
+                   Other ->
+                     {ok, Rows} = postgresql_functions:execute_combined_queries(TableName, [{equal, "name", binary_to_list(Other)},
+                       {range, "unix", Start, End}]),
+                     #{Other => Rows}
+                 end;
+
+               true ->
+                 case maps:get(<<"selected">>, Request) of
+                   <<"All">> ->
+                     TargetBC = bhive:discover_bases(#base_discover_query{capabilities = <<"FACILITY_ROOM_INSTANCE_INFO">>}, BH),
+                     lists:foldl(fun(Elem, Acc) ->
+                       Name = base_business_card:get_name(Elem),
+                       {ok, Rows} = postgresql_functions:execute_combined_queries(TableName, [{equal, "name", binary_to_list(Name)}]),
+                       maps:merge(Acc, #{Name => Rows})
+                                 end, #{}, TargetBC);
+                   Other ->
+                     {ok, Rows} = postgresql_functions:execute_combined_queries(TableName, [{equal, "name", binary_to_list(Other)}]),
+                     #{Other => Rows}
+                 end
              end;
+           <<"Store">> ->
+             TableName1 = "room_sensor_data",
 
-           true ->
-             case maps:get(<<"selected">>, Request) of
-               <<"All">> ->
-                 TargetBC = bhive:discover_bases(#base_discover_query{capabilities = <<"FACILITY_ROOM_INSTANCE_INFO">>}, BH),
-                 lists:foldl(fun(Elem, Acc) ->
-                   Name = base_business_card:get_name(Elem),
-                   {ok, Rows} = postgresql_functions:execute_combined_queries(TableName, [{equal, "name", binary_to_list(Name)}]),
-                   maps:merge(Acc, #{Name => Rows})
-                             end, #{}, TargetBC);
-               Other ->
-                 {ok, Rows} = postgresql_functions:execute_combined_queries(TableName, [{equal, "name", binary_to_list(Other)}]),
-                 #{Other => Rows}
-             end
+             Resource = maps:get(<<"resource">>, Request),
+
+             Start = integer_to_list(maps:get(<<"start">>, Request)),
+             End = integer_to_list(maps:get(<<"end">>, Request)),
+             {ok, Rows} = postgresql_functions:execute_combined_queries(TableName1, [{equal, "name", binary_to_list(Resource)},
+               {range, "unix", Start, End}]),
+             #{Resource => Rows}
          end,
-
   {reply, Data}.

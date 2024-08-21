@@ -32,8 +32,6 @@ spawn_and_wait_for_child(enter, OldState, State)->
   BH = maps:get(<<"BH">>,State),
   [Current|_] = maps:get(<<"children">>,State),
 
-  io:format("Current: ~p~n",[Current]),
-
   case map_size(Current) of
     0 -> {next_state, task_not_possible, State};
     _ ->
@@ -67,8 +65,22 @@ spawn_and_wait_for_child(enter, OldState, State)->
                               Time
                           end
                       end;
-                    Time ->
-                      Time % If it has a time, that should be the start time. A Process Step should have a start time
+                    Time1 ->
+                      ChildPred = maps:get(<<"predecessor">>, ChildData),
+                      io:format("ChildPred: ~p~n",[ChildPred]),
+                      case ChildPred of
+                        <<>> -> Time1;
+                        _ -> % If it does have a pred, the end time of the pred is now the start time for the next
+                          Pred = base_variables:read(ChildPred, <<"endTime">>, BH),
+                          io:format("Pred: ~p~n",[Pred]),
+                          case Pred of
+                            no_entry -> % Just check to see that the pred has been spawned, if not, it takes the parents
+                              Time1;
+                            PredEnd when PredEnd < Time1 -> Time1;
+                            PredEnd -> PredEnd
+                          end
+                      end % If it has a time, that should be the start time. A Process Step should have a start time
+%%                      Time
                   end,
 
       MyBC = base:get_my_bc(BH),
@@ -79,12 +91,15 @@ spawn_and_wait_for_child(enter, OldState, State)->
       NewCurrent = maps:remove(<<"startTime">>,ChildData), % We need to add the actual start time
 
       TaskHolons = bhive:discover_bases(#base_discover_query{capabilities = Spawn_Tag}, BH),
+      log:message(myFuncs:myName(BH), base_business_card:get_name(hd(TaskHolons)), Spawn_Tag),
       [ChildName] = base_signal:emit_request(TaskHolons, Spawn_Tag,
         maps:merge(NewCurrent,
         #{<<"parentID">>=>MyID,
           <<"childContract">>=>Contract,
           <<"startTime">>=>StartTime}
       ), BH),
+
+      io:format("The startTime for ~p is: ~p",[ChildName, myFuncs:convert_unix_time_to_normal(StartTime)]),
 
       base_variables:write(<<"predecessors">>,ChildName,maps:get(<<"predecessor">>,ChildData),BH),
       {keep_state, {State,ChildName}}
@@ -113,7 +128,7 @@ contract_child(enter, OldState, {State,ChildName})->
   Base_Link = base_attributes:read(<<"meta">>,<<"childContract">>,BH),
   io:format("~p starting a negotiation with child: ~p~n",[myFuncs:myName(BH), ChildName]),
 
-
+  log:message(<<"EVENT">>, myFuncs:myName(BH), <<"Negotiating with child">>),
   base_link_master_sp:start_link_negotiation(#{<<"name">>=>ChildName,<<"type">>=>activity},Base_Link,BH),
   {keep_state, State};
 
@@ -162,6 +177,9 @@ finish(enter, OldState, State)->
   StartTime = base_variables:read(<<"FSM_INFO">>,<<"startTime">>,BH),
   EndTime = base_variables:read(<<"FSM_INFO">>,<<"endTime">>,BH),
 
+%%  io:format("Start and end times for ~p: ~p || ~p~n",[myFuncs:myName(BH), myFuncs:convert_unix_time_to_normal(StartTime),
+%%    myFuncs:convert_unix_time_to_normal(EndTime)]),
+
   ProID = base_attributes:read(<<"meta">>,<<"parentID">>,BH),
   TaskHolons = bhive:discover_bases(#base_discover_query{id = ProID}, BH),
   base_signal:emit_signal(TaskHolons, <<"taskScheduled">>,
@@ -176,5 +194,7 @@ finish(cast, _, State)->
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 terminate(Reason, _StateName, State) ->
+  BH = maps:get(<<"BH">>, State),
+  log:message(<<"EVENT">>, myFuncs:myName(BH), <<"Scheduling Complete">>),
   ok.
 

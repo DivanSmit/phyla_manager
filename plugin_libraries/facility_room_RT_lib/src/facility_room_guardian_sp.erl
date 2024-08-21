@@ -45,7 +45,6 @@ generate_instance_recipe(Name, BH) ->
       <<"plugins">> => [
         #{<<"name">>=><<"contracting_resource_servant_link_ep">>,<<"lib">>=><<"resource_instance_lib">>,<<"init_args">>=>[]},
         #{<<"name">>=><<"contracting_room_servant_link_sp">>,<<"lib">>=><<"resource_instance_lib">>,<<"init_args">>=>[]},
-        #{<<"name">>=><<"contracting_resource_servant_ap">>,<<"lib">>=><<"resource_instance_lib">>,<<"init_args">>=>[]},
         #{<<"name">>=><<"contracting_resource_servant_rp">>,<<"lib">>=><<"resource_instance_lib">>,<<"init_args">>=>[]},
         #{<<"name">>=><<"facility_room_info_handler_ep">>,<<"lib">>=><<"facility_room_RT_lib">>,<<"init_args">>=>[]},
         #{<<"name">>=><<"sensor_api_sp">>,<<"lib">>=><<"resource_instance_lib">>,<<"init_args">>=>[]},
