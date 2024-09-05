@@ -145,17 +145,18 @@ handle_request(<<"Update">>, From, _, BH) ->
 
 handle_request(<<"CheckIn">>, From, _, BH) ->
   %% TODO this function should also change such that it check for the next task on sched according to time and not in list order
-  case base_execution:get_all_tasks(BH) of
-    #{} ->
-      Tasks = base_schedule:get_all_tasks(BH),
-      Masters = myFuncs:extract_partner_names(Tasks, master),
-      case lists:nth(1, Masters) of % If there is nothing on the execution and the next task on sched is with parent
-        From ->
-
-          {reply, ready};
-        _ ->
-          {reply, not_ready}
-      end;
+  case map_size(base_execution:get_all_tasks(BH)) of
+    0 ->
+      {reply, ready};
+%%      Tasks = base_schedule:get_all_tasks(BH),
+%%      Masters = myFuncs:extract_partner_names(Tasks, master),
+%%      case lists:nth(1, Masters) of % If there is nothing on the execution and the next task on sched is with parent
+%%        From ->
+%%
+%%          {reply, ready};
+%%        _ ->
+%%          {reply, not_ready}
+%%      end;
     _ ->
       {reply, not_ready}
   end.

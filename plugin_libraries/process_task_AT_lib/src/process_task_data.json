@@ -3,6 +3,24 @@
     {
       "children": [
         {
+          "processType": "Label Fruit"
+        },
+        {
+          "processType": "Machine and Op"
+        },
+        {
+          "processType": "Machine and Op"
+        },
+        {
+          "processType": "Move Fruit 1"
+        }
+      ],
+      "processType": "EquipmentFailure",
+      "type": "SPAWN_PROCESS_TASK_INSTANCE"
+    },
+    {
+      "children": [
+        {
           "processType": "Operator_Only"
         },
         {

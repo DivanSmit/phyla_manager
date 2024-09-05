@@ -330,7 +330,7 @@ update_list_and_average(List, Value) ->
 
 check_availability(StartTimeTarget, DurationTarget, _Type, BH) ->
   % Get all tasks from the system
-  All_tasks = maps:values(base_schedule:get_all_tasks(BH)),
+  All_tasks = maps:values(base_schedule:get_all_tasks(BH))++maps:values(base_execution:get_all_tasks(BH)),
 
   % Fold through tasks to find the first available start time
   {ok, AvailableStart} =
@@ -338,7 +338,11 @@ check_availability(StartTimeTarget, DurationTarget, _Type, BH) ->
       Data1 = Elem#base_task.data1,
       Shell = Elem#base_task.task_shell,
       TaskDuration = maps:get(<<"duration">>, Data1, 0),
-      TaskStart = Shell#task_shell.tsched,
+      TaskStart = if
+                    Shell#task_shell.tstart == undefined -> Shell#task_shell.tsched;
+                    true -> Shell#task_shell.tstart
+                  end,
+
       TaskFinish = TaskStart + TaskDuration,
 
       if

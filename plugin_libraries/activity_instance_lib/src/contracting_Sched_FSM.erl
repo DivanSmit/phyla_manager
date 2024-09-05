@@ -99,7 +99,7 @@ spawn_and_wait_for_child(enter, OldState, State)->
           <<"startTime">>=>StartTime}
       ), BH),
 
-      io:format("The startTime for ~p is: ~p",[ChildName, myFuncs:convert_unix_time_to_normal(StartTime)]),
+%%      io:format("The startTime for ~p is: ~p",[ChildName, myFuncs:convert_unix_time_to_normal(StartTime)]),
 
       base_variables:write(<<"predecessors">>,ChildName,maps:get(<<"predecessor">>,ChildData),BH),
       {keep_state, {State,ChildName}}

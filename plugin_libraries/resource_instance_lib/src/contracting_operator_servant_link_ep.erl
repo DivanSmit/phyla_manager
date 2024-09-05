@@ -15,6 +15,8 @@
 
 
 init(Pars, BH) ->
+  base_variables:write(<<"TaskStatus">>, <<"TRU">>, [], BH),
+
   ok.
 
 stop(BH) ->
@@ -28,7 +30,6 @@ request_start_link(PluginState, ExH, BH) ->
   PartnerName = base_business_card:get_name(PartnerBC),
   CurrentTime = binary_to_list(myFuncs:convert_unix_time_to_normal(base:get_origo())),
   io:format("Servant contract: ~p with parent ~p ready to start at ~p~n",[MyName,PartnerName,CurrentTime]),
-  base_variables:write(<<"TaskStatus">>, <<"TRU">>, [], BH),
   base_variables:subscribe(<<"TaskStatus">>, <<"TRU">>, self(), BH),
 
   {start, nostate}.

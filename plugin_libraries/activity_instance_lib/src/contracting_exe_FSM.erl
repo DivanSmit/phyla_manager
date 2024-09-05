@@ -207,6 +207,7 @@ wait_for_operator_start(cast, start, State)->
   BH = maps:get(<<"BH">>,State),
   io:format("~n *[CONTRACT E STATE | ~p]*: Operator wants to start ~n",[myFuncs:myName(BH)]),
   Handles = base_variables:read(<<"FSM_EXE">>, <<"ExecutionHandels">>,BH),
+%%  io:format("Handles: ~p~n",[Handles]),
   lists:foldl(fun(Elem,Acc)->
     base_link_ep:start_link(Elem)
   end, [], Handles),
@@ -214,7 +215,11 @@ wait_for_operator_start(cast, start, State)->
   %Start link with parent
   Handle = base_variables:read(<<"FSM_EXE">>, <<"parentExecutionHandel">>,BH),
   base_link_ep:start_link(Handle),
+%%  io:format("Handle: ~p~n",[Handle]),
   %Start timer task
+
+%%  io:format("My sched ~p: ~p~n",[myFuncs:myName(BH), maps:keys(base_schedule:get_all_tasks(BH))]),
+
 
   {next_state, wait_for_operator_end, State};
 
@@ -249,29 +254,60 @@ wait_for_operator_end(cast, Cast, State)->
 
 rescheduling(enter, OldState, State)->
   BH = maps:get(<<"BH">>, State),
-  MyBC = base:get_my_bc(BH),
-  MyName = base_business_card:get_name(MyBC),
-  io:format("~n *[CONTRACT E STATE | ~p]*: ~p needs rescheduling ~n",[MyName,MyName]),
+  io:format("~n *[CONTRACT E STATE | ~p]*: Rescheduleing~n",[myFuncs:myName(BH)]),
 
-  ProID = base_attributes:read(<<"meta">>, <<"parentID">>, BH),
-  TaskHolons = bhive:discover_bases(#base_discover_query{id = ProID}, BH),
-  [Reply] = base_signal:emit_request(TaskHolons, <<"Update">>, {MyName,query}, BH),
-  case Reply of
-    {ready, TRU} ->
-      io:format("~p received TRU list from parent: ~p~n",[myFuncs:myName(BH),TRU]),
-      base_variables:write(<<"TRU">>, <<"List">>, TRU, BH),
-      {keep_state, State, 30000};
-    not_ready ->
-      {keep_state, State, 30000}
+  Rescheduled = base_variables:read(<<"FSM_INFO">>,<<"Rescheduled">>, BH),
+  if
+    Rescheduled == true -> {keep_state, State, 10000};
+    true ->
+      % Only reschedule once
+      base_variables:write(<<"FSM_INFO">>,<<"Rescheduled">>, true,BH),
+
+      % First Remove tasks
+      AllTasks = base_schedule:get_all_tasks(BH),
+      Keys = maps:keys(AllTasks),
+      MyName = myFuncs:myName(BH),
+      lists:foreach(fun(Elem) ->
+        Task = maps:get(Elem, AllTasks),
+        Meta = Task#base_task.meta,
+        BC = Meta#base_contract.servant_bc,
+        Name =base_business_card:get_name(BC),
+        if
+          MyName == Name -> ok;
+          true ->
+            base_signal:emit_signal([BC], <<"REMOVE_TASK">>, myFuncs:myName(BH), BH),
+            base_schedule:take_task(Elem, BH)
+        end
+
+                    end, Keys),
+
+%%      io:format("My sched ~p: ~p~n",[myFuncs:myName(BH), maps:keys(base_schedule:get_all_tasks(BH))]),
+
+      % Then reschedule the tasks
+      base_variables:write(<<"FSM_INFO">>,<<"startTime">>,base:get_origo()+500,BH),
+      base_variables:write(<<"FSM_EXE">>, <<"ExecutionHandels">>,[],BH),
+      FSM = base_attributes:read(<<"meta">>,<<"FSM_Schedule">>,BH),
+      FSM_Data = #{
+        <<"BH">>=>BH
+      },
+      {ok, StateMachinePID} = gen_statem:start_link({global, base_business_card:get_id(base:get_my_bc(BH))}, FSM, FSM_Data, []),
+      base_variables:write(<<"FSM_INFO">>, <<"FSM_PID">>, StateMachinePID, BH),
+      {keep_state, State}
   end;
 
+
+rescheduling(cast, scheduled, State) ->
+  BH = maps:get(<<"BH">>, State),
+  io:format("~n *[CONTRACT E STATE | ~p]*: Rescheduleing finsihed~n",[myFuncs:myName(BH)]),
+  {next_state, wait_for_scheduled_time, State};
 
 rescheduling(timeout, _EventContent, State) ->
   {next_state, check_with_parent, State};
 
-rescheduling(cast, _, State)->
-
-  {next_state, check_with_contracted_child, State}.
+rescheduling(cast, Cast, State)->
+  BH = maps:get(<<"BH">>,State),
+  io:format("~n *[CONTRACT E STATE | ~p]*: Unsupported cast in rescheduling of ~p~n",[myFuncs:myName(BH), Cast]),
+  {keep_state, State}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

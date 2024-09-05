@@ -43,7 +43,7 @@ handle_request(<<"INFO">>,<<"INFO">>, FROM, BH)->
 
 handle_request(<<"CheckIn">>, From, _, BH) ->
   Tasks = base_execution:get_all_tasks(BH),
-  io:format("Tasks for ~p : ~p~n",[myFuncs:myName(BH), Tasks]),
+%%  io:format("Tasks for ~p : ~p~n",[myFuncs:myName(BH), Tasks]),
   case Tasks of
     #{} ->
       {reply, ready};

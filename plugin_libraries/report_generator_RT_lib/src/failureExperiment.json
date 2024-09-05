@@ -1,0 +1,19 @@
+{
+  "list": [
+    {
+      "type": "sugar",
+      "value": "10.9",
+      "unit": "g"
+    },
+    {
+      "type": "sugar",
+      "value": "11.3",
+      "unit": "g"
+    },
+    {
+      "type": "error",
+      "value": "na",
+      "unit": "na"
+    }
+  ]
+}

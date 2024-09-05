@@ -41,16 +41,11 @@ handle_request(<<"INFO">>,<<"INFO">>, FROM, BH)->
   {reply, Reply};
 
 handle_request(<<"CheckIn">>, From, _, BH) ->
-  case base_execution:get_all_tasks(BH) of
+  Tasks = base_execution:get_all_tasks(BH),
+%%  io:format("Tasks for ~p : ~p~n",[myFuncs:myName(BH), Tasks]),
+  case Tasks of
     #{} ->
-      Tasks = base_schedule:get_all_tasks(BH),
-      Masters = myFuncs:extract_partner_names(Tasks, master),
-      case lists:nth(1, Masters) of % If there is nothing on the execution and the next task on sched is with parent
-        From ->
-          {reply, ready};
-        _ ->
-          {reply, not_ready}
-      end;
+      {reply, ready};
     _ ->
       {reply, not_ready}
   end.

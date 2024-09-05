@@ -28,9 +28,22 @@ generate_proposal([Requirements], PluginState, NegH, BH) ->
   %% TODO get the correct requirements, and decode them accordingly
 %%  TaskDuration = base_attributes:read(<<"TaskDurations">>, <<"contractingOp">>, BH),
   TaskDuration = maps:get(<<"duration">>, Requirements),
+  MyName = myFuncs:myName(BH),
+  Resource = maps:get(<<"resourceName">>, Requirements, none),
+  io:format("Resource: ~p~n",[Resource]),
   StartTime = maps:get(<<"AVAILABILITY">>,Requirements),
   {Result,AvailabilityTime} = case StartTime of
-                                any -> {ok,base:get_origo()};
+                                now ->
+                                  case Resource of
+                                     MyName ->  io:format("MY name is ~p~n",[MyName]),
+                                       {ok,base:get_origo()+20000};
+                                    _-> Tasks = base_execution:get_all_tasks(BH),
+                                      case map_size(Tasks) of
+                                         0 -> io:format("Not my name, but not busy: ~p~n",[MyName]),
+                                         {ok,base:get_origo()+20000};
+                                        _-> myFuncs:check_availability(base:get_origo(), TaskDuration,earliest_from_now,BH)
+                                      end
+                                  end;
                                 _ ->
                                   {ok, Best} = myFuncs:check_availability(StartTime, TaskDuration,earliest_from_now,BH),
 

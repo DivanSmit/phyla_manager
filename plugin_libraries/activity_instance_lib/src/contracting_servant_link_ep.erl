@@ -27,7 +27,7 @@ request_start_link(PluginState, ExH, BH) ->
   PartnerBC = base_link_ep:get_partner_bc(ExH),
   PartnerName = base_business_card:get_name(PartnerBC),
   CurrentTime = binary_to_list(myFuncs:convert_unix_time_to_normal(base:get_origo())),
-%%  io:format("Servant contract: ~p with parent ~p ready to start at ~p~n",[MyName,PartnerName,CurrentTime]),
+  io:format("Servant contract: ~p with parent ~p ready to start at ~p~n",[MyName,PartnerName,CurrentTime]),
 
   base_variables:write(<<"FSM_EXE">>, <<"parentExecutionHandel">>,ExH,BH),
 
@@ -39,6 +39,7 @@ request_resume_link(PluginState, ExH, BH) ->
   {cancel, no_state}.
 
 link_start(PluginState, ExH, BH) ->
+  io:format("Servant ~p started task ~n",[myFuncs:myName(BH)]),
   {ok, no_state}.
 
 link_resume(PluginState, ExH, BH) ->
@@ -56,6 +57,7 @@ link_end(Reason, PluginState, ExH, BH) ->
 %%  ProID = base_attributes:read(<<"meta">>, <<"parentID">>, BH),
 %%  TaskHolons = bhive:discover_bases(#base_discover_query{id = ProID}, BH),
 %%  base_signal:emit_signal(TaskHolons, <<"Update">>, {MyName,completed}, BH),
+  io:format("~p finished task~n",[myFuncs:myName(BH)]),
   archive.
 
 base_variable_update({<<"TRU">>,<<"List">>, Value}, PluginState, ExH, BH) ->

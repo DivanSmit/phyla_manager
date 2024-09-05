@@ -17,6 +17,7 @@
 init(Pars, BH) ->
   base:wait_for_base_ready(BH),
 
+  base_variables:write(<<"FSM_INFO">>,<<"Rescheduled">>, false,BH),
   base_variables:write(<<"FSM_INFO">>,<<"FSM_Count">>, 0,BH),
   base_variables:write(<<"FSM_INFO">>,<<"FSM_Ready">>, 0,BH),
   base_variables:write(<<"FSM_INFO">>,<<"startTime">>, base_attributes:read(<<"meta">>,<<"startTime">>, BH),BH),
@@ -108,24 +109,50 @@ all_proposals_received(ProposalList, PluginState, NegH, BH) ->
         _ ->
           WinningMap = maps:fold(fun(CandidateBC, Proposal, Acc) ->
             #{<<"startTime">> := CandidateTime} = Proposal,
+            CandidateList = CandidateBC#business_card.capabilities,
+            case Acc of
+              null ->
+                % It is the first proposal being evaluated
+                #{<<"startTime">> => CandidateTime, <<"proposal">> => Proposal,
+                  <<"candidateBC">> => CandidateBC, <<"candidateList">> => CandidateList};
+              _ ->
+                % It is not the first proposal being evaluated
+                PreviousTime = maps:get(<<"startTime">>, Acc),
+                AccCandidateList = maps:get(<<"candidateList">>, Acc, []),
 
-            if
-              Acc == null ->
-                % it is the first proposal being evaluated
-                #{<<"startTime">> => CandidateTime, <<"proposal">> => Proposal, <<"candidateBC">> => CandidateBC};
-              true ->
-                % it is not the first proposal being evaluated
-                PreviousTime = maps:get(<<"startTime">>, Acc), % get the current best proposal
-                if
-                  CandidateTime < PreviousTime ->
-                    % the latest proposal is better, update the current best proposal
-                    #{<<"startTime">> => CandidateTime, <<"proposal">> => Proposal, <<"candidateBC">> => CandidateBC};
+                case CandidateTime < PreviousTime of
                   true ->
-                    % the latest proposal is not better, keep the old proposal
-                    Acc
+                    % The latest proposal is better, update the current best proposal
+                    #{<<"startTime">> => CandidateTime, <<"proposal">> => Proposal,
+                      <<"candidateBC">> => CandidateBC, <<"candidateList">> => CandidateList};
+                  false ->
+                    case CandidateTime == PreviousTime of
+                      true ->
+                        % Multiple proposals with the same start time
+                        case {lists:member(<<"manage_facility">>, CandidateList),
+                          lists:member(<<"manage_facility">>, AccCandidateList)} of
+                          {true, false} ->
+                            % The current candidate has 'manage_facility', prefer the other
+                            Acc;
+                          {false, true} ->
+                            % The current best candidate has 'manage_facility', prefer the current one
+                            #{<<"startTime">> => CandidateTime, <<"proposal">> => Proposal,
+                              <<"candidateBC">> => CandidateBC, <<"candidateList">> => CandidateList};
+                          {false, false} ->
+                            % No preference based on 'manage_facility', keep the current best proposal
+                            Acc;
+                          {true, true} ->
+                            % Both have 'manage_facility', keep the current best proposal
+                            Acc
+                        end;
+                      false ->
+                        % The latest proposal is not better, keep the old proposal
+                        Acc
+                    end
                 end
             end
                                  end, null, ProposalList),
+
           % retrieve the winning BC
           CanidateProposal = maps:get(<<"proposal">>,WinningMap),
           io:format("Proposal: ~p~n",[CanidateProposal]),

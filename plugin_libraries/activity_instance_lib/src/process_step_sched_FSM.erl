@@ -55,20 +55,26 @@ negotiate_with_resource(cast, contracted, State) ->
 
   Old = base_variables:read(<<"FSM_INFO">>, <<"old_Sched">>, BH),
   StartTime = base_variables:read(<<"FSM_INFO">>,<<"startTime">>,BH),
+  MyName = myFuncs:myName(BH),
 %%  timer:sleep(2000),
   State1 = if
-    Old==StartTime -> State;
+    Old==StartTime orelse Old==now -> State;
     true ->
       timer:sleep(2000),
-      io:format("Old Time: ~p~nNew Time: ~p~n",[myFuncs:convert_unix_time_to_normal(Old),myFuncs:convert_unix_time_to_normal(StartTime)]),
+%%      io:format("Old Time: ~p~nNew Time: ~p~n",[myFuncs:convert_unix_time_to_normal(Old),myFuncs:convert_unix_time_to_normal(StartTime)]),
       AllTasks = base_schedule:get_all_tasks(BH),
       Keys = maps:keys(AllTasks),
       lists:foreach(fun(Elem) ->
         Task = maps:get(Elem, AllTasks),
         Meta = Task#base_task.meta,
         BC = Meta#base_contract.servant_bc,
-        base_signal:emit_signal([BC], <<"REMOVE_TASK">>, myFuncs:myName(BH), BH),
-        base_schedule:take_task(Elem, BH)
+        Name =base_business_card:get_name(BC),
+        if
+          MyName == Name -> ok;
+          true ->
+            base_signal:emit_signal([BC], <<"REMOVE_TASK">>, myFuncs:myName(BH), BH),
+            base_schedule:take_task(Elem, BH)
+        end
                     end, Keys),
 
       base_variables:write(<<"FSM_INFO">>, <<"old_Sched">>,StartTime, BH),
@@ -97,12 +103,20 @@ negotiate_with_resource(cast, _, State) ->
 process_resource(State, Resource, Rest) ->
   BH = maps:get(<<"BH">>, State),
   Base_Link = base_attributes:read(<<"meta">>, <<"childContract">>, BH),
-  StartTime = base_variables:read(<<"FSM_INFO">>,<<"startTime">>,BH),
+  Old = base_variables:read(<<"FSM_INFO">>, <<"old_Sched">>, BH),
+
+  StartTime = if
+    Old == now-> now;
+    true -> base_variables:read(<<"FSM_INFO">>,<<"startTime">>,BH)
+  end,
+  ProcessType = base_attributes:read(<<"meta">>, <<"processType">>, BH),
 
   Name = if
-           <<"processType">> == <<"Maintenance">>-> base_attributes:read(<<"meta">>, <<"resourceName">>, BH);
+            ProcessType == <<"Maintenance">>-> base_attributes:read(<<"meta">>, <<"resourceName">>, BH);
            true -> maps:get(<<"name">>, Resource)
          end,
+
+  io:format("The name is: ~p~n",[Name]),
 
   Change = 10,
   Requirements = #{
@@ -114,7 +128,8 @@ process_resource(State, Resource, Rest) ->
     <<"description">> => base_attributes:read(<<"meta">>, <<"description">>, BH),
     <<"duration">> => base_attributes:read(<<"meta">>, <<"duration">>, BH),
     <<"truAction">> => base_attributes:read(<<"meta">>, <<"truAction">>, BH),
-    <<"resource">> => maps:get(<<"name">>, Resource)
+    <<"resource">> => maps:get(<<"name">>, Resource),
+    <<"resourceName">>=> Name
 
   },
 
@@ -136,6 +151,7 @@ task_scheduled(enter, OldState, State)->
   StartTime = base_variables:read(<<"FSM_INFO">>,<<"startTime">>,BH),
   EndTime = base_variables:read(<<"FSM_INFO">>,<<"endTime">>,BH),
 
+  io:format("My sched time ~p is: ~p~n",[myFuncs:myName(BH), myFuncs:convert_unix_time_to_normal(StartTime)]),
 
   ProID = base_attributes:read(<<"meta">>,<<"parentID">>,BH),
   TaskHolons = bhive:discover_bases(#base_discover_query{id = ProID}, BH),

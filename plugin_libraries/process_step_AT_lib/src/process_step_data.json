@@ -41,7 +41,7 @@
     {
       "FSM": "contracting_exe_FSM",
       "description": "Measure the fruit initially.",
-      "duration": 60000,
+      "duration": 180000,
       "processType": "Initial Measurements",
       "resources": [
         {
@@ -57,7 +57,7 @@
     {
       "FSM": "contracting_exe_FSM",
       "description": "Measure the end values of the fruit.",
-      "duration": 60000,
+      "duration": 180000,
       "processType": "Final Measurements",
       "resources": [
         {
@@ -73,7 +73,7 @@
     {
       "FSM": "contracting_exe_FSM",
       "description": "Move fruit from CA to the Evaluation.",
-      "duration": 60000,
+      "duration": 120000,
       "processType": "Move Fruit 2",
       "resources": [
         {
@@ -117,7 +117,7 @@
     {
       "FSM": "contracting_exe_FSM",
       "description": "Move the measured fruit to CA1.",
-      "duration": 60000,
+      "duration": 120000,
       "processType": "Move Fruit 1",
       "resources": [
         {
@@ -145,7 +145,7 @@
     {
       "FSM": "contracting_exe_FSM",
       "description": "Label the Moved fruit with the QR codes.",
-      "duration": 60000,
+      "duration": 180000,
       "processType": "Label Fruit",
       "resources": [
         {
@@ -161,7 +161,7 @@
     {
       "FSM": "contracting_exe_FSM",
       "description": "Move the fruit from Storage Room 1 to the Evaluation Room.",
-      "duration": 60000,
+      "duration": 120000,
       "processType": "Collect Fruit 1",
       "resources": [
         {
@@ -177,7 +177,7 @@
     {
       "FSM": "contracting_exe_FSM",
       "description": "Measure the values with a machine.",
-      "duration": 120000,
+      "duration": 180000,
       "processType": "Machine and Op",
       "resources": [
         {
@@ -237,7 +237,7 @@
     {
       "FSM": "contracting_exe_FSM",
       "description": "Move the fruit from storage.",
-      "duration": 10000,
+      "duration": 90000,
       "processType": "Collect_Initial_Fruit",
       "resources": [
         {

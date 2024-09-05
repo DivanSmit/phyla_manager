@@ -57,7 +57,8 @@ link_start(PluginState, ExH, BH) ->
         <<"BH">>=> BH,
         <<"Data1">>=>Data1
       },
-      {ok, StateMachinePID} = gen_statem:start_link({global, base_business_card:get_id(base:get_my_bc(BH))}, no_operator_task_FSM, FSM_data, []);
+      Shell = base_task_ep:get_shell(ExH),
+      {ok, StateMachinePID} = gen_statem:start_link({global, Shell#task_shell.id}, no_operator_task_FSM, FSM_data, []);
    <<"Measure">>->
      spawn(fun()->
        listen_on_port(9910,ExH,BH)
@@ -122,14 +123,26 @@ listen(ListenSocket, State,ExH,BH) ->
           gen_tcp:close(Socket),
           State;
         JsonValue -> io:format("Received JSON: ~p~n", [JsonValue]),
-          gen_tcp:close(Socket),
-          CurrentTRU = base_variables:read(<<"TRU">>,<<"CurrentTRU">>,BH),
-          NewJson = maps:update(<<"name">>, CurrentTRU, JsonValue),
-          NewData = [NewJson | State],
-          base_task_ep:write_execution_data(#{<<"TRU_Data">> => NewData}, base_link_ep:get_shell(ExH), BH),
-          base_variables:write(<<"measure">>,<<"values">>,NewData,BH),
-          io:format("New Data: ~p~n",[NewData]),
-          listen(ListenSocket, NewData,ExH,BH)
+          case maps:get(<<"name">>, JsonValue) of
+            <<"error">> -> % Test case for machine repair
+              DataS = #{
+                <<"name">>=>myFuncs:myName(BH),
+                <<"StartTime">>=> now
+              },
+              TaskHolons = bhive:discover_bases(#base_discover_query{capabilities = <<"SPAWN_PROCESS_TASK_INSTANCE">>}, BH),
+              base_signal:emit_signal(TaskHolons, <<"ScheduleMaintenance">>, DataS, BH),
+              base_variables:write(<<"Maintenance">>, <<"Scheduled">>,true,BH),
+              State;
+            _ -> gen_tcp:close(Socket),
+              CurrentTRU = base_variables:read(<<"TRU">>, <<"CurrentTRU">>, BH),
+              NewJson = maps:update(<<"name">>, CurrentTRU, JsonValue),
+              NewData = [NewJson | State],
+              base_task_ep:write_execution_data(#{<<"TRU_Data">> => NewData}, base_link_ep:get_shell(ExH), BH),
+              base_variables:write(<<"measure">>, <<"values">>, NewData, BH),
+              io:format("New Data: ~p~n", [NewData]),
+              listen(ListenSocket, NewData, ExH, BH)
+          end
+
       end
   end.
 
