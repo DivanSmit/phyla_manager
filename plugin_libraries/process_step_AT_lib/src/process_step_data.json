@@ -2,6 +2,22 @@
   "list": [
     {
       "FSM": "contracting_exe_FSM",
+      "description": "Move the measured fruit to CA4.",
+      "duration": 120000,
+      "processType": "Move Fruit",
+      "resources": [
+        {
+          "capabilities": "OPERATOR_INSTANCE_INFO",
+          "change": 0,
+          "name": "",
+          "port": 0
+        }
+      ],
+      "truAction": "Move",
+      "type": "SPAWN_PS_INSTANCE"
+    },
+    {
+      "FSM": "contracting_exe_FSM",
       "description": "",
       "duration": 600000,
       "processType": "Store Fruit 2",

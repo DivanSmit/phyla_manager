@@ -3,6 +3,15 @@
     {
       "children": [
         {
+          "processType": "Move Fruit"
+        }
+      ],
+      "processType": "Test Process",
+      "type": "SPAWN_PROCESS_TASK_INSTANCE"
+    },
+    {
+      "children": [
+        {
           "processType": "Label Fruit"
         },
         {
